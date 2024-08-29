@@ -71,6 +71,7 @@ func (i *importCmd) Execute(ctx context.Context, _ *flag.FlagSet, _ ...interface
 		return subcommands.ExitFailure
 	}
 
+	slog.Debug("Data imported successfully")
 	return subcommands.ExitSuccess
 }
 
