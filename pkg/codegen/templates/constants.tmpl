@@ -1,0 +1,7 @@
+{{- if gt (len .SecuritySchemeProviderNames) 0 }}
+const (
+{{range $ProviderName := .SecuritySchemeProviderNames}}
+    {{- $ProviderName | sanitizeGoIdentity | ucFirst}}Scopes = "{{$ProviderName}}.Scopes"
+{{end}}
+)
+{{end}}

@@ -1,0 +1,37 @@
+{{- define "insert_update" -}}
+{{- $struct := .Name | structify -}}
+// InsertWithUpdate inserts the {{ $struct }} to the database, and tries to update
+// on unique constraint violations.
+func (m *{{ $struct }}) InsertWithUpdate(db DB) error {
+    t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("insert_update_{{ $struct | structify -}}"))
+    defer t.ObserveDuration()
+
+    {{ $autoinc := autoinc_column . }}
+    {{- $cols := non_autoinc_columns . -}}
+    {{- $updates := non_identity_columns . -}}
+    const sqlstr = "INSERT INTO {{ .Name }} (" +
+        "{{ range $i, $column := $cols }}{{ if $i }}, {{ end }}`{{ $column.Name }}`{{ end }}" +
+        ") VALUES (" +
+        "{{ range $i, $column := $cols }}{{ if $i }}, {{ end }}?{{ end }}" +
+        ") ON DUPLICATE KEY UPDATE " +
+        "{{ range $i, $column := $updates }}{{ if $i }}, {{ end }}`{{ $column.Name }}` = VALUES(`{{ $column.Name }}`){{ end }}"
+
+    DBLog(sqlstr, {{ range $i, $column := $cols }}{{ if $i }}, {{ end }}m.{{ $column.Name | structify }}{{ end }})
+    {{ if $autoinc }}res{{ else }}_{{ end }}, err := db.Exec(sqlstr, {{ range $i, $column := $cols }}{{ if $i }}, {{ end }}m.{{ $column.Name | structify }}{{ end }})
+    {{ with $autoinc -}}
+    if err != nil {
+        return err
+    }
+
+    id, err := res.LastInsertId()
+    if err != nil {
+        return err
+    }
+
+    m.{{ .Name | structify }} = {{ template "type" . }}(id)
+    return nil
+    {{- else -}}
+    return err
+    {{- end }}
+}
+{{- end -}}

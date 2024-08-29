@@ -1,0 +1,72 @@
+// wrapHandler will wrap the handler with middlewares in the other specified
+// making the execution order the inverse of the parameter declaration
+func wrapHandler(handler http.HandlerFunc, middlewares ...mux.MiddlewareFunc) http.Handler {
+	var wrappedHandler http.Handler = handler
+	for _, middleware := range middlewares {
+	    if middleware == nil {
+            continue
+        }
+		wrappedHandler = middleware(wrappedHandler)
+	}
+	return wrappedHandler
+}
+
+// RegisterHandlers registers the api handlers.
+func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOption) {
+    wrapper := ServerInterfaceWrapper{
+        handler: si,
+    }
+
+    for _, opt := range opts {
+        if opt == nil {
+            continue
+        }
+        opt(&wrapper)
+    }
+
+    router.Use(uhttp.AuthHeaderToContextMux())
+    router.Use(uhttp.RequestIDToContextMux())
+
+{{ range . }}
+    {{- $authed := .Spec.Security }}
+    {{- if $authed }}
+        router.Methods(http.Method{{.Method | lower | title }}).Path("{{.Path}}").Handler(wrapHandler(wrapper.{{.OperationId}}))
+    {{ end -}}
+{{ end -}}
+}
+
+
+{{ $unauthedExists := false}}
+{{ range . }}
+    {{ $unauth := not .Spec.Security }}
+    {{ if $unauth }}
+        {{ $unauthedExists = true }}
+    {{ end -}}
+{{ end -}}
+
+{{ if $unauthedExists }}
+// RegisterUnauthedHandlers registers any api handlers which do not have any authentication on them. Most services will not have any.
+func RegisterUnauthedHandlers(router *mux.Router, si ServerInterface, opts ...ServerOption) {
+    wrapper := ServerInterfaceWrapper{
+        handler: si,
+    }
+
+    for _, opt := range opts {
+        if opt == nil {
+            continue
+        }
+        opt(&wrapper)
+    }
+
+    router.Use(uhttp.AuthHeaderToContextMux())
+    router.Use(uhttp.RequestIDToContextMux())
+
+    // We do not have a gateway preparer here as no auth is sent.
+    {{ range . }}
+        {{- $unauth := not .Spec.Security }}
+        {{- if $unauth }}
+            router.Methods(http.Method{{.Method | lower | title }}).Path("{{.Path | swaggerUriToGorillaUri}}").Handler(wrapHandler(wrapper.{{.OperationId}}))
+        {{ end -}}
+    {{ end -}}
+}
+{{ end -}}

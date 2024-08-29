@@ -1,0 +1,13 @@
+{{- define "tags" -}}
+    `db:"{{- .Name -}}
+    {{- if .AutoIncrementing -}}
+    ,autoinc
+    {{- end -}}
+    {{- if .InPrimaryKey -}}
+    ,pk
+    {{- end -}}
+    {{- if .HasDefault -}}
+    ,default
+    {{- end -}}
+    "`
+{{- end -}}
