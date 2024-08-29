@@ -1,0 +1,20 @@
+name: Docker Trigger
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  docker-build:
+    name: Build All
+    permissions: write-all
+    uses: jacobbrewer1/f1-data/.github/workflows/ci-docker.yml@main
+    secrets: inherit
+    with: # We don't need to pass in the app name here, as it's already defined in the ci-docker.yml workflow
+      app: 'build-all'
+      push: ${{ github.event_name != 'pull_request' }}
