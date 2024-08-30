@@ -15,11 +15,11 @@ func (s *service) Import(from, to int) error {
 	for i := from; i <= to; i++ {
 		slog.Debug(fmt.Sprintf("Importing season %d", i))
 
-		season, err := s.r.GetSeasonByYear(i)
+		_, err := s.r.GetSeasonByYear(i)
 		if err != nil && !errors.Is(err, repo.ErrNoSeasonFound) {
 			return fmt.Errorf("error getting season by year: %w", err)
 		} else if errors.Is(err, repo.ErrNoSeasonFound) {
-			season = &models.Season{
+			season := &models.Season{
 				Year: i,
 			}
 			err = s.r.SaveSeason(season)
