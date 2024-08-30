@@ -5,13 +5,24 @@ package data
 
 import (
 	externalRef0 "github.com/Jacobbrewer1/f1-data/pkg/codegen/apis/common"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
+
+// Race defines the model for race.
+type Race struct {
+	Date *openapi_types.Date `json:"date,omitempty"`
+	Id   *int64              `json:"id,omitempty"`
+	Name *string             `json:"name,omitempty"`
+}
 
 // Season defines the model for season.
 type Season struct {
 	Id   *int64 `json:"id,omitempty"`
 	Year *int64 `json:"year,omitempty"`
 }
+
+// PathYear defines the model for path_year.
+type PathYear = int64
 
 // QueryYear defines the model for query_year.
 type QueryYear = int64
@@ -51,3 +62,24 @@ type GetSeasonsParams struct {
 
 // GetSeasonsParamsSortDir defines parameters for GetSeasons.
 type GetSeasonsParamsSortDir string
+
+// GetSeasonsYearRacesParams defines parameters for GetSeasonsYearRaces.
+type GetSeasonsYearRacesParams struct {
+	// Limit Report type
+	Limit *externalRef0.LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// LastVal Pagination details, last value of the sort column on the previous page.
+	LastVal *externalRef0.LastValue `form:"last_val,omitempty" json:"last_val,omitempty"`
+
+	// LastId Pagination details, last value of the id column on the previous page.
+	LastId *externalRef0.LastId `form:"last_id,omitempty" json:"last_id,omitempty"`
+
+	// SortBy Pagination details, sort column, if empty uses the id column.
+	SortBy *externalRef0.SortBy `form:"sort_by,omitempty" json:"sort_by,omitempty"`
+
+	// SortDir Pagination details, sorting order.
+	SortDir *GetSeasonsYearRacesParamsSortDir `form:"sort_dir,omitempty" json:"sort_dir,omitempty"`
+}
+
+// GetSeasonsYearRacesParamsSortDir defines parameters for GetSeasonsYearRaces.
+type GetSeasonsYearRacesParamsSortDir string

@@ -10,3 +10,8 @@ type GetSeasonsFilters struct {
 	// YearMax is the maximum year of the season.
 	YearMax *int `json:"year_max"`
 }
+
+type GetSeasonRacesFilters struct {
+	// SeasonYear is the year of the season.
+	SeasonYear *int `json:"season_year"`
+}

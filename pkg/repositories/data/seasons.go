@@ -58,17 +58,17 @@ func (r *repository) getSeasonsFilters(filters *GetSeasonsFilters) *pagefilter.M
 	}
 
 	if filters.Year != nil {
-		f := repoFilter.NewYear(*filters.Year)
+		f := repoFilter.NewSeasonYear(*filters.Year)
 		mf.Add(f)
 	}
 
 	if filters.YearMin != nil {
-		f := repoFilter.NewYearMin(*filters.YearMin)
+		f := repoFilter.NewSeasonYearMin(*filters.YearMin)
 		mf.Add(f)
 	}
 
 	if filters.YearMax != nil {
-		f := repoFilter.NewYearMax(*filters.YearMax)
+		f := repoFilter.NewSeasonYearMax(*filters.YearMax)
 		mf.Add(f)
 	}
 

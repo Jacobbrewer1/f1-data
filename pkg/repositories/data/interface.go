@@ -8,4 +8,7 @@ import (
 type Repository interface {
 	// GetSeasons returns all seasons.
 	GetSeasons(paginationDetails *pagefilter.PaginatorDetails, filters *GetSeasonsFilters) ([]*models.Season, error)
+
+	// GetSeasonRaces returns all races for a season
+	GetSeasonRaces(paginationDetails *pagefilter.PaginatorDetails, filters *GetSeasonRacesFilters) ([]*models.Race, error)
 }
