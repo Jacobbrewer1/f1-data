@@ -12,6 +12,66 @@ type MockRepository struct {
 	mock.Mock
 }
 
+// GetConstructorByName provides a mock function with given fields: seasonId, name
+func (_m *MockRepository) GetConstructorByName(seasonId int, name string) (*models.ConstructorChampionship, error) {
+	ret := _m.Called(seasonId, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetConstructorByName")
+	}
+
+	var r0 *models.ConstructorChampionship
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int, string) (*models.ConstructorChampionship, error)); ok {
+		return rf(seasonId, name)
+	}
+	if rf, ok := ret.Get(0).(func(int, string) *models.ConstructorChampionship); ok {
+		r0 = rf(seasonId, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.ConstructorChampionship)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int, string) error); ok {
+		r1 = rf(seasonId, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetDriverByName provides a mock function with given fields: seasonId, name
+func (_m *MockRepository) GetDriverByName(seasonId int, name string) (*models.DriverChampionship, error) {
+	ret := _m.Called(seasonId, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetDriverByName")
+	}
+
+	var r0 *models.DriverChampionship
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int, string) (*models.DriverChampionship, error)); ok {
+		return rf(seasonId, name)
+	}
+	if rf, ok := ret.Get(0).(func(int, string) *models.DriverChampionship); ok {
+		r0 = rf(seasonId, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.DriverChampionship)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int, string) error); ok {
+		r1 = rf(seasonId, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetRaceBySeasonIdAndGrandPrix provides a mock function with given fields: seasonId, grandPrix
 func (_m *MockRepository) GetRaceBySeasonIdAndGrandPrix(seasonId int, grandPrix string) (*models.Race, error) {
 	ret := _m.Called(seasonId, grandPrix)
@@ -100,6 +160,42 @@ func (_m *MockRepository) GetSeasonByYear(year int) (*models.Season, error) {
 	}
 
 	return r0, r1
+}
+
+// SaveConstructor provides a mock function with given fields: constructor
+func (_m *MockRepository) SaveConstructor(constructor *models.ConstructorChampionship) error {
+	ret := _m.Called(constructor)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveConstructor")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.ConstructorChampionship) error); ok {
+		r0 = rf(constructor)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SaveDriver provides a mock function with given fields: driver
+func (_m *MockRepository) SaveDriver(driver *models.DriverChampionship) error {
+	ret := _m.Called(driver)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveDriver")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.DriverChampionship) error); ok {
+		r0 = rf(driver)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // SaveRace provides a mock function with given fields: race

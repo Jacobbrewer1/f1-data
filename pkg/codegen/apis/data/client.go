@@ -89,6 +89,12 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// GetConstructorsChampionship request
+	GetConstructorsChampionship(ctx context.Context, year PathYear, params *GetConstructorsChampionshipParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetDriversChampionship request
+	GetDriversChampionship(ctx context.Context, year PathYear, params *GetDriversChampionshipParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetRaceResults request
 	GetRaceResults(ctx context.Context, raceId PathRaceId, params *GetRaceResultsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -97,6 +103,30 @@ type ClientInterface interface {
 
 	// GetSeasonRaces request
 	GetSeasonRaces(ctx context.Context, year PathYear, params *GetSeasonRacesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) GetConstructorsChampionship(ctx context.Context, year PathYear, params *GetConstructorsChampionshipParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetConstructorsChampionshipRequest(c.Server, year, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetDriversChampionship(ctx context.Context, year PathYear, params *GetDriversChampionshipParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetDriversChampionshipRequest(c.Server, year, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) GetRaceResults(ctx context.Context, raceId PathRaceId, params *GetRaceResultsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -133,6 +163,310 @@ func (c *Client) GetSeasonRaces(ctx context.Context, year PathYear, params *GetS
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewGetConstructorsChampionshipRequest generates requests for GetConstructorsChampionship
+func NewGetConstructorsChampionshipRequest(server string, year PathYear, params *GetConstructorsChampionshipParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "year", runtime.ParamLocationPath, year)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/championships/%s/constructors", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.LastVal != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "last_val", runtime.ParamLocationQuery, *params.LastVal); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.LastId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "last_id", runtime.ParamLocationQuery, *params.LastId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortBy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort_by", runtime.ParamLocationQuery, *params.SortBy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortDir != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort_dir", runtime.ParamLocationQuery, *params.SortDir); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Name != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "name", runtime.ParamLocationQuery, *params.Name); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetDriversChampionshipRequest generates requests for GetDriversChampionship
+func NewGetDriversChampionshipRequest(server string, year PathYear, params *GetDriversChampionshipParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "year", runtime.ParamLocationPath, year)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/championships/%s/drivers", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.LastVal != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "last_val", runtime.ParamLocationQuery, *params.LastVal); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.LastId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "last_id", runtime.ParamLocationQuery, *params.LastId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortBy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort_by", runtime.ParamLocationQuery, *params.SortBy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortDir != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort_dir", runtime.ParamLocationQuery, *params.SortDir); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Name != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "name", runtime.ParamLocationQuery, *params.Name); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Tag != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tag", runtime.ParamLocationQuery, *params.Tag); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Team != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "team", runtime.ParamLocationQuery, *params.Team); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
 }
 
 // NewGetRaceResultsRequest generates requests for GetRaceResults
@@ -579,6 +913,12 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// GetConstructorsChampionshipWithResponse request
+	GetConstructorsChampionshipWithResponse(ctx context.Context, year PathYear, params *GetConstructorsChampionshipParams, reqEditors ...RequestEditorFn) (*GetConstructorsChampionshipResponse, error)
+
+	// GetDriversChampionshipWithResponse request
+	GetDriversChampionshipWithResponse(ctx context.Context, year PathYear, params *GetDriversChampionshipParams, reqEditors ...RequestEditorFn) (*GetDriversChampionshipResponse, error)
+
 	// GetRaceResultsWithResponse request
 	GetRaceResultsWithResponse(ctx context.Context, raceId PathRaceId, params *GetRaceResultsParams, reqEditors ...RequestEditorFn) (*GetRaceResultsResponse, error)
 
@@ -587,6 +927,56 @@ type ClientWithResponsesInterface interface {
 
 	// GetSeasonRacesWithResponse request
 	GetSeasonRacesWithResponse(ctx context.Context, year PathYear, params *GetSeasonRacesParams, reqEditors ...RequestEditorFn) (*GetSeasonRacesResponse, error)
+}
+
+type GetConstructorsChampionshipResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]Constructor
+	JSON400      *externalRef0.ErrorMessage
+	JSON404      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetConstructorsChampionshipResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetConstructorsChampionshipResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetDriversChampionshipResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]Driver
+	JSON400      *externalRef0.ErrorMessage
+	JSON404      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetDriversChampionshipResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetDriversChampionshipResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type GetRaceResultsResponse struct {
@@ -664,6 +1054,24 @@ func (r GetSeasonRacesResponse) StatusCode() int {
 	return 0
 }
 
+// GetConstructorsChampionshipWithResponse request returning *GetConstructorsChampionshipResponse
+func (c *ClientWithResponses) GetConstructorsChampionshipWithResponse(ctx context.Context, year PathYear, params *GetConstructorsChampionshipParams, reqEditors ...RequestEditorFn) (*GetConstructorsChampionshipResponse, error) {
+	rsp, err := c.GetConstructorsChampionship(ctx, year, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetConstructorsChampionshipResponse(rsp)
+}
+
+// GetDriversChampionshipWithResponse request returning *GetDriversChampionshipResponse
+func (c *ClientWithResponses) GetDriversChampionshipWithResponse(ctx context.Context, year PathYear, params *GetDriversChampionshipParams, reqEditors ...RequestEditorFn) (*GetDriversChampionshipResponse, error) {
+	rsp, err := c.GetDriversChampionship(ctx, year, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetDriversChampionshipResponse(rsp)
+}
+
 // GetRaceResultsWithResponse request returning *GetRaceResultsResponse
 func (c *ClientWithResponses) GetRaceResultsWithResponse(ctx context.Context, raceId PathRaceId, params *GetRaceResultsParams, reqEditors ...RequestEditorFn) (*GetRaceResultsResponse, error) {
 	rsp, err := c.GetRaceResults(ctx, raceId, params, reqEditors...)
@@ -689,6 +1097,100 @@ func (c *ClientWithResponses) GetSeasonRacesWithResponse(ctx context.Context, ye
 		return nil, err
 	}
 	return ParseGetSeasonRacesResponse(rsp)
+}
+
+// ParseGetConstructorsChampionshipResponse parses an HTTP response from a GetConstructorsChampionshipWithResponse call
+func ParseGetConstructorsChampionshipResponse(rsp *http.Response) (*GetConstructorsChampionshipResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetConstructorsChampionshipResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []Constructor
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetDriversChampionshipResponse parses an HTTP response from a GetDriversChampionshipWithResponse call
+func ParseGetDriversChampionshipResponse(rsp *http.Response) (*GetDriversChampionshipResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetDriversChampionshipResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []Driver
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseGetRaceResultsResponse parses an HTTP response from a GetRaceResultsWithResponse call

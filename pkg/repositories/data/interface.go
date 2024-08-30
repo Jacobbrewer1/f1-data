@@ -14,4 +14,10 @@ type Repository interface {
 
 	// GetRaceResults returns all results for a specific race
 	GetRaceResults(paginationDetails *pagefilter.PaginatorDetails, filters *GetRaceResultsFilters) ([]*models.RaceResult, error)
+
+	// GetDriversChampionship returns the drivers championship for a specific season
+	GetDriversChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetDriversChampionshipFilters) ([]*models.DriverChampionship, error)
+
+	// GetConstructorsChampionship returns the constructors' championship for a specific season
+	GetConstructorsChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetConstructorsChampionshipFilters) ([]*models.ConstructorChampionship, error)
 }

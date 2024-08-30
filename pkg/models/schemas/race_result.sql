@@ -5,6 +5,7 @@ create table race_result
     position      varchar(10)   not null,
     driver_number int           not null,
     driver        varchar(255)  not null,
+    driver_tag    varchar(3)    not null,
     team          varchar(255)  not null,
     laps          int           not null,
     time_retired  varchar(100)  not null,

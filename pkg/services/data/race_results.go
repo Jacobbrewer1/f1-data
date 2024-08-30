@@ -78,9 +78,10 @@ func (s *service) modelAsApiRaceResult(m *models.RaceResult) *api.RaceResult {
 	return &api.RaceResult{
 		DriverName:    utils.Ptr(m.Driver),
 		DriverNumber:  utils.Ptr(int64(m.DriverNumber)),
+		DriverTag:     utils.Ptr(m.DriverTag),
 		Id:            utils.Ptr(int64(m.Id)),
 		LapsCompleted: utils.Ptr(int64(m.Laps)),
-		Points:        utils.Ptr(int64(m.Points)),
+		Points:        utils.Ptr(float32(m.Points)),
 		Position:      utils.Ptr(m.Position),
 		TeamName:      utils.Ptr(m.Team),
 		TimeOrRetired: utils.Ptr(m.TimeRetired),
