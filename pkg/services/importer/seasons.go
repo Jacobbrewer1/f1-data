@@ -164,12 +164,18 @@ func (s *service) ImportSeasonDriversChamps(year int) error {
 			driver.Nationality = children[2]
 			driver.Team = children[3]
 
+			position, err := strconv.Atoi(children[0])
+			if err != nil {
+				slog.Error("Error converting position to int", slog.String(logging.KeyError, err.Error()))
+				return
+			}
+			driver.Position = position
+
 			points, err := strconv.ParseFloat(children[4], 64)
 			if err != nil {
 				slog.Error("Error converting points to int", slog.String(logging.KeyError, err.Error()))
 				return
 			}
-
 			driver.Points = points
 
 			err = s.r.SaveDriver(driver)
@@ -220,12 +226,18 @@ func (s *service) ImportSeasonConstructorsChamps(year int) error {
 			constructor.SeasonId = season.Id
 			constructor.Name = children[1]
 
+			position, err := strconv.Atoi(children[0])
+			if err != nil {
+				slog.Error("Error converting position to int", slog.String(logging.KeyError, err.Error()))
+				return
+			}
+			constructor.Position = position
+
 			points, err := strconv.ParseFloat(children[2], 64)
 			if err != nil {
 				slog.Error("Error converting points to int", slog.String(logging.KeyError, err.Error()))
 				return
 			}
-
 			constructor.Points = points
 
 			err = s.r.SaveConstructor(constructor)

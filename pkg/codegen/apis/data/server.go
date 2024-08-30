@@ -14,6 +14,9 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Get all drivers for a season
+	// (GET /championships/{year}/drivers)
+	GetDriversChampionship(w http.ResponseWriter, r *http.Request, year PathYear, params GetDriversChampionshipParams)
 	// Get all results for a season
 	// (GET /races/{race_id}/results)
 	GetRaceResults(w http.ResponseWriter, r *http.Request, raceId PathRaceId, params GetRaceResultsParams)
@@ -68,6 +71,102 @@ func WithMetricsMiddleware(middleware MetricsMiddlewareFunc) ServerOption {
 
 // ServerOption represents an optional feature applied to the server.
 type ServerOption func(s *ServerInterfaceWrapper)
+
+// GetDriversChampionship operation middleware
+func (siw *ServerInterfaceWrapper) GetDriversChampionship(w http.ResponseWriter, r *http.Request) {
+	cw := uhttp.NewClientWriter(w)
+	ctx := r.Context()
+
+	defer func() {
+		if siw.metricsMiddleware != nil {
+			siw.metricsMiddleware(cw, r)
+		}
+	}()
+
+	var err error
+
+	// ------------- Path parameter "year" -------------
+	var year PathYear
+
+	err = runtime.BindStyledParameterWithOptions("simple", "year", mux.Vars(r)["year"], &year, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "year", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetDriversChampionshipParams
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "last_val" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "last_val", r.URL.Query(), &params.LastVal)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "last_val", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "last_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "last_id", r.URL.Query(), &params.LastId)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "last_id", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort_by" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort_by", r.URL.Query(), &params.SortBy)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "sort_by", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort_dir" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort_dir", r.URL.Query(), &params.SortDir)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "sort_dir", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "name" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "name", r.URL.Query(), &params.Name)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "name", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "tag" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "tag", r.URL.Query(), &params.Tag)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "tag", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "team" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "team", r.URL.Query(), &params.Team)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "team", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.handler.GetDriversChampionship(cw, r, year, params)
+	}))
+
+	handler.ServeHTTP(cw, r.WithContext(ctx))
+}
 
 // GetRaceResults operation middleware
 func (siw *ServerInterfaceWrapper) GetRaceResults(w http.ResponseWriter, r *http.Request) {
@@ -417,6 +516,8 @@ func RegisterUnauthedHandlers(router *mux.Router, si ServerInterface, opts ...Se
 	router.Use(uhttp.RequestIDToContextMux())
 
 	// We do not have a gateway preparer here as no auth is sent.
+
+	router.Methods(http.MethodGet).Path("/championships/{year}/drivers").Handler(wrapHandler(wrapper.GetDriversChampionship))
 
 	router.Methods(http.MethodGet).Path("/races/{race_id}/results").Handler(wrapHandler(wrapper.GetRaceResults))
 

@@ -11,6 +11,7 @@ import (
 type DriverChampionship struct {
 	Id          int     `db:"id,autoinc,pk"`
 	SeasonId    int     `db:"season_id"`
+	Position    int     `db:"position"`
 	Driver      string  `db:"driver"`
 	DriverTag   string  `db:"driver_tag"`
 	Nationality string  `db:"nationality"`
@@ -19,7 +20,7 @@ type DriverChampionship struct {
 }
 
 // DriverChampionshipColumns is the sorted column names for the type DriverChampionship
-var DriverChampionshipColumns = []string{"Driver", "DriverTag", "Id", "Nationality", "Points", "SeasonId", "Team"}
+var DriverChampionshipColumns = []string{"Driver", "DriverTag", "Id", "Nationality", "Points", "Position", "SeasonId", "Team"}
 
 // Insert inserts the DriverChampionship to the database.
 func (m *DriverChampionship) Insert(db DB) error {
@@ -27,13 +28,13 @@ func (m *DriverChampionship) Insert(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO driver_championship (" +
-		"`season_id`, `driver`, `driver_tag`, `nationality`, `team`, `points`" +
+		"`season_id`, `position`, `driver`, `driver_tag`, `nationality`, `team`, `points`" +
 		") VALUES (" +
-		"?, ?, ?, ?, ?, ?" +
+		"?, ?, ?, ?, ?, ?, ?" +
 		")"
 
-	DBLog(sqlstr, m.SeasonId, m.Driver, m.DriverTag, m.Nationality, m.Team, m.Points)
-	res, err := db.Exec(sqlstr, m.SeasonId, m.Driver, m.DriverTag, m.Nationality, m.Team, m.Points)
+	DBLog(sqlstr, m.SeasonId, m.Position, m.Driver, m.DriverTag, m.Nationality, m.Team, m.Points)
+	res, err := db.Exec(sqlstr, m.SeasonId, m.Position, m.Driver, m.DriverTag, m.Nationality, m.Team, m.Points)
 	if err != nil {
 		return err
 	}
@@ -56,15 +57,15 @@ func InsertManyDriverChampionships(db DB, ms ...*DriverChampionship) error {
 	defer t.ObserveDuration()
 
 	var sqlstr = "INSERT INTO driver_championship (" +
-		"`season_id`,`driver`,`driver_tag`,`nationality`,`team`,`points`" +
+		"`season_id`,`position`,`driver`,`driver_tag`,`nationality`,`team`,`points`" +
 		") VALUES"
 
 	var args []interface{}
 	for _, m := range ms {
 		sqlstr += " (" +
-			"?,?,?,?,?,?" +
+			"?,?,?,?,?,?,?" +
 			"),"
-		args = append(args, m.SeasonId, m.Driver, m.DriverTag, m.Nationality, m.Team, m.Points)
+		args = append(args, m.SeasonId, m.Position, m.Driver, m.DriverTag, m.Nationality, m.Team, m.Points)
 	}
 
 	DBLog(sqlstr, args...)
@@ -96,11 +97,11 @@ func (m *DriverChampionship) Update(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "UPDATE driver_championship " +
-		"SET `season_id` = ?, `driver` = ?, `driver_tag` = ?, `nationality` = ?, `team` = ?, `points` = ? " +
+		"SET `season_id` = ?, `position` = ?, `driver` = ?, `driver_tag` = ?, `nationality` = ?, `team` = ?, `points` = ? " +
 		"WHERE `id` = ?"
 
-	DBLog(sqlstr, m.SeasonId, m.Driver, m.DriverTag, m.Nationality, m.Team, m.Points, m.Id)
-	res, err := db.Exec(sqlstr, m.SeasonId, m.Driver, m.DriverTag, m.Nationality, m.Team, m.Points, m.Id)
+	DBLog(sqlstr, m.SeasonId, m.Position, m.Driver, m.DriverTag, m.Nationality, m.Team, m.Points, m.Id)
+	res, err := db.Exec(sqlstr, m.SeasonId, m.Position, m.Driver, m.DriverTag, m.Nationality, m.Team, m.Points, m.Id)
 	if err != nil {
 		return err
 	}
@@ -122,14 +123,14 @@ func (m *DriverChampionship) InsertWithUpdate(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO driver_championship (" +
-		"`season_id`, `driver`, `driver_tag`, `nationality`, `team`, `points`" +
+		"`season_id`, `position`, `driver`, `driver_tag`, `nationality`, `team`, `points`" +
 		") VALUES (" +
-		"?, ?, ?, ?, ?, ?" +
+		"?, ?, ?, ?, ?, ?, ?" +
 		") ON DUPLICATE KEY UPDATE " +
-		"`season_id` = VALUES(`season_id`), `driver` = VALUES(`driver`), `driver_tag` = VALUES(`driver_tag`), `nationality` = VALUES(`nationality`), `team` = VALUES(`team`), `points` = VALUES(`points`)"
+		"`season_id` = VALUES(`season_id`), `position` = VALUES(`position`), `driver` = VALUES(`driver`), `driver_tag` = VALUES(`driver_tag`), `nationality` = VALUES(`nationality`), `team` = VALUES(`team`), `points` = VALUES(`points`)"
 
-	DBLog(sqlstr, m.SeasonId, m.Driver, m.DriverTag, m.Nationality, m.Team, m.Points)
-	res, err := db.Exec(sqlstr, m.SeasonId, m.Driver, m.DriverTag, m.Nationality, m.Team, m.Points)
+	DBLog(sqlstr, m.SeasonId, m.Position, m.Driver, m.DriverTag, m.Nationality, m.Team, m.Points)
+	res, err := db.Exec(sqlstr, m.SeasonId, m.Position, m.Driver, m.DriverTag, m.Nationality, m.Team, m.Points)
 	if err != nil {
 		return err
 	}
@@ -180,7 +181,7 @@ func DriverChampionshipById(db DB, id int) (*DriverChampionship, error) {
 	t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("insert_DriverChampionship"))
 	defer t.ObserveDuration()
 
-	const sqlstr = "SELECT `id`, `season_id`, `driver`, `driver_tag`, `nationality`, `team`, `points` " +
+	const sqlstr = "SELECT `id`, `season_id`, `position`, `driver`, `driver_tag`, `nationality`, `team`, `points` " +
 		"FROM driver_championship " +
 		"WHERE `id` = ?"
 

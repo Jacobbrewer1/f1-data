@@ -42,6 +42,7 @@ type raceResult struct {
 	Position     string  `db:"position"`
 	DriverNumber int     `db:"driver_number"`
 	Driver       string  `db:"driver"`
+	DriverTag    string  `db:"driver_tag"`
 	Team         string  `db:"team"`
 	Laps         int     `db:"laps"`
 	TimeRetired  string  `db:"time_retired"`
@@ -59,5 +60,29 @@ func (r *raceResult) AsModel() *models.RaceResult {
 		Laps:         r.Laps,
 		TimeRetired:  r.TimeRetired,
 		Points:       r.Points,
+	}
+}
+
+type driverChampionship struct {
+	Id          int     `db:"id"`
+	SeasonId    int     `db:"season_id"`
+	Position    int     `db:"position"`
+	Driver      string  `db:"driver"`
+	DriverTag   string  `db:"driver_tag"`
+	Nationality string  `db:"nationality"`
+	Team        string  `db:"team"`
+	Points      float64 `db:"points"`
+}
+
+func (d *driverChampionship) AsModel() *models.DriverChampionship {
+	return &models.DriverChampionship{
+		Id:          d.Id,
+		SeasonId:    d.SeasonId,
+		Position:    d.Position,
+		Driver:      d.Driver,
+		DriverTag:   d.DriverTag,
+		Nationality: d.Nationality,
+		Team:        d.Team,
+		Points:      d.Points,
 	}
 }

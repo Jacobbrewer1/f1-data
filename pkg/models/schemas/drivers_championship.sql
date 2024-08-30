@@ -2,6 +2,7 @@ create table driver_championship
 (
     id          int           not null auto_increment,
     season_id   int           not null,
+    position    int           not null,
     driver      varchar(255)  not null,
     driver_tag  varchar(3)    not null,
     nationality varchar(3)    not null,
