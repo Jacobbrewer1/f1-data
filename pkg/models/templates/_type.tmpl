@@ -1,0 +1,169 @@
+{{- define "type" -}}
+    {{- if eq .Type "bigint" -}}
+        {{- if .Nullable -}}
+            usql.NullInt64
+        {{- else -}}
+            {{- if .Unsigned -}}
+                uint64
+            {{- else -}}
+                int64
+            {{- end -}}
+        {{- end -}}
+    {{- else if eq .Type "int" -}}
+        {{- if .Nullable -}}
+            usql.NullInt64
+        {{- else -}}
+            {{- if .Unsigned -}}
+                uint
+            {{- else -}}
+                int
+            {{- end -}}
+        {{- end -}}
+    {{- else if eq .Type "tinyint" -}}
+        {{- if eq .TypeSize 1 -}}
+            {{- if .Nullable -}}
+                usql.NullBool
+            {{- else -}}
+                bool
+            {{- end -}}
+        {{- else -}}
+            {{- if .Nullable -}}
+                usql.NullInt64
+            {{- else -}}
+                {{- if .Unsigned -}}
+                    uint8
+                {{- else -}}
+                    int8
+                {{- end -}}
+            {{- end -}}
+        {{- end -}}
+    {{- else if eq .Type "smallint" -}}
+        {{- if .Nullable -}}
+            usql.NullInt64
+        {{- else -}}
+            {{- if .Unsigned -}}
+                uint16
+            {{- else -}}
+                int16
+            {{- end -}}
+        {{- end -}}
+    {{- else if eq .Type "mediumint" -}}
+        {{- if .Nullable -}}
+            usql.NullInt64
+        {{- else -}}
+            {{- if .Unsigned -}}
+                uint32
+            {{- else -}}
+                int32
+            {{- end -}}
+        {{- end -}}
+    {{- else if eq .Type "float" -}}
+        {{- if .Nullable -}}
+            usql.NullFloat64
+        {{- else -}}
+            float{{ if lt .TypeSize 25 }}32{{ else }}64{{ end }}
+        {{- end -}}
+    {{- else if eq .Type "decimal" -}}
+        {{- if .Nullable -}}
+            usql.NullFloat64
+        {{- else -}}
+            float64
+        {{- end -}}
+    {{- else if eq .Type "double" -}}
+        {{- if .Nullable -}}
+            usql.NullFloat64
+        {{- else -}}
+            float64
+        {{- end -}}
+    {{- else if eq .Type "char" -}}
+        {{- if .Nullable -}}
+            usql.NullString
+        {{- else -}}
+            string
+        {{- end -}}
+    {{- else if eq .Type "binary" -}}
+        []byte
+    {{- else if eq .Type "varchar" -}}
+        {{- if .Nullable -}}
+            usql.NullString
+        {{- else -}}
+            string
+        {{- end -}}
+    {{- else if eq .Type "varbinary" -}}
+        []byte
+    {{- else if eq .Type "tinyblob" -}}
+        []byte
+    {{- else if eq .Type "tinytext" -}}
+        {{- if .Nullable -}}
+            usql.NullString
+        {{- else -}}
+            string
+        {{- end -}}
+    {{- else if eq .Type "blob" -}}
+        []byte
+    {{- else if eq .Type "text" -}}
+        {{- if .Nullable -}}
+            usql.NullString
+        {{- else -}}
+            string
+        {{- end -}}
+    {{- else if eq .Type "mediumblob" -}}
+        []byte
+    {{- else if eq .Type "mediumtext" -}}
+        {{- if .Nullable -}}
+            usql.NullString
+        {{- else -}}
+            string
+        {{- end -}}
+    {{- else if eq .Type "longblob" -}}
+        []byte
+    {{- else if eq .Type "longtext" -}}
+        {{- if .Nullable -}}
+            usql.NullString
+        {{- else -}}
+            string
+        {{- end -}}
+    {{- else if eq .Type "enum" -}}
+        {{- if .Nullable -}}
+            usql.NullEnum
+        {{- else -}}
+            usql.Enum
+        {{- end -}}
+    {{- else if eq .Type "mediumint" -}}
+        {{- if .Nullable -}}
+            usql.NullString
+        {{- else -}}
+            string
+        {{- end -}}
+    {{- else if eq .Type "year" -}}
+        {{- if .Nullable -}}
+            usql.NullTime
+        {{- else -}}
+            time.Time
+        {{- end -}}
+    {{- else if eq .Type "date" -}}
+        {{- if .Nullable -}}
+            usql.NullTime
+        {{- else -}}
+            time.Time
+        {{- end -}}
+    {{- else if eq .Type "time" -}}
+        {{- if .Nullable -}}
+            usql.NullDuration
+        {{- else -}}
+            usql.Duration
+        {{- end -}}
+    {{- else if eq .Type "datetime" -}}
+        {{- if .Nullable -}}
+            usql.NullTime
+        {{- else -}}
+            time.Time
+        {{- end -}}
+    {{- else if eq .Type "timestamp" -}}
+        {{- if .Nullable -}}
+            usql.NullTime
+        {{- else -}}
+            time.Time
+        {{- end -}}
+    {{- end -}}
+{{- end -}}

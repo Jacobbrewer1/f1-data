@@ -1,0 +1,76 @@
+{{- define "insert" -}}
+{{- $struct := .Name | structify -}}
+// Insert inserts the {{ $struct }} to the database.
+func (m *{{ $struct }}) Insert(db DB) error {
+    t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("insert_{{ $struct | structify -}}"))
+    defer t.ObserveDuration()
+
+    {{ $autoinc := autoinc_column . }}
+    {{- $cols := non_autoinc_columns . -}}
+    const sqlstr = "INSERT INTO {{ .Name }} (" +
+        "{{ range $i, $column := $cols }}{{ if $i }}, {{ end }}`{{ $column.Name }}`{{ end }}" +
+        ") VALUES (" +
+        "{{ range $i, $column := $cols }}{{ if $i }}, {{ end }}?{{ end }}" +
+        ")"
+
+    DBLog(sqlstr, {{ range $i, $column := $cols }}{{ if $i }}, {{ end }}m.{{ $column.Name | structify }}{{ end }})
+    {{ if $autoinc }}res{{ else }}_{{ end }}, err := db.Exec(sqlstr, {{ range $i, $column := $cols }}{{ if $i }}, {{ end }}m.{{ $column.Name | structify }}{{ end }})
+    {{ with $autoinc -}}
+    if err != nil {
+        return err
+    }
+
+    id, err := res.LastInsertId()
+    if err != nil {
+        return err
+    }
+
+    m.{{ .Name | structify }} = {{ template "type" . }}(id)
+    return nil
+    {{- else -}}
+    return err
+    {{- end }}
+}
+
+func InsertMany{{ $struct }}s(db DB, ms ...*{{ $struct }}) error {
+    if len(ms) == 0 {
+        return nil
+    }
+
+    t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("insert_many_{{ $struct | structify -}}"))
+    defer t.ObserveDuration()
+
+    {{ $autoinc := autoinc_column . -}}
+    {{- $cols := non_autoinc_columns . -}}
+    var sqlstr = "INSERT INTO {{ .Name }} (" +
+        "{{ range $i, $column := $cols }}{{ if $i }},{{ end }}`{{ $column.Name }}`{{ end }}" +
+        ") VALUES"
+
+    var args []interface{}
+    for _, m := range ms {
+        sqlstr += " (" +
+            "{{ range $i, $column := $cols }}{{ if $i }},{{ end }}?{{ end }}" +
+            "),"
+        args = append(args, {{ range $i, $column := $cols }}{{ if $i }}, {{ end }}m.{{ $column.Name | structify }}{{ end }})
+    }
+
+    DBLog(sqlstr, args...)
+    {{ if $autoinc }}res{{ else }}_{{ end }}, err := db.Exec(sqlstr, args...)
+    if err != nil {
+        return err
+    }
+
+    {{ with $autoinc -}}
+    id, err := res.LastInsertId()
+    if err != nil {
+        return err
+    }
+
+    for i, m := range ms {
+        m.{{ .Name | structify }} = {{ template "type" . }}(id + int64(i))
+    }
+    {{- end }}
+
+    return nil
+}
+{{- end -}}

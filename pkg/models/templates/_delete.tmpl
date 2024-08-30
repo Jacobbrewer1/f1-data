@@ -1,0 +1,24 @@
+{{- define "delete" -}}
+{{- $struct := .Name | structify -}}
+// Delete deletes the {{ $struct }} from the database.
+func (m *{{ $struct }}) Delete(db DB) error {
+    t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("delete_{{ $struct | structify -}}"))
+    defer t.ObserveDuration()
+
+    {{ if identity_columns . -}}
+        {{ $cols := identity_columns . }}
+        const sqlstr = "DELETE FROM {{ .Name }} WHERE {{ range $i, $column := $cols }}{{ if $i }} AND {{ end }}`{{ $column.Name }}` = ?{{ end }}"
+
+        DBLog(sqlstr, {{ range $i, $column := $cols }}{{ if $i }}, {{ end }}m.{{ $column.Name | structify }}{{ end }})
+        _, err := db.Exec(sqlstr, {{ range $i, $column := $cols }}{{ if $i }}, {{ end }}m.{{ $column.Name | structify }}{{ end }})
+    {{- else -}}
+        {{ $cols := .Columns }}
+        const sqlstr = "DELETE FROM {{ .Name }} WHERE {{ range $i, $column := $cols }}{{ if $i }} AND {{ end }}`{{ $column.Name }}` = ?{{ end }}"
+
+        DBLog(sqlstr, {{ range $i, $column := $cols }}{{ if $i }}, {{ end }}m.{{ $column.Name | structify }}{{ end }})
+        _, err := db.Exec(sqlstr, {{ range $i, $column := $cols }}{{ if $i }}, {{ end }}m.{{ $column.Name | structify }}{{ end }})
+    {{- end }}
+
+    return err
+}
+{{- end -}}

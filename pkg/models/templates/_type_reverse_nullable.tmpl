@@ -1,0 +1,89 @@
+{{- define "type_reverse_nullable" -}}
+    {{- if eq .Type "bigint" -}}
+        {{- if .Nullable -}}
+            Int64
+        {{- end -}}
+    {{- else if eq .Type "int" -}}
+        {{- if .Nullable -}}
+            Int64
+        {{- end -}}
+    {{- else if eq .Type "tinyint" -}}
+        {{- if eq .TypeSize 1 -}}
+            {{- if .Nullable -}}
+                Bool
+            {{- end -}}
+        {{- end -}}
+    {{- else if eq .Type "smallint" -}}
+        {{- if .Nullable -}}
+            Int64
+        {{- end -}}
+    {{- else if eq .Type "mediumint" -}}
+        {{- if .Nullable -}}
+            Int64
+        {{- end -}}
+    {{- else if eq .Type "float" -}}
+        {{- if .Nullable -}}
+            Float64
+        {{- end -}}
+    {{- else if eq .Type "decimal" -}}
+        {{- if .Nullable -}}
+            Float64
+        {{- end -}}
+    {{- else if eq .Type "double" -}}
+        {{- if .Nullable -}}
+            Float64
+        {{- end -}}
+    {{- else if eq .Type "char" -}}
+        {{- if .Nullable -}}
+            String
+        {{- end -}}
+    {{- else if eq .Type "varchar" -}}
+        {{- if .Nullable -}}
+            String
+        {{- end -}}
+    {{- else if eq .Type "tinytext" -}}
+        {{- if .Nullable -}}
+            String
+        {{- end -}}
+    {{- else if eq .Type "text" -}}
+        {{- if .Nullable -}}
+            String
+        {{- end -}}
+    {{- else if eq .Type "mediumtext" -}}
+        {{- if .Nullable -}}
+            String
+        {{- end -}}
+    {{- else if eq .Type "longtext" -}}
+        {{- if .Nullable -}}
+            String
+        {{- end -}}
+    {{- else if eq .Type "enum" -}}
+        {{- if .Nullable -}}
+            Enum
+        {{- end -}}
+    {{- else if eq .Type "mediumint" -}}
+        {{- if .Nullable -}}
+            String
+        {{- end -}}
+    {{- else if eq .Type "year" -}}
+        {{- if .Nullable -}}
+            mysql.NullTime
+        {{- end -}}
+    {{- else if eq .Type "date" -}}
+        {{- if .Nullable -}}
+            mysql.NullTime
+        {{- end -}}
+    {{- else if eq .Type "time" -}}
+        {{- if .Nullable -}}
+            Duration
+        {{- end -}}
+    {{- else if eq .Type "datetime" -}}
+        {{- if .Nullable -}}
+            mysql.NullTime
+        {{- end -}}
+    {{- else if eq .Type "timestamp" -}}
+        {{- if .Nullable -}}
+            mysql.NullTime
+        {{- end -}}
+    {{- end -}}
+{{- end -}}

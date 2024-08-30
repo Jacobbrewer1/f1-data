@@ -1,0 +1,20 @@
+{{range .Types}}
+{{if ne .TypeName .Schema.TypeDecl }}
+{{- if gt (len .Schema.UnionElements) 0 }}
+// {{.TypeName}} defines the model for {{.JsonName}}.
+type {{.TypeName}} = interface{}
+{{- else -}}
+// {{.TypeName}} defines the model for {{.JsonName}}.
+type {{.TypeName}} {{if or (.IsAlias) (gt (len .Schema.EnumValues) 0) }}={{end}} {{.Schema.TypeDecl}}
+{{- end }}
+{{end}}
+{{- if and (gt (len .Schema.EnumValues) 0) (eq .Schema.GoType "string") }}
+// List of {{ .TypeName }}
+const (
+	{{- $typeName := .TypeName }}
+    {{- range $key, $value := .Schema.EnumValues }}
+    {{ $typeName }}_{{ $value }} {{ $typeName }} = "{{ $value }}"
+    {{- end }}
+)
+{{- end }}
+{{end}}

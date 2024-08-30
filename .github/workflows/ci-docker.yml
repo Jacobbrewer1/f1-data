@@ -1,0 +1,56 @@
+name: Docker
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        description: 'App to build'
+        required: false
+        type: string
+        default: 'build-all'
+      push:
+        description: 'Push to registry'
+        required: false
+        type: boolean
+        default: true
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  docker-build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ vars.GO_VERSION }}
+          cache-dependency-path: "**/*.sum"
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build app
+        run: |
+          export CGO_ENABLED=0
+          chmod +x ./docker_build.sh
+          ./docker_build.sh ${{ inputs.app }} ${{ inputs.push }}

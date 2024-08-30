@@ -1,0 +1,35 @@
+version: '0.1'
+name: f1-data
+
+services:
+  vault:
+    image: vault:latest
+    container_name: vault-server
+    ports:
+      - "8200:8200"
+    restart: always
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: root
+      VAULT_ADDR: http://localhost:8200
+    networks:
+      f1-data-net:
+
+  mariadb:
+    image: mariadb:11.5.1-rc
+    container_name: mariadb-server
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: Password01
+      MARIADB_DATABASE: f1data
+      MARIADB_USER: f1-user
+      MARIADB_PASSWORD: Password01
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./pkg/models/ddl:/docker-entrypoint-initdb.d
+    networks:
+      f1-data-net:
+
+networks:
+  f1-data-net:
+    driver: bridge
