@@ -4,16 +4,17 @@
 package models
 
 import (
-	usql "github.com/Jacobbrewer1/f1-data/pkg/utils/sql"
+	"time"
+
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 // Race represents a row from 'race'.
 type Race struct {
-	Id        int           `db:"id,autoinc,pk"`
-	SeasonId  int           `db:"season_id"`
-	GrandPrix string        `db:"grand_prix"`
-	Date      usql.NullTime `db:"date"`
+	Id        int       `db:"id,autoinc,pk"`
+	SeasonId  int       `db:"season_id"`
+	GrandPrix string    `db:"grand_prix"`
+	Date      time.Time `db:"date"`
 }
 
 // RaceColumns is the sorted column names for the type Race

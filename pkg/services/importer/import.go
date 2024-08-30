@@ -14,7 +14,7 @@ func (s *service) Import(from, to int) error {
 			return fmt.Errorf("error importing season %d: %w", i, err)
 		}
 
-		slog.Debug(fmt.Sprintf("Imported season %d", i))
+		slog.Debug(fmt.Sprintf("Import completed for season %d", i))
 	}
 
 	return nil

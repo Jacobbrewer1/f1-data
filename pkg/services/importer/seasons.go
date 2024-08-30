@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/Jacobbrewer1/f1-data/pkg/logging"
 	"github.com/Jacobbrewer1/f1-data/pkg/models"
@@ -33,7 +34,30 @@ func (s *service) ImportSeason(year int) error {
 		return fmt.Errorf("error parsing URL: %w", err)
 	}
 
+	raceDates := make(map[string]*time.Time)
+	datesCollected := make(chan struct{}) // Used to enforce order of operations.
+
 	c := colly.NewCollector()
+
+	c.OnHTML("tbody", func(e *colly.HTMLElement) {
+		e.ForEach("tr", func(_ int, el *colly.HTMLElement) {
+			children := el.ChildTexts("td")
+			if len(children) < 2 {
+				return
+			}
+
+			t, err := parseDate(children[1])
+			if err != nil {
+				slog.Error("Error parsing date", slog.String(logging.KeyError, err.Error()))
+				return
+			}
+
+			raceDates[children[0]] = t
+		})
+
+		slog.Debug("Dates collected, closing channel")
+		close(datesCollected)
+	})
 
 	c.OnHTML("a", func(e *colly.HTMLElement) {
 		// Get the href attribute of the element.
@@ -60,6 +84,15 @@ func (s *service) ImportSeason(year int) error {
 		race.SeasonId = season.Id
 		race.GrandPrix = e.Text
 
+		<-datesCollected
+
+		if raceDate, ok := raceDates[e.Text]; ok {
+			race.Date = *raceDate
+		} else {
+			slog.Error("Error getting race date from map, assuming the hasn't happened or didnt happen", slog.String("grand_prix", e.Text))
+			return
+		}
+
 		err = s.r.SaveRace(race)
 		if err != nil {
 			slog.Error("Error saving race", slog.String(logging.KeyError, err.Error()))
@@ -82,4 +115,12 @@ func (s *service) ImportSeason(year int) error {
 	}
 
 	return nil
+}
+
+func parseDate(date string) (*time.Time, error) {
+	t, err := time.Parse("02 Jan 2006", date)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing date: %w", err)
+	}
+	return &t, nil
 }
