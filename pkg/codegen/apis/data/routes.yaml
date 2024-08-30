@@ -4,6 +4,10 @@ info:
   title: F1 Data API
   description: This is the API for the F1 Data project
 
+servers:
+  - url: https://api.bthree.uk/f1/v1/
+    description: Production server
+
 paths:
   /seasons:
     get:
