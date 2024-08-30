@@ -26,4 +26,10 @@ type Repository interface {
 
 	// SaveDriver saves a driver
 	SaveDriver(driver *models.DriverChampionship) error
+
+	// GetConstructorByName returns a constructor by name
+	GetConstructorByName(seasonId int, name string) (*models.ConstructorChampionship, error)
+
+	// SaveConstructor saves a constructor
+	SaveConstructor(constructor *models.ConstructorChampionship) error
 }

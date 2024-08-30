@@ -51,6 +51,18 @@ func (s *service) Import(from, to int) error {
 
 			slog.Info(fmt.Sprintf("Imported drivers championship for season %d", i))
 		}(i)
+
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			err := s.ImportSeasonConstructorsChamps(i)
+			if err != nil {
+				slog.Error(fmt.Sprintf("error importing season %d constructors championship: %v", i, err))
+				return
+			}
+
+			slog.Info(fmt.Sprintf("Imported constructors championship for season %d", i))
+		}(i)
 	}
 
 	wg.Wait()

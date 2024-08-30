@@ -187,3 +187,59 @@ func (s *service) ImportSeasonDriversChamps(year int) error {
 
 	return nil
 }
+
+func (s *service) ImportSeasonConstructorsChamps(year int) error {
+	season, err := s.r.GetSeasonByYear(year)
+	if err != nil {
+		return fmt.Errorf("error getting season by year: %w", err)
+	}
+
+	urlFmt := fmt.Sprintf("%s/en/results/%d/team", s.baseUrl, year)
+	u, err := url.Parse(urlFmt)
+	if err != nil {
+		return fmt.Errorf("error parsing URL: %w", err)
+	}
+
+	c := colly.NewCollector()
+
+	c.OnHTML("tbody", func(e *colly.HTMLElement) {
+		e.ForEach("tr", func(_ int, el *colly.HTMLElement) {
+			children := el.ChildTexts("td")
+			if len(children) < 3 {
+				return
+			}
+
+			constructor, err := s.r.GetConstructorByName(season.Id, children[1])
+			if err != nil && !errors.Is(err, repo.ErrConstructorNotFound) {
+				slog.Error("Error getting driver", slog.String(logging.KeyError, err.Error()))
+				return
+			} else if errors.Is(err, repo.ErrConstructorNotFound) {
+				constructor = new(models.ConstructorChampionship)
+			}
+
+			constructor.SeasonId = season.Id
+			constructor.Name = children[1]
+
+			points, err := strconv.ParseFloat(children[2], 64)
+			if err != nil {
+				slog.Error("Error converting points to int", slog.String(logging.KeyError, err.Error()))
+				return
+			}
+
+			constructor.Points = points
+
+			err = s.r.SaveConstructor(constructor)
+			if err != nil {
+				slog.Error("Error saving driver", slog.String(logging.KeyError, err.Error()))
+				return
+			}
+		})
+	})
+
+	err = c.Visit(u.String())
+	if err != nil {
+		return fmt.Errorf("error visiting URL: %w", err)
+	}
+
+	return nil
+}
