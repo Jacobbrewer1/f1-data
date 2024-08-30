@@ -13,7 +13,8 @@ import (
 	api "github.com/Jacobbrewer1/f1-data/pkg/codegen/apis/data"
 	"github.com/Jacobbrewer1/f1-data/pkg/logging"
 	"github.com/Jacobbrewer1/f1-data/pkg/repositories"
-	repo "github.com/Jacobbrewer1/f1-data/pkg/repositories/importer"
+	repo "github.com/Jacobbrewer1/f1-data/pkg/repositories/data"
+	svc "github.com/Jacobbrewer1/f1-data/pkg/services/data"
 	uhttp "github.com/Jacobbrewer1/f1-data/pkg/utils/http"
 	"github.com/Jacobbrewer1/f1-data/pkg/vault"
 	"github.com/google/subcommands"
@@ -98,10 +99,6 @@ func (s *serveCmd) setup(ctx context.Context, r *mux.Router) (err error) {
 		return fmt.Errorf("error reading config file: %w", err)
 	}
 
-	if !v.IsSet("hosts.golfdata") {
-		return errors.New("golfdata host configuration not found")
-	}
-
 	if !v.IsSet("vault") {
 		return errors.New("vault configuration not found")
 	}
@@ -142,8 +139,7 @@ func (s *serveCmd) setup(ctx context.Context, r *mux.Router) (err error) {
 	slog.Info("Database connection generate from vault secrets")
 
 	repository := repo.NewRepository(db)
-	service := svc.NewService(repository, vc, v.GetString("hosts.golfdata"))
-	svcAuthz := svc.NewAuthz(service, repository, vc)
+	service := svc.NewService(repository)
 
 	r.HandleFunc("/metrics", uhttp.InternalOnly(promhttp.Handler())).Methods(http.MethodGet)
 	r.HandleFunc("/health", uhttp.InternalOnly(healthHandler(db))).Methods(http.MethodGet)
@@ -154,7 +150,6 @@ func (s *serveCmd) setup(ctx context.Context, r *mux.Router) (err error) {
 	api.RegisterHandlers(
 		r,
 		service,
-		api.WithAuthorization(svcAuthz),
 		api.WithMetricsMiddleware(metricsMiddleware),
 		api.WithErrorHandlerFunc(uhttp.GenericErrorHandler),
 	)

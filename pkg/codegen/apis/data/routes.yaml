@@ -1,13 +1,22 @@
 openapi: 3.0.0
 info:
   version: latest
-  title: Golf Data API
-  description: This is the API for the golf data service
+  title: F1 Data API
+  description: This is the API for the F1 Data project
 
 paths:
   /seasons:
     get:
       summary: Get all seasons
+      parameters:
+        - $ref: '../common/common.yaml#/components/parameters/limit_param'
+        - $ref: '../common/common.yaml#/components/parameters/last_value'
+        - $ref: '../common/common.yaml#/components/parameters/last_id'
+        - $ref: '../common/common.yaml#/components/parameters/sort_by'
+        - $ref: '../common/common.yaml#/components/parameters/sort_direction'
+        - $ref: '#/components/parameters/query_year'
+        - $ref: '#/components/parameters/query_year_min'
+        - $ref: '#/components/parameters/query_year_max'
       responses:
         '200':
           description: A list of all seasons
@@ -17,6 +26,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/season'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
         '404':
           description: No seasons found
           content:
@@ -31,6 +46,32 @@ paths:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
 
 components:
+  parameters:
+    query_year:
+      name: year
+      in: query
+      description: The year of the season
+      required: false
+      schema:
+        type: integer
+        format: int64
+    query_year_min:
+      name: year_min
+      in: query
+      description: The minimum year of the season
+      required: false
+      schema:
+        type: integer
+        format: int64
+    query_year_max:
+      name: year_max
+      in: query
+      description: The maximum year of the season
+      required: false
+      schema:
+        type: integer
+        format: int64
+
   schemas:
     season:
       type: object

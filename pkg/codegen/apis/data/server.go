@@ -9,13 +9,14 @@ import (
 
 	uhttp "github.com/Jacobbrewer1/f1-data/pkg/utils/http"
 	"github.com/gorilla/mux"
+	"github.com/oapi-codegen/runtime"
 )
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Get all seasons
 	// (GET /seasons)
-	GetSeasons(w http.ResponseWriter, r *http.Request)
+	GetSeasons(w http.ResponseWriter, r *http.Request, params GetSeasonsParams)
 }
 
 type RateLimiterFunc = func(http.ResponseWriter, *http.Request) error
@@ -73,8 +74,77 @@ func (siw *ServerInterfaceWrapper) GetSeasons(w http.ResponseWriter, r *http.Req
 		}
 	}()
 
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetSeasonsParams
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "last_val" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "last_val", r.URL.Query(), &params.LastVal)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "last_val", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "last_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "last_id", r.URL.Query(), &params.LastId)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "last_id", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort_by" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort_by", r.URL.Query(), &params.SortBy)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "sort_by", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort_dir" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort_dir", r.URL.Query(), &params.SortDir)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "sort_dir", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "year" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "year", r.URL.Query(), &params.Year)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "year", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "year_min" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "year_min", r.URL.Query(), &params.YearMin)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "year_min", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "year_max" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "year_max", r.URL.Query(), &params.YearMax)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "year_max", Err: err})
+		return
+	}
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.handler.GetSeasons(cw, r)
+		siw.handler.GetSeasons(cw, r, params)
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
