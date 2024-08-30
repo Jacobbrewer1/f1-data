@@ -1,0 +1,86 @@
+name: Deploy
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: environment
+        default: 'prod-1'
+        options:
+          - 'prod-1'
+      app:
+        description: 'App to deploy'
+        required: true
+        type: choice
+        options:
+          - 'importer'
+          - 'data'
+
+jobs:
+  build:
+    name: Build All
+    permissions: write-all
+    uses: jacobbrewer1/f1-data/.github/workflows/ci-docker.yml@main
+    secrets: inherit
+    with:
+      app: ${{ inputs.app }}
+      push: ${{ github.event_name != 'pull_request' }}
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: [ build ]
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get commit
+        id: get_commit
+        run: echo "sha_short_deploy=$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_OUTPUT
+
+      - name: Import secrets
+        id: import-secrets
+        uses: hashicorp/vault-action@v2
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          method: userpass
+          username: ${{ secrets.VAULT_USER }}
+          password: ${{ secrets.VAULT_PASS }}
+          secrets: |
+            ${{ secrets.VAULT_MOUNT }}/data/${{ secrets.VAULT_GITHUB_API_NAME }} ${{ secrets.VAULT_GITHUB_API_KEY }} | GITHUB_TOKEN ;
+            ${{ secrets.VAULT_MOUNT }}/data/${{ secrets.VAULT_KUBE_CONFIG_NAME }} ${{ secrets.VAULT_KUBE_CONFIG_KEY }} | KUBE_CONFIG ;
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          repository: Jacobbrewer1/supporting-charts
+          path: ./charts
+          token: ${{ steps.import-secrets.outputs.GITHUB_TOKEN }}
+
+      - name: Deploy
+        uses: WyriHaximus/github-action-helm3@v4
+        with:
+          exec: helm upgrade --install f1-data-${{ inputs.app }} ./charts --values charts/valueFiles/${{ inputs.environment }}/f1-data-${{ inputs.app }}.yaml --set image.tag=${{ steps.get_commit.outputs.sha_short_deploy }}
+          kubeconfig: '${{ steps.import-secrets.outputs.KUBE_CONFIG }}'
+
+      - name: Docs
+        # Only run on the main branch
+        if: ${{ github.ref == 'refs/heads/main' }}
+        shell: bash
+        run: |
+          curl -L \
+          -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ steps.import-secrets.outputs.GITHUB_TOKEN }}" \
+          https://api.github.com/repos/Jacobbrewer1/f1-data-docs/actions/workflows/Deploy_Docs/dispatches \
+          -d '{"ref":"main"}'
