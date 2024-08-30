@@ -1,7 +1,6 @@
 package http
 
 import (
-	"errors"
 	"net/http"
 )
 
@@ -32,13 +31,14 @@ func NewHttpError(status int, str string) error {
 	}
 }
 
-func SendHttpError(w http.ResponseWriter, err error) {
-	e := new(httpError)
-	ok := errors.As(err, &e)
-	if !ok {
-		GenericErrorHandler(w, nil, err)
-		return
-	}
-
-	SendMessageWithStatus(w, e.Status(), e.Error())
-}
+// TODO: Uncomment when golangci lint is fixed
+//func SendHttpError(w http.ResponseWriter, err error) {
+//	e := new(httpError)
+//	ok := errors.As(err, &e)
+//	if !ok {
+//		GenericErrorHandler(w, nil, err)
+//		return
+//	}
+//
+//	SendMessageWithStatus(w, e.Status(), e.Error())
+//}

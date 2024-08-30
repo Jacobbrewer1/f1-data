@@ -99,7 +99,11 @@ func (s *service) ImportSeason(year int) error {
 			return
 		}
 
-		raceUrl, err := url.Parse(s.baseUrl + link)
+		raceUrl, uErr := url.Parse(s.baseUrl + link)
+		if uErr != nil {
+			slog.Error("Error parsing URL", slog.String(logging.KeyError, err.Error()))
+		}
+
 		err = s.processRace(race.Id, raceUrl)
 		if err != nil {
 			slog.Error("Error processing race results", slog.String(logging.KeyError, err.Error()))
