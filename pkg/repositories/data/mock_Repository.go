@@ -14,6 +14,66 @@ type MockRepository struct {
 	mock.Mock
 }
 
+// GetConstructorsChampionship provides a mock function with given fields: paginationDetails, filters
+func (_m *MockRepository) GetConstructorsChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetConstructorsChampionshipFilters) ([]*models.ConstructorChampionship, error) {
+	ret := _m.Called(paginationDetails, filters)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetConstructorsChampionship")
+	}
+
+	var r0 []*models.ConstructorChampionship
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetConstructorsChampionshipFilters) ([]*models.ConstructorChampionship, error)); ok {
+		return rf(paginationDetails, filters)
+	}
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetConstructorsChampionshipFilters) []*models.ConstructorChampionship); ok {
+		r0 = rf(paginationDetails, filters)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.ConstructorChampionship)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*pagefilter.PaginatorDetails, *GetConstructorsChampionshipFilters) error); ok {
+		r1 = rf(paginationDetails, filters)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetDriversChampionship provides a mock function with given fields: paginationDetails, filters
+func (_m *MockRepository) GetDriversChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetDriversChampionshipFilters) ([]*models.DriverChampionship, error) {
+	ret := _m.Called(paginationDetails, filters)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetDriversChampionship")
+	}
+
+	var r0 []*models.DriverChampionship
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetDriversChampionshipFilters) ([]*models.DriverChampionship, error)); ok {
+		return rf(paginationDetails, filters)
+	}
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetDriversChampionshipFilters) []*models.DriverChampionship); ok {
+		r0 = rf(paginationDetails, filters)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.DriverChampionship)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*pagefilter.PaginatorDetails, *GetDriversChampionshipFilters) error); ok {
+		r1 = rf(paginationDetails, filters)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetRaceResults provides a mock function with given fields: paginationDetails, filters
 func (_m *MockRepository) GetRaceResults(paginationDetails *pagefilter.PaginatorDetails, filters *GetRaceResultsFilters) ([]*models.RaceResult, error) {
 	ret := _m.Called(paginationDetails, filters)
