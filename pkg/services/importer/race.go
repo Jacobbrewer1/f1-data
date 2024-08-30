@@ -41,6 +41,10 @@ func (s *service) processRace(raceId int, url *url.URL) error {
 					text = child[0] + " " + child[1]
 				}
 
+				if len(child) >= 2 {
+					raceResult.DriverTag = child[2]
+				}
+
 				var err error
 				switch i {
 				case 0:

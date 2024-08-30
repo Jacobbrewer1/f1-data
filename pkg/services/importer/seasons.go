@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,18 +15,10 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
-func (s *service) ImportSeason(year int) error {
+func (s *service) ImportSeasonRaces(year int) error {
 	season, err := s.r.GetSeasonByYear(year)
-	if err != nil && !errors.Is(err, repo.ErrNoSeasonFound) {
+	if err != nil {
 		return fmt.Errorf("error getting season by year: %w", err)
-	} else if errors.Is(err, repo.ErrNoSeasonFound) {
-		season = &models.Season{
-			Year: year,
-		}
-		err = s.r.SaveSeason(season)
-		if err != nil {
-			return fmt.Errorf("error saving season: %w", err)
-		}
 	}
 
 	urlFmt := fmt.Sprintf("%s/en/results/%d/races", s.baseUrl, year)
@@ -127,4 +120,70 @@ func parseDate(date string) (*time.Time, error) {
 		return nil, fmt.Errorf("error parsing date: %w", err)
 	}
 	return &t, nil
+}
+
+func (s *service) ImportSeasonDriversChamps(year int) error {
+	season, err := s.r.GetSeasonByYear(year)
+	if err != nil {
+		return fmt.Errorf("error getting season by year: %w", err)
+	}
+
+	urlFmt := fmt.Sprintf("%s/en/results/%d/drivers", s.baseUrl, year)
+	u, err := url.Parse(urlFmt)
+	if err != nil {
+		return fmt.Errorf("error parsing URL: %w", err)
+	}
+
+	c := colly.NewCollector()
+
+	c.OnHTML("tbody", func(e *colly.HTMLElement) {
+		e.ForEach("tr", func(_ int, el *colly.HTMLElement) {
+			children := el.ChildTexts("td")
+			if len(children) < 5 {
+				return
+			}
+
+			driverNames := el.ChildTexts("span")
+			if driverNames == nil || len(driverNames) < 2 {
+				slog.Error("Error getting driver names")
+				return
+			}
+			driverName := driverNames[0] + " " + driverNames[1]
+
+			driver, err := s.r.GetDriverByName(season.Id, driverName)
+			if err != nil && !errors.Is(err, repo.ErrDriverNotFound) {
+				slog.Error("Error getting driver", slog.String(logging.KeyError, err.Error()))
+				return
+			} else if errors.Is(err, repo.ErrDriverNotFound) {
+				driver = new(models.DriverChampionship)
+			}
+
+			driver.SeasonId = season.Id
+			driver.Driver = driverName
+			driver.DriverTag = driverNames[2]
+			driver.Nationality = children[2]
+			driver.Team = children[3]
+
+			points, err := strconv.ParseFloat(children[4], 64)
+			if err != nil {
+				slog.Error("Error converting points to int", slog.String(logging.KeyError, err.Error()))
+				return
+			}
+
+			driver.Points = points
+
+			err = s.r.SaveDriver(driver)
+			if err != nil {
+				slog.Error("Error saving driver", slog.String(logging.KeyError, err.Error()))
+				return
+			}
+		})
+	})
+
+	err = c.Visit(u.String())
+	if err != nil {
+		return fmt.Errorf("error visiting URL: %w", err)
+	}
+
+	return nil
 }

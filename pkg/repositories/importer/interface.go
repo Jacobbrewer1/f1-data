@@ -20,4 +20,10 @@ type Repository interface {
 
 	// SaveRaceResult saves a race result
 	SaveRaceResult(raceResult *models.RaceResult) error
+
+	// GetDriverByName returns a driver by name
+	GetDriverByName(seasonId int, name string) (*models.DriverChampionship, error)
+
+	// SaveDriver saves a driver
+	SaveDriver(driver *models.DriverChampionship) error
 }

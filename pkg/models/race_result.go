@@ -14,6 +14,7 @@ type RaceResult struct {
 	Position     string  `db:"position"`
 	DriverNumber int     `db:"driver_number"`
 	Driver       string  `db:"driver"`
+	DriverTag    string  `db:"driver_tag"`
 	Team         string  `db:"team"`
 	Laps         int     `db:"laps"`
 	TimeRetired  string  `db:"time_retired"`
@@ -21,7 +22,7 @@ type RaceResult struct {
 }
 
 // RaceResultColumns is the sorted column names for the type RaceResult
-var RaceResultColumns = []string{"Driver", "DriverNumber", "Id", "Laps", "Points", "Position", "RaceId", "Team", "TimeRetired"}
+var RaceResultColumns = []string{"Driver", "DriverNumber", "DriverTag", "Id", "Laps", "Points", "Position", "RaceId", "Team", "TimeRetired"}
 
 // Insert inserts the RaceResult to the database.
 func (m *RaceResult) Insert(db DB) error {
@@ -29,13 +30,13 @@ func (m *RaceResult) Insert(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO race_result (" +
-		"`race_id`, `position`, `driver_number`, `driver`, `team`, `laps`, `time_retired`, `points`" +
+		"`race_id`, `position`, `driver_number`, `driver`, `driver_tag`, `team`, `laps`, `time_retired`, `points`" +
 		") VALUES (" +
-		"?, ?, ?, ?, ?, ?, ?, ?" +
+		"?, ?, ?, ?, ?, ?, ?, ?, ?" +
 		")"
 
-	DBLog(sqlstr, m.RaceId, m.Position, m.DriverNumber, m.Driver, m.Team, m.Laps, m.TimeRetired, m.Points)
-	res, err := db.Exec(sqlstr, m.RaceId, m.Position, m.DriverNumber, m.Driver, m.Team, m.Laps, m.TimeRetired, m.Points)
+	DBLog(sqlstr, m.RaceId, m.Position, m.DriverNumber, m.Driver, m.DriverTag, m.Team, m.Laps, m.TimeRetired, m.Points)
+	res, err := db.Exec(sqlstr, m.RaceId, m.Position, m.DriverNumber, m.Driver, m.DriverTag, m.Team, m.Laps, m.TimeRetired, m.Points)
 	if err != nil {
 		return err
 	}
@@ -58,15 +59,15 @@ func InsertManyRaceResults(db DB, ms ...*RaceResult) error {
 	defer t.ObserveDuration()
 
 	var sqlstr = "INSERT INTO race_result (" +
-		"`race_id`,`position`,`driver_number`,`driver`,`team`,`laps`,`time_retired`,`points`" +
+		"`race_id`,`position`,`driver_number`,`driver`,`driver_tag`,`team`,`laps`,`time_retired`,`points`" +
 		") VALUES"
 
 	var args []interface{}
 	for _, m := range ms {
 		sqlstr += " (" +
-			"?,?,?,?,?,?,?,?" +
+			"?,?,?,?,?,?,?,?,?" +
 			"),"
-		args = append(args, m.RaceId, m.Position, m.DriverNumber, m.Driver, m.Team, m.Laps, m.TimeRetired, m.Points)
+		args = append(args, m.RaceId, m.Position, m.DriverNumber, m.Driver, m.DriverTag, m.Team, m.Laps, m.TimeRetired, m.Points)
 	}
 
 	DBLog(sqlstr, args...)
@@ -98,11 +99,11 @@ func (m *RaceResult) Update(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "UPDATE race_result " +
-		"SET `race_id` = ?, `position` = ?, `driver_number` = ?, `driver` = ?, `team` = ?, `laps` = ?, `time_retired` = ?, `points` = ? " +
+		"SET `race_id` = ?, `position` = ?, `driver_number` = ?, `driver` = ?, `driver_tag` = ?, `team` = ?, `laps` = ?, `time_retired` = ?, `points` = ? " +
 		"WHERE `id` = ?"
 
-	DBLog(sqlstr, m.RaceId, m.Position, m.DriverNumber, m.Driver, m.Team, m.Laps, m.TimeRetired, m.Points, m.Id)
-	res, err := db.Exec(sqlstr, m.RaceId, m.Position, m.DriverNumber, m.Driver, m.Team, m.Laps, m.TimeRetired, m.Points, m.Id)
+	DBLog(sqlstr, m.RaceId, m.Position, m.DriverNumber, m.Driver, m.DriverTag, m.Team, m.Laps, m.TimeRetired, m.Points, m.Id)
+	res, err := db.Exec(sqlstr, m.RaceId, m.Position, m.DriverNumber, m.Driver, m.DriverTag, m.Team, m.Laps, m.TimeRetired, m.Points, m.Id)
 	if err != nil {
 		return err
 	}
@@ -124,14 +125,14 @@ func (m *RaceResult) InsertWithUpdate(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO race_result (" +
-		"`race_id`, `position`, `driver_number`, `driver`, `team`, `laps`, `time_retired`, `points`" +
+		"`race_id`, `position`, `driver_number`, `driver`, `driver_tag`, `team`, `laps`, `time_retired`, `points`" +
 		") VALUES (" +
-		"?, ?, ?, ?, ?, ?, ?, ?" +
+		"?, ?, ?, ?, ?, ?, ?, ?, ?" +
 		") ON DUPLICATE KEY UPDATE " +
-		"`race_id` = VALUES(`race_id`), `position` = VALUES(`position`), `driver_number` = VALUES(`driver_number`), `driver` = VALUES(`driver`), `team` = VALUES(`team`), `laps` = VALUES(`laps`), `time_retired` = VALUES(`time_retired`), `points` = VALUES(`points`)"
+		"`race_id` = VALUES(`race_id`), `position` = VALUES(`position`), `driver_number` = VALUES(`driver_number`), `driver` = VALUES(`driver`), `driver_tag` = VALUES(`driver_tag`), `team` = VALUES(`team`), `laps` = VALUES(`laps`), `time_retired` = VALUES(`time_retired`), `points` = VALUES(`points`)"
 
-	DBLog(sqlstr, m.RaceId, m.Position, m.DriverNumber, m.Driver, m.Team, m.Laps, m.TimeRetired, m.Points)
-	res, err := db.Exec(sqlstr, m.RaceId, m.Position, m.DriverNumber, m.Driver, m.Team, m.Laps, m.TimeRetired, m.Points)
+	DBLog(sqlstr, m.RaceId, m.Position, m.DriverNumber, m.Driver, m.DriverTag, m.Team, m.Laps, m.TimeRetired, m.Points)
+	res, err := db.Exec(sqlstr, m.RaceId, m.Position, m.DriverNumber, m.Driver, m.DriverTag, m.Team, m.Laps, m.TimeRetired, m.Points)
 	if err != nil {
 		return err
 	}
@@ -182,7 +183,7 @@ func RaceResultById(db DB, id int) (*RaceResult, error) {
 	t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("insert_RaceResult"))
 	defer t.ObserveDuration()
 
-	const sqlstr = "SELECT `id`, `race_id`, `position`, `driver_number`, `driver`, `team`, `laps`, `time_retired`, `points` " +
+	const sqlstr = "SELECT `id`, `race_id`, `position`, `driver_number`, `driver`, `driver_tag`, `team`, `laps`, `time_retired`, `points` " +
 		"FROM race_result " +
 		"WHERE `id` = ?"
 
