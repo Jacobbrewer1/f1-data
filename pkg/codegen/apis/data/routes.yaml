@@ -1,0 +1,215 @@
+openapi: 3.0.0
+info:
+  version: latest
+  title: F1 Data API
+  description: This is the API for the F1 Data project
+
+paths:
+  /seasons:
+    get:
+      summary: Get all seasons
+      operationId: getSeasons
+      parameters:
+        - $ref: '../common/common.yaml#/components/parameters/limit_param'
+        - $ref: '../common/common.yaml#/components/parameters/last_value'
+        - $ref: '../common/common.yaml#/components/parameters/last_id'
+        - $ref: '../common/common.yaml#/components/parameters/sort_by'
+        - $ref: '../common/common.yaml#/components/parameters/sort_direction'
+        - $ref: '#/components/parameters/query_year'
+        - $ref: '#/components/parameters/query_year_min'
+        - $ref: '#/components/parameters/query_year_max'
+      responses:
+        '200':
+          description: A list of all seasons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/season'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+        '404':
+          description: No seasons found
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
+  /seasons/{year}/races:
+    get:
+      summary: Get all races for a season
+      operationId: getSeasonRaces
+      parameters:
+        - $ref: '../common/common.yaml#/components/parameters/limit_param'
+        - $ref: '../common/common.yaml#/components/parameters/last_value'
+        - $ref: '../common/common.yaml#/components/parameters/last_id'
+        - $ref: '../common/common.yaml#/components/parameters/sort_by'
+        - $ref: '../common/common.yaml#/components/parameters/sort_direction'
+        - $ref: '#/components/parameters/path_year'
+      responses:
+        '200':
+          description: A list of all races for the specified season
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/race'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+        '404':
+          description: No races found
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
+  /races/{race_id}/results:
+    get:
+      summary: Get all results for a season
+      operationId: getRaceResults
+      parameters:
+        - $ref: '../common/common.yaml#/components/parameters/limit_param'
+        - $ref: '../common/common.yaml#/components/parameters/last_value'
+        - $ref: '../common/common.yaml#/components/parameters/last_id'
+        - $ref: '../common/common.yaml#/components/parameters/sort_by'
+        - $ref: '../common/common.yaml#/components/parameters/sort_direction'
+        - $ref: '#/components/parameters/path_race_id'
+      responses:
+        '200':
+          description: A list of all results for the specified season
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/race_result'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+        '404':
+          description: No results found
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
+components:
+  parameters:
+    query_year:
+      name: year
+      in: query
+      description: The year of the season
+      required: false
+      schema:
+        type: integer
+        format: int64
+    query_year_min:
+      name: year_min
+      in: query
+      description: The minimum year of the season
+      required: false
+      schema:
+        type: integer
+        format: int64
+    query_year_max:
+      name: year_max
+      in: query
+      description: The maximum year of the season
+      required: false
+      schema:
+        type: integer
+        format: int64
+    path_year:
+      name: year
+      in: path
+      description: The year of the season
+      required: true
+      schema:
+        type: integer
+        format: int64
+    path_race_id:
+      name: race_id
+      in: path
+      description: The ID of the race
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+  schemas:
+    season:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        year:
+          type: integer
+          format: int64
+
+    race:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        date:
+          type: string
+          format: date
+
+    race_result:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        position:
+          type: string
+        driver_number:
+          type: integer
+          format: int64
+        driver_name:
+          type: string
+        team_name:
+          type: string
+        laps_completed:
+          type: integer
+          format: int64
+        time_or_retired:
+          type: string
+        points:
+          type: integer
+          format: int64
