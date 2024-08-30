@@ -89,11 +89,26 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// GetRaceResults request
+	GetRaceResults(ctx context.Context, raceId PathRaceId, params *GetRaceResultsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetSeasons request
 	GetSeasons(ctx context.Context, params *GetSeasonsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetSeasonsYearRaces request
-	GetSeasonsYearRaces(ctx context.Context, year PathYear, params *GetSeasonsYearRacesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetSeasonRaces request
+	GetSeasonRaces(ctx context.Context, year PathYear, params *GetSeasonRacesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) GetRaceResults(ctx context.Context, raceId PathRaceId, params *GetRaceResultsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetRaceResultsRequest(c.Server, raceId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) GetSeasons(ctx context.Context, params *GetSeasonsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -108,8 +123,8 @@ func (c *Client) GetSeasons(ctx context.Context, params *GetSeasonsParams, reqEd
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetSeasonsYearRaces(ctx context.Context, year PathYear, params *GetSeasonsYearRacesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetSeasonsYearRacesRequest(c.Server, year, params)
+func (c *Client) GetSeasonRaces(ctx context.Context, year PathYear, params *GetSeasonRacesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetSeasonRacesRequest(c.Server, year, params)
 	if err != nil {
 		return nil, err
 	}
@@ -118,6 +133,126 @@ func (c *Client) GetSeasonsYearRaces(ctx context.Context, year PathYear, params 
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewGetRaceResultsRequest generates requests for GetRaceResults
+func NewGetRaceResultsRequest(server string, raceId PathRaceId, params *GetRaceResultsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "race_id", runtime.ParamLocationPath, raceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/races/%s/results", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.LastVal != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "last_val", runtime.ParamLocationQuery, *params.LastVal); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.LastId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "last_id", runtime.ParamLocationQuery, *params.LastId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortBy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort_by", runtime.ParamLocationQuery, *params.SortBy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortDir != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort_dir", runtime.ParamLocationQuery, *params.SortDir); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
 }
 
 // NewGetSeasonsRequest generates requests for GetSeasons
@@ -281,8 +416,8 @@ func NewGetSeasonsRequest(server string, params *GetSeasonsParams) (*http.Reques
 	return req, nil
 }
 
-// NewGetSeasonsYearRacesRequest generates requests for GetSeasonsYearRaces
-func NewGetSeasonsYearRacesRequest(server string, year PathYear, params *GetSeasonsYearRacesParams) (*http.Request, error) {
+// NewGetSeasonRacesRequest generates requests for GetSeasonRaces
+func NewGetSeasonRacesRequest(server string, year PathYear, params *GetSeasonRacesParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -444,11 +579,39 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// GetRaceResultsWithResponse request
+	GetRaceResultsWithResponse(ctx context.Context, raceId PathRaceId, params *GetRaceResultsParams, reqEditors ...RequestEditorFn) (*GetRaceResultsResponse, error)
+
 	// GetSeasonsWithResponse request
 	GetSeasonsWithResponse(ctx context.Context, params *GetSeasonsParams, reqEditors ...RequestEditorFn) (*GetSeasonsResponse, error)
 
-	// GetSeasonsYearRacesWithResponse request
-	GetSeasonsYearRacesWithResponse(ctx context.Context, year PathYear, params *GetSeasonsYearRacesParams, reqEditors ...RequestEditorFn) (*GetSeasonsYearRacesResponse, error)
+	// GetSeasonRacesWithResponse request
+	GetSeasonRacesWithResponse(ctx context.Context, year PathYear, params *GetSeasonRacesParams, reqEditors ...RequestEditorFn) (*GetSeasonRacesResponse, error)
+}
+
+type GetRaceResultsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]RaceResult
+	JSON400      *externalRef0.ErrorMessage
+	JSON404      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetRaceResultsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetRaceResultsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type GetSeasonsResponse struct {
@@ -476,7 +639,7 @@ func (r GetSeasonsResponse) StatusCode() int {
 	return 0
 }
 
-type GetSeasonsYearRacesResponse struct {
+type GetSeasonRacesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *[]Race
@@ -486,7 +649,7 @@ type GetSeasonsYearRacesResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetSeasonsYearRacesResponse) Status() string {
+func (r GetSeasonRacesResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -494,11 +657,20 @@ func (r GetSeasonsYearRacesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetSeasonsYearRacesResponse) StatusCode() int {
+func (r GetSeasonRacesResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
+}
+
+// GetRaceResultsWithResponse request returning *GetRaceResultsResponse
+func (c *ClientWithResponses) GetRaceResultsWithResponse(ctx context.Context, raceId PathRaceId, params *GetRaceResultsParams, reqEditors ...RequestEditorFn) (*GetRaceResultsResponse, error) {
+	rsp, err := c.GetRaceResults(ctx, raceId, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetRaceResultsResponse(rsp)
 }
 
 // GetSeasonsWithResponse request returning *GetSeasonsResponse
@@ -510,13 +682,60 @@ func (c *ClientWithResponses) GetSeasonsWithResponse(ctx context.Context, params
 	return ParseGetSeasonsResponse(rsp)
 }
 
-// GetSeasonsYearRacesWithResponse request returning *GetSeasonsYearRacesResponse
-func (c *ClientWithResponses) GetSeasonsYearRacesWithResponse(ctx context.Context, year PathYear, params *GetSeasonsYearRacesParams, reqEditors ...RequestEditorFn) (*GetSeasonsYearRacesResponse, error) {
-	rsp, err := c.GetSeasonsYearRaces(ctx, year, params, reqEditors...)
+// GetSeasonRacesWithResponse request returning *GetSeasonRacesResponse
+func (c *ClientWithResponses) GetSeasonRacesWithResponse(ctx context.Context, year PathYear, params *GetSeasonRacesParams, reqEditors ...RequestEditorFn) (*GetSeasonRacesResponse, error) {
+	rsp, err := c.GetSeasonRaces(ctx, year, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetSeasonsYearRacesResponse(rsp)
+	return ParseGetSeasonRacesResponse(rsp)
+}
+
+// ParseGetRaceResultsResponse parses an HTTP response from a GetRaceResultsWithResponse call
+func ParseGetRaceResultsResponse(rsp *http.Response) (*GetRaceResultsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetRaceResultsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []RaceResult
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseGetSeasonsResponse parses an HTTP response from a GetSeasonsWithResponse call
@@ -566,15 +785,15 @@ func ParseGetSeasonsResponse(rsp *http.Response) (*GetSeasonsResponse, error) {
 	return response, nil
 }
 
-// ParseGetSeasonsYearRacesResponse parses an HTTP response from a GetSeasonsYearRacesWithResponse call
-func ParseGetSeasonsYearRacesResponse(rsp *http.Response) (*GetSeasonsYearRacesResponse, error) {
+// ParseGetSeasonRacesResponse parses an HTTP response from a GetSeasonRacesWithResponse call
+func ParseGetSeasonRacesResponse(rsp *http.Response) (*GetSeasonRacesResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetSeasonsYearRacesResponse{
+	response := &GetSeasonRacesResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}

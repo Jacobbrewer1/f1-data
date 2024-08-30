@@ -35,3 +35,29 @@ func (r *race) AsModel() *models.Race {
 		Date:      r.Date,
 	}
 }
+
+type raceResult struct {
+	Id           int     `db:"id"`
+	RaceId       int     `db:"race_id"`
+	Position     string  `db:"position"`
+	DriverNumber int     `db:"driver_number"`
+	Driver       string  `db:"driver"`
+	Team         string  `db:"team"`
+	Laps         int     `db:"laps"`
+	TimeRetired  string  `db:"time_retired"`
+	Points       float64 `db:"points"`
+}
+
+func (r *raceResult) AsModel() *models.RaceResult {
+	return &models.RaceResult{
+		Id:           r.Id,
+		RaceId:       r.RaceId,
+		Position:     r.Position,
+		DriverNumber: r.DriverNumber,
+		Driver:       r.Driver,
+		Team:         r.Team,
+		Laps:         r.Laps,
+		TimeRetired:  r.TimeRetired,
+		Points:       r.Points,
+	}
+}

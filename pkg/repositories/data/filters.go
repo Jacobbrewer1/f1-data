@@ -15,3 +15,11 @@ type GetSeasonRacesFilters struct {
 	// SeasonYear is the year of the season.
 	SeasonYear *int `json:"season_year"`
 }
+
+type GetRaceResultsFilters struct {
+	// RaceID
+	RaceID *int
+
+	// SeasonYear is the year of the season.
+	SeasonYear *int `json:"season_year"`
+}

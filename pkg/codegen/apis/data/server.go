@@ -14,12 +14,15 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Get all results for a season
+	// (GET /races/{race_id}/results)
+	GetRaceResults(w http.ResponseWriter, r *http.Request, raceId PathRaceId, params GetRaceResultsParams)
 	// Get all seasons
 	// (GET /seasons)
 	GetSeasons(w http.ResponseWriter, r *http.Request, params GetSeasonsParams)
 	// Get all races for a season
 	// (GET /seasons/{year}/races)
-	GetSeasonsYearRaces(w http.ResponseWriter, r *http.Request, year PathYear, params GetSeasonsYearRacesParams)
+	GetSeasonRaces(w http.ResponseWriter, r *http.Request, year PathYear, params GetSeasonRacesParams)
 }
 
 type RateLimiterFunc = func(http.ResponseWriter, *http.Request) error
@@ -65,6 +68,78 @@ func WithMetricsMiddleware(middleware MetricsMiddlewareFunc) ServerOption {
 
 // ServerOption represents an optional feature applied to the server.
 type ServerOption func(s *ServerInterfaceWrapper)
+
+// GetRaceResults operation middleware
+func (siw *ServerInterfaceWrapper) GetRaceResults(w http.ResponseWriter, r *http.Request) {
+	cw := uhttp.NewClientWriter(w)
+	ctx := r.Context()
+
+	defer func() {
+		if siw.metricsMiddleware != nil {
+			siw.metricsMiddleware(cw, r)
+		}
+	}()
+
+	var err error
+
+	// ------------- Path parameter "race_id" -------------
+	var raceId PathRaceId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "race_id", mux.Vars(r)["race_id"], &raceId, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "race_id", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetRaceResultsParams
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "last_val" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "last_val", r.URL.Query(), &params.LastVal)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "last_val", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "last_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "last_id", r.URL.Query(), &params.LastId)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "last_id", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort_by" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort_by", r.URL.Query(), &params.SortBy)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "sort_by", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort_dir" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort_dir", r.URL.Query(), &params.SortDir)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "sort_dir", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.handler.GetRaceResults(cw, r, raceId, params)
+	}))
+
+	handler.ServeHTTP(cw, r.WithContext(ctx))
+}
 
 // GetSeasons operation middleware
 func (siw *ServerInterfaceWrapper) GetSeasons(w http.ResponseWriter, r *http.Request) {
@@ -153,8 +228,8 @@ func (siw *ServerInterfaceWrapper) GetSeasons(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(cw, r.WithContext(ctx))
 }
 
-// GetSeasonsYearRaces operation middleware
-func (siw *ServerInterfaceWrapper) GetSeasonsYearRaces(w http.ResponseWriter, r *http.Request) {
+// GetSeasonRaces operation middleware
+func (siw *ServerInterfaceWrapper) GetSeasonRaces(w http.ResponseWriter, r *http.Request) {
 	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
 
@@ -176,7 +251,7 @@ func (siw *ServerInterfaceWrapper) GetSeasonsYearRaces(w http.ResponseWriter, r 
 	}
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetSeasonsYearRacesParams
+	var params GetSeasonRacesParams
 
 	// ------------- Optional query parameter "limit" -------------
 
@@ -219,7 +294,7 @@ func (siw *ServerInterfaceWrapper) GetSeasonsYearRaces(w http.ResponseWriter, r 
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.handler.GetSeasonsYearRaces(cw, r, year, params)
+		siw.handler.GetSeasonRaces(cw, r, year, params)
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
@@ -343,7 +418,9 @@ func RegisterUnauthedHandlers(router *mux.Router, si ServerInterface, opts ...Se
 
 	// We do not have a gateway preparer here as no auth is sent.
 
+	router.Methods(http.MethodGet).Path("/races/{race_id}/results").Handler(wrapHandler(wrapper.GetRaceResults))
+
 	router.Methods(http.MethodGet).Path("/seasons").Handler(wrapHandler(wrapper.GetSeasons))
 
-	router.Methods(http.MethodGet).Path("/seasons/{year}/races").Handler(wrapHandler(wrapper.GetSeasonsYearRaces))
+	router.Methods(http.MethodGet).Path("/seasons/{year}/races").Handler(wrapHandler(wrapper.GetSeasonRaces))
 }
