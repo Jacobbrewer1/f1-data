@@ -8,15 +8,23 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Constructor defines the model for constructor.
+type Constructor struct {
+	Id       *int64   `json:"id,omitempty"`
+	Name     *string  `json:"name,omitempty"`
+	Points   *float32 `json:"points,omitempty"`
+	Position *int64   `json:"position,omitempty"`
+}
+
 // Driver defines the model for driver.
 type Driver struct {
-	Id          *int64  `json:"id,omitempty"`
-	Name        *string `json:"name,omitempty"`
-	Nationality *string `json:"nationality,omitempty"`
-	Points      *int64  `json:"points,omitempty"`
-	Position    *int64  `json:"position,omitempty"`
-	Tag         *string `json:"tag,omitempty"`
-	Team        *string `json:"team,omitempty"`
+	Id          *int64   `json:"id,omitempty"`
+	Name        *string  `json:"name,omitempty"`
+	Nationality *string  `json:"nationality,omitempty"`
+	Points      *float32 `json:"points,omitempty"`
+	Position    *int64   `json:"position,omitempty"`
+	Tag         *string  `json:"tag,omitempty"`
+	Team        *string  `json:"team,omitempty"`
 }
 
 // Race defines the model for race.
@@ -28,15 +36,15 @@ type Race struct {
 
 // RaceResult defines the model for race_result.
 type RaceResult struct {
-	DriverName    *string `json:"driver_name,omitempty"`
-	DriverNumber  *int64  `json:"driver_number,omitempty"`
-	DriverTag     *string `json:"driver_tag,omitempty"`
-	Id            *int64  `json:"id,omitempty"`
-	LapsCompleted *int64  `json:"laps_completed,omitempty"`
-	Points        *int64  `json:"points,omitempty"`
-	Position      *string `json:"position,omitempty"`
-	TeamName      *string `json:"team_name,omitempty"`
-	TimeOrRetired *string `json:"time_or_retired,omitempty"`
+	DriverName    *string  `json:"driver_name,omitempty"`
+	DriverNumber  *int64   `json:"driver_number,omitempty"`
+	DriverTag     *string  `json:"driver_tag,omitempty"`
+	Id            *int64   `json:"id,omitempty"`
+	LapsCompleted *int64   `json:"laps_completed,omitempty"`
+	Points        *float32 `json:"points,omitempty"`
+	Position      *string  `json:"position,omitempty"`
+	TeamName      *string  `json:"team_name,omitempty"`
+	TimeOrRetired *string  `json:"time_or_retired,omitempty"`
 }
 
 // Season defines the model for season.
@@ -68,6 +76,30 @@ type QueryYearMax = int64
 
 // QueryYearMin defines the model for query_year_min.
 type QueryYearMin = int64
+
+// GetConstructorsChampionshipParams defines parameters for GetConstructorsChampionship.
+type GetConstructorsChampionshipParams struct {
+	// Limit Report type
+	Limit *externalRef0.LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// LastVal Pagination details, last value of the sort column on the previous page.
+	LastVal *externalRef0.LastValue `form:"last_val,omitempty" json:"last_val,omitempty"`
+
+	// LastId Pagination details, last value of the id column on the previous page.
+	LastId *externalRef0.LastId `form:"last_id,omitempty" json:"last_id,omitempty"`
+
+	// SortBy Pagination details, sort column, if empty uses the id column.
+	SortBy *externalRef0.SortBy `form:"sort_by,omitempty" json:"sort_by,omitempty"`
+
+	// SortDir Pagination details, sorting order.
+	SortDir *GetConstructorsChampionshipParamsSortDir `form:"sort_dir,omitempty" json:"sort_dir,omitempty"`
+
+	// Name The name to filter by
+	Name *QueryName `form:"name,omitempty" json:"name,omitempty"`
+}
+
+// GetConstructorsChampionshipParamsSortDir defines parameters for GetConstructorsChampionship.
+type GetConstructorsChampionshipParamsSortDir string
 
 // GetDriversChampionshipParams defines parameters for GetDriversChampionship.
 type GetDriversChampionshipParams struct {

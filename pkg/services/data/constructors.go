@@ -15,7 +15,7 @@ import (
 	uhttp "github.com/Jacobbrewer1/f1-data/pkg/utils/http"
 )
 
-func (s *service) GetDriversChampionship(w http.ResponseWriter, r *http.Request, year api.PathYear, params api.GetDriversChampionshipParams) {
+func (s *service) GetConstructorsChampionship(w http.ResponseWriter, r *http.Request, year api.PathYear, params api.GetConstructorsChampionshipParams) {
 	var sortDir *common.SortDirection
 	if params.SortDir != nil {
 		sortDir = (*common.SortDirection)(params.SortDir)
@@ -27,70 +27,57 @@ func (s *service) GetDriversChampionship(w http.ResponseWriter, r *http.Request,
 		paginationDetails.RemoveLimit()
 	}
 
-	filts, err := s.getDriversChampionshipFilters(&year, params.Name, params.Tag, params.Team)
+	filts, err := s.getConstructorsChampionshipFilters(&year, params.Name)
 	if err != nil {
 		slog.Error("Failed to parse filters", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "failed to parse filters", err)
 		return
 	}
 
-	driversChampionship, err := s.r.GetDriversChampionship(paginationDetails, filts)
+	driversChampionship, err := s.r.GetConstructorsChampionship(paginationDetails, filts)
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrDriverChampionshipNotFound):
-			driversChampionship = make([]*models.DriverChampionship, 0)
+			driversChampionship = make([]*models.ConstructorChampionship, 0)
 		default:
 			slog.Error("Error getting drivers championship", slog.String(logging.KeyError, err.Error()))
 		}
 	}
 
-	resp := make([]*api.Driver, len(driversChampionship))
+	resp := make([]*api.Constructor, len(driversChampionship))
 	for i, driverChampionship := range driversChampionship {
-		resp[i] = s.modelAsApiDriver(driverChampionship)
+		resp[i] = s.modelAsApiConstructor(driverChampionship)
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
 	if err != nil {
-		slog.Error("Error encoding season to user", slog.String(logging.KeyError, err.Error()))
+		slog.Error("Error encoding drivers championship to user", slog.String(logging.KeyError, err.Error()))
 		return
 	}
 }
 
-func (s *service) getDriversChampionshipFilters(
+func (s *service) getConstructorsChampionshipFilters(
 	year *api.PathYear,
-	name *api.QueryName,
-	tag *api.QueryTag,
-	team *api.QueryTeam,
-) (*repo.GetDriversChampionshipFilters, error) {
-	filters := new(repo.GetDriversChampionshipFilters)
+	name *string,
+) (*repo.GetConstructorsChampionshipFilters, error) {
+	filters := new(repo.GetConstructorsChampionshipFilters)
 
 	if year != nil {
 		filters.SeasonYear = utils.Ptr(int(*year))
 	}
 
 	if name != nil {
-		filters.DriverName = name
-	}
-
-	if tag != nil {
-		filters.DriverTag = tag
-	}
-
-	if team != nil {
-		filters.Team = team
+		filters.ConstructorName = name
 	}
 
 	return filters, nil
 }
 
-func (s *service) modelAsApiDriver(m *models.DriverChampionship) *api.Driver {
-	return &api.Driver{
-		Id:          utils.Ptr(int64(m.Id)),
-		Name:        utils.Ptr(m.Driver),
-		Nationality: utils.Ptr(m.Nationality),
-		Points:      utils.Ptr(float32(m.Points)),
-		Position:    utils.Ptr(int64(m.Position)),
-		Tag:         utils.Ptr(m.DriverTag),
-		Team:        utils.Ptr(m.Team),
+func (s *service) modelAsApiConstructor(c *models.ConstructorChampionship) *api.Constructor {
+	return &api.Constructor{
+		Id:       utils.Ptr(int64(c.Id)),
+		Name:     utils.Ptr(c.Name),
+		Points:   utils.Ptr(float32(c.Points)),
+		Position: utils.Ptr(int64(c.Position)),
 	}
 }

@@ -170,6 +170,46 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
 
+  /championships/{year}/constructors:
+    get:
+      summary: Get all drivers for a season
+      operationId: getConstructorsChampionship
+      parameters:
+        - $ref: '../common/common.yaml#/components/parameters/limit_param'
+        - $ref: '../common/common.yaml#/components/parameters/last_value'
+        - $ref: '../common/common.yaml#/components/parameters/last_id'
+        - $ref: '../common/common.yaml#/components/parameters/sort_by'
+        - $ref: '../common/common.yaml#/components/parameters/sort_direction'
+        - $ref: '#/components/parameters/path_year'
+        - $ref: '#/components/parameters/query_name'
+      responses:
+        '200':
+          description: A list of all drivers for the specified season
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/constructor'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+        '404':
+          description: No drivers found
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
 components:
   parameters:
     query_year:
@@ -280,8 +320,7 @@ components:
         time_or_retired:
           type: string
         points:
-          type: integer
-          format: int64
+          type: number
 
     driver:
       type: object
@@ -301,5 +340,18 @@ components:
         team:
           type: string
         points:
+          type: number
+
+    constructor:
+      type: object
+      properties:
+        id:
           type: integer
           format: int64
+        position:
+          type: integer
+          format: int64
+        name:
+          type: string
+        points:
+          type: number

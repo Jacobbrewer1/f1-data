@@ -17,4 +17,7 @@ type Repository interface {
 
 	// GetDriversChampionship returns the drivers championship for a specific season
 	GetDriversChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetDriversChampionshipFilters) ([]*models.DriverChampionship, error)
+
+	// GetConstructorsChampionship returns the constructors' championship for a specific season
+	GetConstructorsChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetConstructorsChampionshipFilters) ([]*models.ConstructorChampionship, error)
 }

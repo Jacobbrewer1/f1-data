@@ -2,18 +2,18 @@ package data
 
 type GetSeasonsFilters struct {
 	// Year is the year of the season.
-	Year *int `json:"year"`
+	Year *int
 
 	// YearMin is the minimum year of the season.
-	YearMin *int `json:"year_min"`
+	YearMin *int
 
 	// YearMax is the maximum year of the season.
-	YearMax *int `json:"year_max"`
+	YearMax *int
 }
 
 type GetSeasonRacesFilters struct {
 	// SeasonYear is the year of the season.
-	SeasonYear *int `json:"season_year"`
+	SeasonYear *int
 }
 
 type GetRaceResultsFilters struct {
@@ -21,19 +21,27 @@ type GetRaceResultsFilters struct {
 	RaceID *int
 
 	// SeasonYear is the year of the season.
-	SeasonYear *int `json:"season_year"`
+	SeasonYear *int
 }
 
 type GetDriversChampionshipFilters struct {
 	// SeasonYear is the year of the season.
-	SeasonYear *int `json:"season_year"`
+	SeasonYear *int
 
 	// DriverName is the name of the driver.
-	DriverName *string `json:"driver_name"`
+	DriverName *string
 
 	// DriverTag is the tag of the driver.
-	DriverTag *string `json:"driver_tag"`
+	DriverTag *string
 
 	// Team is the team of the driver.
-	Team *string `json:"team"`
+	Team *string
+}
+
+type GetConstructorsChampionshipFilters struct {
+	// SeasonYear is the year of the season.
+	SeasonYear *int
+
+	// ConstructorName is the name of the constructor.
+	ConstructorName *string
 }

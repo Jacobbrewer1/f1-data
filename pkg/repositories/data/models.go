@@ -86,3 +86,21 @@ func (d *driverChampionship) AsModel() *models.DriverChampionship {
 		Points:      d.Points,
 	}
 }
+
+type constructorChampionship struct {
+	Id       int     `db:"id"`
+	SeasonId int     `db:"season_id"`
+	Position int     `db:"position"`
+	Name     string  `db:"name"`
+	Points   float64 `db:"points"`
+}
+
+func (c *constructorChampionship) AsModel() *models.ConstructorChampionship {
+	return &models.ConstructorChampionship{
+		Id:       c.Id,
+		SeasonId: c.SeasonId,
+		Position: c.Position,
+		Name:     c.Name,
+		Points:   c.Points,
+	}
+}
