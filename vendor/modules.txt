@@ -14,10 +14,10 @@ github.com/andybalholm/cascadia
 # github.com/antchfx/htmlquery v1.2.3
 ## explicit; go 1.14
 github.com/antchfx/htmlquery
-# github.com/antchfx/xmlquery v1.2.4
+# github.com/antchfx/xmlquery v1.3.1
 ## explicit; go 1.14
 github.com/antchfx/xmlquery
-# github.com/antchfx/xpath v1.1.8
+# github.com/antchfx/xpath v1.1.10
 ## explicit
 github.com/antchfx/xpath
 # github.com/beorn7/perks v1.0.1
@@ -83,7 +83,7 @@ github.com/hashicorp/go-cleanhttp
 # github.com/hashicorp/go-multierror v1.1.1
 ## explicit; go 1.13
 github.com/hashicorp/go-multierror
-# github.com/hashicorp/go-retryablehttp v0.7.6
+# github.com/hashicorp/go-retryablehttp v0.7.7
 ## explicit; go 1.19
 github.com/hashicorp/go-retryablehttp
 # github.com/hashicorp/go-rootcerts v1.0.2
