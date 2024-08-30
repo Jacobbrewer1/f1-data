@@ -20,8 +20,8 @@ on:
         required: true
         type: choice
         options:
-          - 'importer'
           - 'data'
+          - 'importer'
 
 jobs:
   build:
