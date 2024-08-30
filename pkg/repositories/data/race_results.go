@@ -14,7 +14,7 @@ func (r *repository) GetRaceResults(paginationDetails *pagefilter.PaginatorDetai
 	mf := r.getRaceResultFilters(filters)
 	pg := pagefilter.NewPaginator(r.db, "race_result", "id", mf)
 
-	if err := pg.SetDetails(paginationDetails, "id", "position"); err != nil {
+	if err := pg.SetDetails(paginationDetails, "id", "position+0"); err != nil {
 		return nil, fmt.Errorf("set paginator details: %w", err)
 	}
 

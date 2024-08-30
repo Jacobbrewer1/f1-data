@@ -20,7 +20,13 @@ func (s *service) GetRaceResults(w http.ResponseWriter, r *http.Request, raceId 
 	if params.SortDir != nil {
 		sortDir = (*common.SortDirection)(params.SortDir)
 	}
-	paginationDetails := pagefilter.GetPaginatorDetails(params.Limit, params.LastVal, params.LastId, params.SortBy, sortDir)
+	sortBy := params.SortBy
+	if sortBy != nil && *sortBy == "position" {
+		// As we store the position as a string to store non-classified results as "NC", we need to sort by position+0
+		// to get the correct order.
+		sortBy = utils.Ptr("position+0")
+	}
+	paginationDetails := pagefilter.GetPaginatorDetails(params.Limit, params.LastVal, params.LastId, sortBy, sortDir)
 
 	// If the limit is not set, remove it from the pagination details.
 	if params.Limit == nil {
