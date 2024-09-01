@@ -8,9 +8,13 @@ import (
 	"github.com/Jacobbrewer1/f1-data/pkg/models"
 	"github.com/Jacobbrewer1/f1-data/pkg/pagefilter"
 	repoFilter "github.com/Jacobbrewer1/f1-data/pkg/repositories/data/filters"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func (r *repository) GetRaceResults(paginationDetails *pagefilter.PaginatorDetails, filters *GetRaceResultsFilters) ([]*models.RaceResult, error) {
+	t := prometheus.NewTimer(models.DatabaseLatency.WithLabelValues("get_race_results"))
+	defer t.ObserveDuration()
+
 	mf := r.getRaceResultFilters(filters)
 	pg := pagefilter.NewPaginator(r.db, "race_result", "id", mf)
 
