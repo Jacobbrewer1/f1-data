@@ -8,6 +8,7 @@ import (
 	"github.com/Jacobbrewer1/f1-data/pkg/models"
 	"github.com/Jacobbrewer1/f1-data/pkg/pagefilter"
 	repoFilter "github.com/Jacobbrewer1/f1-data/pkg/repositories/data/filters"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 var (
@@ -15,6 +16,9 @@ var (
 )
 
 func (r *repository) GetSeasonRaces(paginationDetails *pagefilter.PaginatorDetails, filters *GetSeasonRacesFilters) ([]*models.Race, error) {
+	t := prometheus.NewTimer(models.DatabaseLatency.WithLabelValues("get_season_races"))
+	defer t.ObserveDuration()
+
 	mf := r.getSeasonRacesFilters(filters)
 	pg := pagefilter.NewPaginator(r.db, "race", "date", mf)
 

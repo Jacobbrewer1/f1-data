@@ -7,6 +7,7 @@ import (
 	"github.com/Jacobbrewer1/f1-data/pkg/models"
 	"github.com/Jacobbrewer1/f1-data/pkg/pagefilter"
 	repoFilter "github.com/Jacobbrewer1/f1-data/pkg/repositories/data/filters"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 var (
@@ -15,6 +16,9 @@ var (
 )
 
 func (r *repository) GetDriversChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetDriversChampionshipFilters) ([]*models.DriverChampionship, error) {
+	t := prometheus.NewTimer(models.DatabaseLatency.WithLabelValues("get_drivers_championship"))
+	defer t.ObserveDuration()
+
 	mf := r.getDriversChampionshipFilters(filters)
 	pg := pagefilter.NewPaginator(r.db, "driver_championship", "id", mf)
 
