@@ -13,6 +13,8 @@ import (
 	"github.com/Jacobbrewer1/f1-data/pkg/models"
 	repo "github.com/Jacobbrewer1/f1-data/pkg/repositories/importer"
 	"github.com/gocolly/colly/v2"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func (s *service) ImportSeasonRaces(year int) error {
@@ -67,29 +69,46 @@ func (s *service) ImportSeasonRaces(year int) error {
 
 		slog.Debug(fmt.Sprintf("Importing Grand Prix %s", e.Text))
 
-		race, err := s.r.GetRaceBySeasonIdAndGrandPrix(season.Id, e.Text)
+		newRace := new(models.Race)
+		existingRace, err := s.r.GetRaceBySeasonIdAndGrandPrix(season.Id, e.Text)
 		if err != nil && !errors.Is(err, repo.ErrRaceNotFound) {
 			slog.Error("Error getting race", slog.String(logging.KeyError, err.Error()))
 			return
-		} else if errors.Is(err, repo.ErrRaceNotFound) {
-			race = new(models.Race)
+		} else if existingRace != nil {
+			newRace.Id = existingRace.Id
 		}
-		race.SeasonId = season.Id
-		race.GrandPrix = e.Text
+
+		newRace.SeasonId = season.Id
+		newRace.GrandPrix = e.Text
 
 		<-datesCollected
 
 		if raceDate, ok := raceDates[e.Text]; ok {
-			race.Date = *raceDate
+			newRace.Date = *raceDate
 		} else {
 			slog.Error("Error getting race date from map, assuming the hasn't happened or didnt happen", slog.String("grand_prix", e.Text))
 			return
 		}
 
-		err = s.r.SaveRace(race)
-		if err != nil {
-			slog.Error("Error saving race", slog.String(logging.KeyError, err.Error()))
-			return
+		opts := cmpopts.IgnoreFields(models.Race{}, "Id")
+		if diff := cmp.Diff(existingRace, newRace, opts); diff == "" {
+			slog.Debug("Races are the same",
+				slog.String("grand_prix", e.Text),
+				slog.String("year", fmt.Sprintf("%d", year)),
+				slog.String("diff", diff),
+			)
+		} else {
+			slog.Debug("Races are different",
+				slog.String("grand_prix", e.Text),
+				slog.String("year", fmt.Sprintf("%d", year)),
+				slog.String("diff", diff),
+			)
+
+			err = s.r.SaveRace(newRace)
+			if err != nil {
+				slog.Error("Error saving race", slog.String(logging.KeyError, err.Error()))
+				return
+			}
 		}
 
 		raceUrl, uErr := url.Parse(s.baseUrl + link)
@@ -97,7 +116,7 @@ func (s *service) ImportSeasonRaces(year int) error {
 			slog.Error("Error parsing URL", slog.String(logging.KeyError, err.Error()))
 		}
 
-		err = s.processRace(race.Id, raceUrl)
+		err = s.processRace(newRace.Id, raceUrl)
 		if err != nil {
 			slog.Error("Error processing race results", slog.String(logging.KeyError, err.Error()))
 			return
@@ -150,38 +169,54 @@ func (s *service) ImportSeasonDriversChamps(year int) error {
 			}
 			driverName := driverNames[0] + " " + driverNames[1]
 
-			driver, err := s.r.GetDriverByName(season.Id, driverName)
+			newDriver := new(models.DriverChampionship)
+			existingDriver, err := s.r.GetDriverByName(season.Id, driverName)
 			if err != nil && !errors.Is(err, repo.ErrDriverNotFound) {
 				slog.Error("Error getting driver", slog.String(logging.KeyError, err.Error()))
 				return
-			} else if errors.Is(err, repo.ErrDriverNotFound) {
-				driver = new(models.DriverChampionship)
+			} else if existingDriver != nil {
+				newDriver.Id = existingDriver.Id
 			}
 
-			driver.SeasonId = season.Id
-			driver.Driver = driverName
-			driver.DriverTag = driverNames[2]
-			driver.Nationality = children[2]
-			driver.Team = children[3]
+			newDriver.SeasonId = season.Id
+			newDriver.Driver = driverName
+			newDriver.DriverTag = driverNames[2]
+			newDriver.Nationality = children[2]
+			newDriver.Team = children[3]
 
 			position, err := strconv.Atoi(children[0])
 			if err != nil {
 				slog.Error("Error converting position to int", slog.String(logging.KeyError, err.Error()))
 				return
 			}
-			driver.Position = position
+			newDriver.Position = position
 
 			points, err := strconv.ParseFloat(children[4], 64)
 			if err != nil {
 				slog.Error("Error converting points to int", slog.String(logging.KeyError, err.Error()))
 				return
 			}
-			driver.Points = points
+			newDriver.Points = points
 
-			err = s.r.SaveDriver(driver)
-			if err != nil {
-				slog.Error("Error saving driver", slog.String(logging.KeyError, err.Error()))
-				return
+			opts := cmpopts.IgnoreFields(models.DriverChampionship{}, "Id")
+			if diff := cmp.Diff(existingDriver, newDriver, opts); diff == "" {
+				slog.Debug("Drivers are the same",
+					slog.String("driver", driverName),
+					slog.String("year", fmt.Sprintf("%d", year)),
+					slog.String("diff", diff),
+				)
+			} else {
+				slog.Debug("Drivers are different",
+					slog.String("driver", driverName),
+					slog.String("year", fmt.Sprintf("%d", year)),
+					slog.String("diff", diff),
+				)
+
+				err = s.r.SaveDriver(newDriver)
+				if err != nil {
+					slog.Error("Error saving driver", slog.String(logging.KeyError, err.Error()))
+					return
+				}
 			}
 		})
 	})
@@ -215,35 +250,51 @@ func (s *service) ImportSeasonConstructorsChamps(year int) error {
 				return
 			}
 
-			constructor, err := s.r.GetConstructorByName(season.Id, children[1])
+			newConstructor := new(models.ConstructorChampionship)
+			existingConstructor, err := s.r.GetConstructorByName(season.Id, children[1])
 			if err != nil && !errors.Is(err, repo.ErrConstructorNotFound) {
 				slog.Error("Error getting driver", slog.String(logging.KeyError, err.Error()))
 				return
-			} else if errors.Is(err, repo.ErrConstructorNotFound) {
-				constructor = new(models.ConstructorChampionship)
+			} else if existingConstructor != nil {
+				newConstructor.Id = existingConstructor.Id
 			}
 
-			constructor.SeasonId = season.Id
-			constructor.Name = children[1]
+			newConstructor.SeasonId = season.Id
+			newConstructor.Name = children[1]
 
 			position, err := strconv.Atoi(children[0])
 			if err != nil {
 				slog.Error("Error converting position to int", slog.String(logging.KeyError, err.Error()))
 				return
 			}
-			constructor.Position = position
+			newConstructor.Position = position
 
 			points, err := strconv.ParseFloat(children[2], 64)
 			if err != nil {
 				slog.Error("Error converting points to int", slog.String(logging.KeyError, err.Error()))
 				return
 			}
-			constructor.Points = points
+			newConstructor.Points = points
 
-			err = s.r.SaveConstructor(constructor)
-			if err != nil {
-				slog.Error("Error saving driver", slog.String(logging.KeyError, err.Error()))
-				return
+			opts := cmpopts.IgnoreFields(models.ConstructorChampionship{}, "Id")
+			if diff := cmp.Diff(existingConstructor, newConstructor, opts); diff == "" {
+				slog.Debug("Constructors are the same",
+					slog.String("constructor", children[1]),
+					slog.String("year", fmt.Sprintf("%d", year)),
+					slog.String("diff", diff),
+				)
+			} else {
+				slog.Debug("Constructors are different",
+					slog.String("constructor", children[1]),
+					slog.String("year", fmt.Sprintf("%d", year)),
+					slog.String("diff", diff),
+				)
+
+				err = s.r.SaveConstructor(newConstructor)
+				if err != nil {
+					slog.Error("Error saving driver", slog.String(logging.KeyError, err.Error()))
+					return
+				}
 			}
 		})
 	})

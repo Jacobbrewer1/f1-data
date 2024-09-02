@@ -11,6 +11,8 @@ import (
 	"github.com/Jacobbrewer1/f1-data/pkg/models"
 	repo "github.com/Jacobbrewer1/f1-data/pkg/repositories/importer"
 	"github.com/gocolly/colly/v2"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func (s *service) processRace(raceId int, url *url.URL) error {
@@ -31,6 +33,7 @@ func (s *service) processRace(raceId int, url *url.URL) error {
 	c.OnHTML("tbody", func(e *colly.HTMLElement) {
 		e.ForEach("tr", func(_ int, el *colly.HTMLElement) {
 			raceResult := new(models.RaceResult)
+			existingRaceResult := new(models.RaceResult)
 
 			el.ForEach("p", func(_ int, elm *colly.HTMLElement) {
 				// Get the value in the span tags.
@@ -61,7 +64,7 @@ func (s *service) processRace(raceId int, url *url.URL) error {
 							break
 						}
 
-						raceResult.Id = foundRaceResult.Id
+						existingRaceResult = foundRaceResult
 					}
 				case 2:
 					raceResult.Driver = text
@@ -86,11 +89,27 @@ func (s *service) processRace(raceId int, url *url.URL) error {
 			})
 			i = 0
 
+			raceResult.Id = existingRaceResult.Id
 			raceResult.RaceId = raceId
 
-			err := s.r.SaveRaceResult(raceResult)
-			if err != nil {
-				slog.Error("Error saving race result", slog.String(logging.KeyError, err.Error()))
+			opts := cmpopts.IgnoreFields(models.RaceResult{}, "Id")
+			if diff := cmp.Diff(existingRaceResult, raceResult, opts); diff == "" {
+				slog.Debug("Race Results are the same",
+					slog.String("driver", raceResult.Driver),
+					slog.Int("race_id", raceId),
+					slog.String("diff", diff),
+				)
+			} else {
+				slog.Debug("Race Results are different",
+					slog.String("driver", raceResult.Driver),
+					slog.Int("race_id", raceId),
+					slog.String("diff", diff),
+				)
+
+				err := s.r.SaveRaceResult(raceResult)
+				if err != nil {
+					slog.Error("Error saving race result", slog.String(logging.KeyError, err.Error()))
+				}
 			}
 		})
 	})
