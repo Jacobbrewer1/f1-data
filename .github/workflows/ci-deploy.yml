@@ -75,7 +75,7 @@ jobs:
 
       - name: Docs
         # Only run on the main branch
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ github.ref == 'refs/heads/main' && inputs.app == 'data' }}
         shell: bash
         run: |
           curl -L \
