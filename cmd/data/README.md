@@ -1,8 +1,10 @@
-# Importer
+# Data API
 
 ## Description
 
-The Importer app is a simple command line tool that scrapes the F1 archive and imports the data into a database.
+The Data API is a RESTful API that provides access to the F1 data stored in the database. The API allows users to query
+the data using various filters and retrieve the results in JSON format; you are able to check out the documentation for
+the API [here](https://github.com/Jacobbrewer1/f1-data-docs).
 
 ## Setup
 
@@ -26,11 +28,6 @@ structure:
   "database": {
     "host": "localhost:5432",
     "schema": "f1data"
-  },
-  "importer": {
-    "f1_base_url": "https://www.formula1.com",
-    "from_year": 1950,
-    "to_year": -1
   }
 }
 ```
@@ -44,22 +41,17 @@ structure:
 * The `database` section contains the configuration for the database.
     * The `host` field is the address of the database server. (address and port separated by a colon)
     * The `schema` field is the schema to use in the database.
-* The `importer` section contains the configuration for the importer.
-    * The `f1_base_url` field is the base URL for the F1 archive.
-    * The `from_year` field is the year to start importing data from.
-    * The `to_year` field is the year to stop importing data at. If the value is -1, the importer will import data
-      up to the current year.
 
 ## Running the app
 
 You can check out all the available commands by running the following command:
 
 ```shell
-go build -o importer && ./importer --help
+go build -o data && ./data --help
 ```
 
 For each command you can check out each flag by running the following command:
 
 ```shell
-./importer <command> --help
+./data <command> --help
 ```
