@@ -50,6 +50,24 @@ jobs:
           only-new-issues: true
           args: --verbose --timeout 5m
 
+  openapi-lint:
+    name: OpenAPI Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Hide any previous plan comments from the Pull Request to keep things tidy
+      - id: hide_previous_plan
+        name: Hide previous plan
+        if: github.event_name == 'pull_request'
+        uses: kanga333/comment-hider@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          hide_user_name: "github-actions[bot]"
+          hide_reason: "OUTDATED"
+          leave_visible: 0 # leave the last 0 comments visible
+
       - name: Install IBM OpenAPI Validator
         run: |
           npm install -g ibm-openapi-validator
