@@ -5,14 +5,26 @@ info:
   description: This is the API for the F1 Data project
 
 servers:
-  - url: https://api.bthree.uk/f1/v1/
+  - url: https://api.bthree.uk/f1/v1
     description: Production server
+
+tags:
+  - name: seasons
+    description: Operations about F1 seasons
+  - name: drivers
+    description: Operations about F1 drivers
+  - name: constructors
+    description: Operations about F1 constructors
+  - name: races
+    description: Operations about F1 races
 
 paths:
   /seasons:
     get:
       summary: Get all seasons
       operationId: getSeasons
+      tags:
+        - seasons
       parameters:
         - $ref: '../common/common.yaml#/components/parameters/limit_param'
         - $ref: '../common/common.yaml#/components/parameters/last_value'
@@ -54,6 +66,9 @@ paths:
     get:
       summary: Get all races for a season
       operationId: getSeasonRaces
+      tags:
+        - seasons
+        - races
       parameters:
         - $ref: '../common/common.yaml#/components/parameters/limit_param'
         - $ref: '../common/common.yaml#/components/parameters/last_value'
@@ -93,6 +108,9 @@ paths:
     get:
       summary: Get all results for a season
       operationId: getRaceResults
+      tags:
+        - seasons
+        - races
       parameters:
         - $ref: '../common/common.yaml#/components/parameters/limit_param'
         - $ref: '../common/common.yaml#/components/parameters/last_value'
@@ -132,6 +150,9 @@ paths:
     get:
       summary: Get all drivers for a season
       operationId: getDriversChampionship
+      tags:
+        - seasons
+        - drivers
       parameters:
         - $ref: '../common/common.yaml#/components/parameters/limit_param'
         - $ref: '../common/common.yaml#/components/parameters/last_value'
@@ -174,6 +195,9 @@ paths:
     get:
       summary: Get all drivers for a season
       operationId: getConstructorsChampionship
+      tags:
+        - seasons
+        - constructors
       parameters:
         - $ref: '../common/common.yaml#/components/parameters/limit_param'
         - $ref: '../common/common.yaml#/components/parameters/last_value'
