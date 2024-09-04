@@ -81,7 +81,7 @@ jobs:
         shell: bash
         run: |
           chmod +x openapi-lint.sh
-          ./openapi-lint.sh > openapi-lint.json
+          ./openapi-lint.sh
 
       - name: Upload the report
         # Run this step on all PR's even if the linting fails
