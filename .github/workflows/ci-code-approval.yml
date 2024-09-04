@@ -80,6 +80,7 @@ jobs:
       - name: Lint OpenAPI
         shell: bash
         run: |
+          chmod +x openapi-lint.sh
           ./openapi-lint.sh > openapi-lint.json
 
       - name: Upload the report
