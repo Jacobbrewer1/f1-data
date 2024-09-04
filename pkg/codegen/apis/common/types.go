@@ -41,6 +41,6 @@ type SortDirection = string
 
 // List of SortDirection
 const (
-	SortDirection_ASC  SortDirection = "ASC"
-	SortDirection_DESC SortDirection = "DESC"
+	SortDirection_asc  SortDirection = "asc"
+	SortDirection_desc SortDirection = "desc"
 )
