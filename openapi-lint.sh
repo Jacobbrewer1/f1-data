@@ -54,6 +54,62 @@ EOF
 
 EOF
 
+  if [[ $errors -gt 0 ]]; then
+    cat <<EOF >>./pr-report.md
+#### Error Messages
+\`\`\`
+EOF
+
+    cat ./lint-output.json | jq -r '.error.summary.entries[].generalizedMessage' >> ./pr-report.md
+
+    cat <<EOF >>./pr-report.md
+\`\`\`
+
+EOF
+  fi
+
+    if [[ $warnings -gt 0 ]]; then
+      cat <<EOF >>./pr-report.md
+#### Warning Messages
+\`\`\`
+EOF
+
+    cat ./lint-output.json | jq -r '.warning.summary.entries[].generalizedMessage' >> ./pr-report.md
+
+    cat <<EOF >>./pr-report.md
+\`\`\`
+
+EOF
+    fi
+
+    if [[ $infos -gt 0 ]]; then
+      cat <<EOF >>./pr-report.md
+#### Info Messages
+\`\`\`
+EOF
+
+    cat ./lint-output.json | jq -r '.info.summary.entries[].generalizedMessage' >> ./pr-report.md
+
+    cat <<EOF >>./pr-report.md
+\`\`\`
+
+EOF
+    fi
+
+    if [[ $hints -gt 0 ]]; then
+      cat <<EOF >>./pr-report.md
+#### Hint Messages
+\`\`\`
+EOF
+
+    cat ./lint-output.json | jq -r '.hint.summary.entries[].generalizedMessage' >> ./pr-report.md
+
+    cat <<EOF >>./pr-report.md
+\`\`\`
+
+EOF
+    fi
+
   # Add the errors, warnings, infos, and hints to the total
   totalErrors=$((totalErrors + errors))
   totalWarnings=$((totalWarnings + warnings))
