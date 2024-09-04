@@ -19,6 +19,11 @@ concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true
 
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
 jobs:
   golang-ci-lint:
     name: Golangci-lint
@@ -44,6 +49,28 @@ jobs:
           version: latest
           only-new-issues: true
           args: --verbose --timeout 5m
+
+      - name: Install IBM OpenAPI Validator
+        run: |
+          npm install -g ibm-openapi-validator
+          npm install @ibm-cloud/openapi-ruleset
+
+      - name: Install JQ
+        run: |
+          sudo apt-get install jq
+
+      - name: Lint OpenAPI
+        shell: bash
+        run: |
+          ./openapi-lint.sh > openapi-lint.json
+
+      - name: Upload the report
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          # Full file path to the plan output
+          filePath: ${{ github.workspace }}/pr-report.md
+          pr_number: ${{ github.event.pull_request.number }}
+          create_if_not_exists: true
 
   code-approval:
     name: "Code Approval"
