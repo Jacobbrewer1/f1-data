@@ -1,4 +1,4 @@
 extends: '@ibm-cloud/openapi-ruleset'
 rules:
-  ibm-no-array-responses: false # TODO: Eventually we want to enable this rule
-  ibm-accept-and-return-models: false # THis is disabled as this doesn't seem to work correctly
+  ibm-no-array-responses: true
+  ibm-accept-and-return-models: true

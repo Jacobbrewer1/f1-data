@@ -6,6 +6,11 @@ import (
 	"github.com/Jacobbrewer1/f1-data/pkg/models"
 )
 
+type PaginationResponse[T comparable] struct {
+	Items []*T  `json:"items"`
+	Total int64 `json:"total"`
+}
+
 // TODO: This is extremely gross and should be changed.
 
 type season struct {

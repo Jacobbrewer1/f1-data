@@ -1,6 +1,8 @@
 package data
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/Jacobbrewer1/f1-data/pkg/models"
@@ -9,7 +11,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-func (r *repository) GetConstructorsChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetConstructorsChampionshipFilters) ([]*models.ConstructorChampionship, error) {
+var (
+	// ErrConstructorChampionshipNotFound is returned when a constructor championship is not found
+	ErrConstructorChampionshipNotFound = errors.New("constructor championship not found")
+)
+
+func (r *repository) GetConstructorsChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetConstructorsChampionshipFilters) (*PaginationResponse[models.ConstructorChampionship], error) {
 	t := prometheus.NewTimer(models.DatabaseLatency.WithLabelValues("get_constructors_championship"))
 	defer t.ObserveDuration()
 
@@ -17,18 +24,33 @@ func (r *repository) GetConstructorsChampionship(paginationDetails *pagefilter.P
 	pg := pagefilter.NewPaginator(r.db, "constructor_championship", "id", mf)
 
 	if err := pg.SetDetails(paginationDetails, "id", "position"); err != nil {
-		return nil, fmt.Errorf("set paginator details: %w", err)
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrConstructorChampionshipNotFound
+		default:
+			return nil, fmt.Errorf("set paginator details: %w", err)
+		}
 	}
 
 	pvt, err := pg.Pivot()
 	if err != nil {
-		return nil, fmt.Errorf("failed to pivot: %w", err)
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrConstructorChampionshipNotFound
+		default:
+			return nil, fmt.Errorf("failed to pivot: %w", err)
+		}
 	}
 
 	items := make([]constructorChampionship, 0)
 	err = pg.Retrieve(pvt, &items)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve: %w", err)
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrConstructorChampionshipNotFound
+		default:
+			return nil, fmt.Errorf("failed to retrieve: %w", err)
+		}
 	}
 
 	returnItems := make([]*models.ConstructorChampionship, len(items))
@@ -36,7 +58,18 @@ func (r *repository) GetConstructorsChampionship(paginationDetails *pagefilter.P
 		returnItems[i] = item.AsModel()
 	}
 
-	return returnItems, nil
+	var total int64 = 0
+	err = pg.Counts(&total)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get total count: %w", err)
+	}
+
+	resp := &PaginationResponse[models.ConstructorChampionship]{
+		Items: returnItems,
+		Total: total,
+	}
+
+	return resp, nil
 }
 
 func (r *repository) getConstructorsChampionshipFilters(filters *GetConstructorsChampionshipFilters) *pagefilter.MultiFilter {

@@ -40,9 +40,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/season'
+                $ref: '#/components/schemas/season_response'
         '400':
           description: Bad request
           content:
@@ -82,9 +80,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/race'
+                $ref: '#/components/schemas/race_response'
         '400':
           description: Bad request
           content:
@@ -124,9 +120,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/race_result'
+                $ref: '#/components/schemas/race_result_response'
         '400':
           description: Bad request
           content:
@@ -169,9 +163,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/driver'
+                $ref: '#/components/schemas/driver_response'
         '400':
           description: Bad request
           content:
@@ -212,9 +204,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/constructor'
+                $ref: '#/components/schemas/constructor_response'
         '400':
           description: Bad request
           content:
@@ -299,6 +289,17 @@ components:
         format: int64
 
   schemas:
+    season_response:
+      type: object
+      properties:
+        seasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/season'
+        total:
+          type: integer
+          format: int64
+
     season:
       type: object
       properties:
@@ -306,6 +307,17 @@ components:
           type: integer
           format: int64
         year:
+          type: integer
+          format: int64
+
+    race_response:
+      type: object
+      properties:
+        races:
+          type: array
+          items:
+            $ref: '#/components/schemas/race'
+        total:
           type: integer
           format: int64
 
@@ -320,6 +332,17 @@ components:
         date:
           type: string
           format: date
+
+    race_result_response:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/race_result'
+        total:
+          type: integer
+          format: int64
 
     race_result:
       type: object
@@ -346,6 +369,17 @@ components:
         points:
           type: number
 
+    driver_response:
+      type: object
+      properties:
+        drivers:
+          type: array
+          items:
+            $ref: '#/components/schemas/driver'
+        total:
+          type: integer
+          format: int64
+
     driver:
       type: object
       properties:
@@ -365,6 +399,17 @@ components:
           type: string
         points:
           type: number
+
+    constructor_response:
+      type: object
+      properties:
+        constructors:
+          type: array
+          items:
+            $ref: '#/components/schemas/constructor'
+        total:
+          type: integer
+          format: int64
 
     constructor:
       type: object

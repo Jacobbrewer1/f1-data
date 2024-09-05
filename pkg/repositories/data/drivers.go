@@ -1,6 +1,7 @@
 package data
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 
@@ -15,7 +16,7 @@ var (
 	ErrDriverChampionshipNotFound = errors.New("driver championship not found")
 )
 
-func (r *repository) GetDriversChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetDriversChampionshipFilters) ([]*models.DriverChampionship, error) {
+func (r *repository) GetDriversChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetDriversChampionshipFilters) (*PaginationResponse[models.DriverChampionship], error) {
 	t := prometheus.NewTimer(models.DatabaseLatency.WithLabelValues("get_drivers_championship"))
 	defer t.ObserveDuration()
 
@@ -23,18 +24,33 @@ func (r *repository) GetDriversChampionship(paginationDetails *pagefilter.Pagina
 	pg := pagefilter.NewPaginator(r.db, "driver_championship", "id", mf)
 
 	if err := pg.SetDetails(paginationDetails, "id", "position"); err != nil {
-		return nil, fmt.Errorf("set paginator details: %w", err)
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrDriverChampionshipNotFound
+		default:
+			return nil, fmt.Errorf("set paginator details: %w", err)
+		}
 	}
 
 	pvt, err := pg.Pivot()
 	if err != nil {
-		return nil, fmt.Errorf("failed to pivot: %w", err)
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrDriverChampionshipNotFound
+		default:
+			return nil, fmt.Errorf("failed to pivot: %w", err)
+		}
 	}
 
 	items := make([]driverChampionship, 0)
 	err = pg.Retrieve(pvt, &items)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve: %w", err)
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrDriverChampionshipNotFound
+		default:
+			return nil, fmt.Errorf("failed to retrieve: %w", err)
+		}
 	}
 
 	returnItems := make([]*models.DriverChampionship, len(items))
@@ -42,7 +58,18 @@ func (r *repository) GetDriversChampionship(paginationDetails *pagefilter.Pagina
 		returnItems[i] = item.AsModel()
 	}
 
-	return returnItems, nil
+	var total int64 = 0
+	err = pg.Counts(&total)
+	if err != nil {
+		return nil, fmt.Errorf("failed to count: %w", err)
+	}
+
+	resp := &PaginationResponse[models.DriverChampionship]{
+		Items: returnItems,
+		Total: total,
+	}
+
+	return resp, nil
 }
 
 func (r *repository) getDriversChampionshipFilters(filters *GetDriversChampionshipFilters) *pagefilter.MultiFilter {

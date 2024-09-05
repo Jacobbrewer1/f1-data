@@ -16,6 +16,12 @@ type Constructor struct {
 	Position *int64   `json:"position,omitempty"`
 }
 
+// ConstructorResponse defines the model for constructor_response.
+type ConstructorResponse struct {
+	Constructors *[]Constructor `json:"constructors,omitempty"`
+	Total        *int64         `json:"total,omitempty"`
+}
+
 // Driver defines the model for driver.
 type Driver struct {
 	Id          *int64   `json:"id,omitempty"`
@@ -27,11 +33,23 @@ type Driver struct {
 	Team        *string  `json:"team,omitempty"`
 }
 
+// DriverResponse defines the model for driver_response.
+type DriverResponse struct {
+	Drivers *[]Driver `json:"drivers,omitempty"`
+	Total   *int64    `json:"total,omitempty"`
+}
+
 // Race defines the model for race.
 type Race struct {
 	Date *openapi_types.Date `json:"date,omitempty"`
 	Id   *int64              `json:"id,omitempty"`
 	Name *string             `json:"name,omitempty"`
+}
+
+// RaceResponse defines the model for race_response.
+type RaceResponse struct {
+	Races *[]Race `json:"races,omitempty"`
+	Total *int64  `json:"total,omitempty"`
 }
 
 // RaceResult defines the model for race_result.
@@ -47,10 +65,22 @@ type RaceResult struct {
 	TimeOrRetired *string  `json:"time_or_retired,omitempty"`
 }
 
+// RaceResultResponse defines the model for race_result_response.
+type RaceResultResponse struct {
+	Results *[]RaceResult `json:"results,omitempty"`
+	Total   *int64        `json:"total,omitempty"`
+}
+
 // Season defines the model for season.
 type Season struct {
 	Id   *int64 `json:"id,omitempty"`
 	Year *int64 `json:"year,omitempty"`
+}
+
+// SeasonResponse defines the model for season_response.
+type SeasonResponse struct {
+	Seasons *[]Season `json:"seasons,omitempty"`
+	Total   *int64    `json:"total,omitempty"`
 }
 
 // PathRaceId defines the model for path_race_id.

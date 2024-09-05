@@ -38,15 +38,25 @@ func (s *service) GetDriversChampionship(w http.ResponseWriter, r *http.Request,
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrDriverChampionshipNotFound):
-			driversChampionship = make([]*models.DriverChampionship, 0)
+			driversChampionship = &repo.PaginationResponse[models.DriverChampionship]{
+				Items: make([]*models.DriverChampionship, 0),
+				Total: 0,
+			}
 		default:
 			slog.Error("Error getting drivers championship", slog.String(logging.KeyError, err.Error()))
+			uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting drivers championship", err)
+			return
 		}
 	}
 
-	resp := make([]*api.Driver, len(driversChampionship))
-	for i, driverChampionship := range driversChampionship {
-		resp[i] = s.modelAsApiDriver(driverChampionship)
+	respArray := make([]api.Driver, len(driversChampionship.Items))
+	for i, driverChampionship := range driversChampionship.Items {
+		respArray[i] = *s.modelAsApiDriver(driverChampionship)
+	}
+
+	resp := &api.DriverResponse{
+		Drivers: &respArray,
+		Total:   utils.Ptr(driversChampionship.Total),
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
