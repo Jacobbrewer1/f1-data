@@ -38,7 +38,10 @@ func (s *service) GetSeasons(w http.ResponseWriter, r *http.Request, params api.
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrNoSeasonsFound):
-			seasons = make([]*models.Season, 0)
+			seasons = &repo.PaginationResponse[models.Season]{
+				Items: make([]*models.Season, 0),
+				Total: 0,
+			}
 		default:
 			slog.Error("Error getting seasons", slog.String(logging.KeyError, err.Error()))
 			uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting seasons", err)
@@ -46,9 +49,14 @@ func (s *service) GetSeasons(w http.ResponseWriter, r *http.Request, params api.
 		}
 	}
 
-	resp := make([]*api.Season, len(seasons))
-	for i, season := range seasons {
-		resp[i] = s.modelAsApiSeason(season)
+	respArray := make([]api.Season, len(seasons.Items))
+	for i, season := range seasons.Items {
+		respArray[i] = *s.modelAsApiSeason(season)
+	}
+
+	resp := &api.SeasonResponse{
+		Seasons: &respArray,
+		Total:   utils.Ptr(seasons.Total),
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)

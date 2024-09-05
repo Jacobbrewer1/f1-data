@@ -11,7 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-func (r *repository) GetRaceResults(paginationDetails *pagefilter.PaginatorDetails, filters *GetRaceResultsFilters) ([]*models.RaceResult, error) {
+func (r *repository) GetRaceResults(paginationDetails *pagefilter.PaginatorDetails, filters *GetRaceResultsFilters) (*PaginationResponse[models.RaceResult], error) {
 	t := prometheus.NewTimer(models.DatabaseLatency.WithLabelValues("get_race_results"))
 	defer t.ObserveDuration()
 
@@ -48,7 +48,18 @@ func (r *repository) GetRaceResults(paginationDetails *pagefilter.PaginatorDetai
 		returnItems[i] = item.AsModel()
 	}
 
-	return returnItems, nil
+	var total int64 = 0
+	err = pg.Counts(&total)
+	if err != nil {
+		return nil, fmt.Errorf("get total count: %w", err)
+	}
+
+	resp := &PaginationResponse[models.RaceResult]{
+		Items: returnItems,
+		Total: total,
+	}
+
+	return resp, nil
 }
 
 func (r *repository) getRaceResultFilters(filters *GetRaceResultsFilters) *pagefilter.MultiFilter {

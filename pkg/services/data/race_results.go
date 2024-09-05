@@ -44,15 +44,25 @@ func (s *service) GetRaceResults(w http.ResponseWriter, r *http.Request, raceId 
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrNoRacesFound):
-			raceResults = make([]*models.RaceResult, 0)
+			raceResults = &repo.PaginationResponse[models.RaceResult]{
+				Items: make([]*models.RaceResult, 0),
+				Total: 0,
+			}
 		default:
 			slog.Error("Error getting season races", slog.String(logging.KeyError, err.Error()))
+			uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting season", err)
+			return
 		}
 	}
 
-	resp := make([]*api.RaceResult, len(raceResults))
-	for i, rr := range raceResults {
-		resp[i] = s.modelAsApiRaceResult(rr)
+	respArray := make([]api.RaceResult, len(raceResults.Items))
+	for i, rr := range raceResults.Items {
+		respArray[i] = *s.modelAsApiRaceResult(rr)
+	}
+
+	resp := &api.RaceResultResponse{
+		Results: &respArray,
+		Total:   utils.Ptr(raceResults.Total),
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)

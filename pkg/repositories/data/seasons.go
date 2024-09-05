@@ -15,7 +15,7 @@ var (
 	ErrNoSeasonsFound = errors.New("no seasons found")
 )
 
-func (r *repository) GetSeasons(paginationDetails *pagefilter.PaginatorDetails, filters *GetSeasonsFilters) ([]*models.Season, error) {
+func (r *repository) GetSeasons(paginationDetails *pagefilter.PaginatorDetails, filters *GetSeasonsFilters) (*PaginationResponse[models.Season], error) {
 	t := prometheus.NewTimer(models.DatabaseLatency.WithLabelValues("get_seasons"))
 	defer t.ObserveDuration()
 
@@ -52,7 +52,18 @@ func (r *repository) GetSeasons(paginationDetails *pagefilter.PaginatorDetails, 
 		returnItems[i] = item.AsModel()
 	}
 
-	return returnItems, nil
+	var total int64 = 0
+	err = pg.Counts(&total)
+	if err != nil {
+		return nil, fmt.Errorf("get total count: %w", err)
+	}
+
+	resp := &PaginationResponse[models.Season]{
+		Items: returnItems,
+		Total: total,
+	}
+
+	return resp, nil
 }
 
 func (r *repository) getSeasonsFilters(filters *GetSeasonsFilters) *pagefilter.MultiFilter {

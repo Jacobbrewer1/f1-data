@@ -34,19 +34,29 @@ func (s *service) GetConstructorsChampionship(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	driversChampionship, err := s.r.GetConstructorsChampionship(paginationDetails, filts)
+	constructorChampionship, err := s.r.GetConstructorsChampionship(paginationDetails, filts)
 	if err != nil {
 		switch {
-		case errors.Is(err, repo.ErrDriverChampionshipNotFound):
-			driversChampionship = make([]*models.ConstructorChampionship, 0)
+		case errors.Is(err, repo.ErrConstructorChampionshipNotFound):
+			constructorChampionship = &repo.PaginationResponse[models.ConstructorChampionship]{
+				Items: make([]*models.ConstructorChampionship, 0),
+				Total: 0,
+			}
 		default:
 			slog.Error("Error getting drivers championship", slog.String(logging.KeyError, err.Error()))
+			uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting drivers championship", err)
+			return
 		}
 	}
 
-	resp := make([]*api.Constructor, len(driversChampionship))
-	for i, driverChampionship := range driversChampionship {
-		resp[i] = s.modelAsApiConstructor(driverChampionship)
+	respArray := make([]api.Constructor, len(constructorChampionship.Items))
+	for i, driverChampionship := range constructorChampionship.Items {
+		respArray[i] = *s.modelAsApiConstructor(driverChampionship)
+	}
+
+	resp := &api.ConstructorResponse{
+		Constructors: &respArray,
+		Total:        utils.Ptr(constructorChampionship.Total),
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
