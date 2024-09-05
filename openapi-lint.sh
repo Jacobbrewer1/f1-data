@@ -10,7 +10,7 @@ fi
 routesFiles=$(find ./pkg/codegen/apis -name "routes.yaml")
 
 touch ./pr-report.md
-echo "## Linting Report" >./pr-report.md
+echo "## OpenAPI Linting Report" >./pr-report.md
 
 totalErrors=0
 totalWarnings=0
