@@ -932,7 +932,7 @@ type ClientWithResponsesInterface interface {
 type GetConstructorsChampionshipResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]ConstructorResponse
+	JSON200      *ConstructorResponse
 	JSON400      *externalRef0.ErrorMessage
 	JSON404      *externalRef0.Message
 	JSON500      *externalRef0.ErrorMessage
@@ -957,7 +957,7 @@ func (r GetConstructorsChampionshipResponse) StatusCode() int {
 type GetDriversChampionshipResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]DriverResponse
+	JSON200      *DriverResponse
 	JSON400      *externalRef0.ErrorMessage
 	JSON404      *externalRef0.Message
 	JSON500      *externalRef0.ErrorMessage
@@ -982,7 +982,7 @@ func (r GetDriversChampionshipResponse) StatusCode() int {
 type GetRaceResultsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]RaceResultResponse
+	JSON200      *RaceResultResponse
 	JSON400      *externalRef0.ErrorMessage
 	JSON404      *externalRef0.Message
 	JSON500      *externalRef0.ErrorMessage
@@ -1007,7 +1007,7 @@ func (r GetRaceResultsResponse) StatusCode() int {
 type GetSeasonsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]SeasonResponse
+	JSON200      *SeasonResponse
 	JSON400      *externalRef0.ErrorMessage
 	JSON404      *externalRef0.Message
 	JSON500      *externalRef0.ErrorMessage
@@ -1032,7 +1032,7 @@ func (r GetSeasonsResponse) StatusCode() int {
 type GetSeasonRacesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]RaceResponse
+	JSON200      *RaceResponse
 	JSON400      *externalRef0.ErrorMessage
 	JSON404      *externalRef0.Message
 	JSON500      *externalRef0.ErrorMessage
@@ -1114,7 +1114,7 @@ func ParseGetConstructorsChampionshipResponse(rsp *http.Response) (*GetConstruct
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []ConstructorResponse
+		var dest ConstructorResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1161,7 +1161,7 @@ func ParseGetDriversChampionshipResponse(rsp *http.Response) (*GetDriversChampio
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []DriverResponse
+		var dest DriverResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1208,7 +1208,7 @@ func ParseGetRaceResultsResponse(rsp *http.Response) (*GetRaceResultsResponse, e
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []RaceResultResponse
+		var dest RaceResultResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1255,7 +1255,7 @@ func ParseGetSeasonsResponse(rsp *http.Response) (*GetSeasonsResponse, error) {
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []SeasonResponse
+		var dest SeasonResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1302,7 +1302,7 @@ func ParseGetSeasonRacesResponse(rsp *http.Response) (*GetSeasonRacesResponse, e
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []RaceResponse
+		var dest RaceResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

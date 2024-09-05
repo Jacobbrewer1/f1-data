@@ -15,23 +15,23 @@ type MockRepository struct {
 }
 
 // GetConstructorsChampionship provides a mock function with given fields: paginationDetails, filters
-func (_m *MockRepository) GetConstructorsChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetConstructorsChampionshipFilters) ([]*models.ConstructorChampionship, error) {
+func (_m *MockRepository) GetConstructorsChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetConstructorsChampionshipFilters) (*PaginationResponse[models.ConstructorChampionship], error) {
 	ret := _m.Called(paginationDetails, filters)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetConstructorsChampionship")
 	}
 
-	var r0 []*models.ConstructorChampionship
+	var r0 *PaginationResponse[models.ConstructorChampionship]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetConstructorsChampionshipFilters) ([]*models.ConstructorChampionship, error)); ok {
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetConstructorsChampionshipFilters) (*PaginationResponse[models.ConstructorChampionship], error)); ok {
 		return rf(paginationDetails, filters)
 	}
-	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetConstructorsChampionshipFilters) []*models.ConstructorChampionship); ok {
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetConstructorsChampionshipFilters) *PaginationResponse[models.ConstructorChampionship]); ok {
 		r0 = rf(paginationDetails, filters)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.ConstructorChampionship)
+			r0 = ret.Get(0).(*PaginationResponse[models.ConstructorChampionship])
 		}
 	}
 
@@ -45,23 +45,23 @@ func (_m *MockRepository) GetConstructorsChampionship(paginationDetails *pagefil
 }
 
 // GetDriversChampionship provides a mock function with given fields: paginationDetails, filters
-func (_m *MockRepository) GetDriversChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetDriversChampionshipFilters) ([]*models.DriverChampionship, error) {
+func (_m *MockRepository) GetDriversChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetDriversChampionshipFilters) (*PaginationResponse[models.DriverChampionship], error) {
 	ret := _m.Called(paginationDetails, filters)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetDriversChampionship")
 	}
 
-	var r0 []*models.DriverChampionship
+	var r0 *PaginationResponse[models.DriverChampionship]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetDriversChampionshipFilters) ([]*models.DriverChampionship, error)); ok {
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetDriversChampionshipFilters) (*PaginationResponse[models.DriverChampionship], error)); ok {
 		return rf(paginationDetails, filters)
 	}
-	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetDriversChampionshipFilters) []*models.DriverChampionship); ok {
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetDriversChampionshipFilters) *PaginationResponse[models.DriverChampionship]); ok {
 		r0 = rf(paginationDetails, filters)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.DriverChampionship)
+			r0 = ret.Get(0).(*PaginationResponse[models.DriverChampionship])
 		}
 	}
 
@@ -75,23 +75,23 @@ func (_m *MockRepository) GetDriversChampionship(paginationDetails *pagefilter.P
 }
 
 // GetRaceResults provides a mock function with given fields: paginationDetails, filters
-func (_m *MockRepository) GetRaceResults(paginationDetails *pagefilter.PaginatorDetails, filters *GetRaceResultsFilters) ([]*models.RaceResult, error) {
+func (_m *MockRepository) GetRaceResults(paginationDetails *pagefilter.PaginatorDetails, filters *GetRaceResultsFilters) (*PaginationResponse[models.RaceResult], error) {
 	ret := _m.Called(paginationDetails, filters)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetRaceResults")
 	}
 
-	var r0 []*models.RaceResult
+	var r0 *PaginationResponse[models.RaceResult]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetRaceResultsFilters) ([]*models.RaceResult, error)); ok {
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetRaceResultsFilters) (*PaginationResponse[models.RaceResult], error)); ok {
 		return rf(paginationDetails, filters)
 	}
-	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetRaceResultsFilters) []*models.RaceResult); ok {
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetRaceResultsFilters) *PaginationResponse[models.RaceResult]); ok {
 		r0 = rf(paginationDetails, filters)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.RaceResult)
+			r0 = ret.Get(0).(*PaginationResponse[models.RaceResult])
 		}
 	}
 
@@ -105,23 +105,23 @@ func (_m *MockRepository) GetRaceResults(paginationDetails *pagefilter.Paginator
 }
 
 // GetSeasonRaces provides a mock function with given fields: paginationDetails, filters
-func (_m *MockRepository) GetSeasonRaces(paginationDetails *pagefilter.PaginatorDetails, filters *GetSeasonRacesFilters) ([]*models.Race, error) {
+func (_m *MockRepository) GetSeasonRaces(paginationDetails *pagefilter.PaginatorDetails, filters *GetSeasonRacesFilters) (*PaginationResponse[models.Race], error) {
 	ret := _m.Called(paginationDetails, filters)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetSeasonRaces")
 	}
 
-	var r0 []*models.Race
+	var r0 *PaginationResponse[models.Race]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetSeasonRacesFilters) ([]*models.Race, error)); ok {
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetSeasonRacesFilters) (*PaginationResponse[models.Race], error)); ok {
 		return rf(paginationDetails, filters)
 	}
-	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetSeasonRacesFilters) []*models.Race); ok {
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetSeasonRacesFilters) *PaginationResponse[models.Race]); ok {
 		r0 = rf(paginationDetails, filters)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.Race)
+			r0 = ret.Get(0).(*PaginationResponse[models.Race])
 		}
 	}
 
@@ -135,23 +135,23 @@ func (_m *MockRepository) GetSeasonRaces(paginationDetails *pagefilter.Paginator
 }
 
 // GetSeasons provides a mock function with given fields: paginationDetails, filters
-func (_m *MockRepository) GetSeasons(paginationDetails *pagefilter.PaginatorDetails, filters *GetSeasonsFilters) ([]*models.Season, error) {
+func (_m *MockRepository) GetSeasons(paginationDetails *pagefilter.PaginatorDetails, filters *GetSeasonsFilters) (*PaginationResponse[models.Season], error) {
 	ret := _m.Called(paginationDetails, filters)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetSeasons")
 	}
 
-	var r0 []*models.Season
+	var r0 *PaginationResponse[models.Season]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetSeasonsFilters) ([]*models.Season, error)); ok {
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetSeasonsFilters) (*PaginationResponse[models.Season], error)); ok {
 		return rf(paginationDetails, filters)
 	}
-	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetSeasonsFilters) []*models.Season); ok {
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetSeasonsFilters) *PaginationResponse[models.Season]); ok {
 		r0 = rf(paginationDetails, filters)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.Season)
+			r0 = ret.Get(0).(*PaginationResponse[models.Season])
 		}
 	}
 
