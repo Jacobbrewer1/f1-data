@@ -61,6 +61,7 @@ func (r *raceResult) AsModel() *models.RaceResult {
 		Position:     r.Position,
 		DriverNumber: r.DriverNumber,
 		Driver:       r.Driver,
+		DriverTag:    r.DriverTag,
 		Team:         r.Team,
 		Laps:         r.Laps,
 		TimeRetired:  r.TimeRetired,
