@@ -92,6 +92,9 @@ type PathYear = int64
 // QueryName defines the model for query_name.
 type QueryName = string
 
+// QueryNationality defines the model for query_nationality.
+type QueryNationality = string
+
 // QueryTag defines the model for query_tag.
 type QueryTag = string
 
@@ -160,6 +163,39 @@ type GetDriversChampionshipParams struct {
 
 // GetDriversChampionshipParamsSortDir defines parameters for GetDriversChampionship.
 type GetDriversChampionshipParamsSortDir string
+
+// GetDriversParams defines parameters for GetDrivers.
+type GetDriversParams struct {
+	// Limit Report type
+	Limit *externalRef0.LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// LastVal Pagination details, last value of the sort column on the previous page.
+	LastVal *externalRef0.LastValue `form:"last_val,omitempty" json:"last_val,omitempty"`
+
+	// LastId Pagination details, last value of the id column on the previous page.
+	LastId *externalRef0.LastId `form:"last_id,omitempty" json:"last_id,omitempty"`
+
+	// SortBy Pagination details, sort column, if empty uses the id column.
+	SortBy *externalRef0.SortBy `form:"sort_by,omitempty" json:"sort_by,omitempty"`
+
+	// SortDir Pagination details, sorting order.
+	SortDir *GetDriversParamsSortDir `form:"sort_dir,omitempty" json:"sort_dir,omitempty"`
+
+	// Name The name to filter by
+	Name *QueryName `form:"name,omitempty" json:"name,omitempty"`
+
+	// Tag The tag to filter by
+	Tag *QueryTag `form:"tag,omitempty" json:"tag,omitempty"`
+
+	// Team The team to filter by
+	Team *QueryTeam `form:"team,omitempty" json:"team,omitempty"`
+
+	// Nationality The nationality to filter by
+	Nationality *QueryNationality `form:"nationality,omitempty" json:"nationality,omitempty"`
+}
+
+// GetDriversParamsSortDir defines parameters for GetDrivers.
+type GetDriversParamsSortDir string
 
 // GetRaceResultsParams defines parameters for GetRaceResults.
 type GetRaceResultsParams struct {
