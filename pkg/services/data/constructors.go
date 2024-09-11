@@ -49,12 +49,12 @@ func (s *service) GetConstructorsChampionship(w http.ResponseWriter, r *http.Req
 		}
 	}
 
-	respArray := make([]api.Constructor, len(constructorChampionship.Items))
+	respArray := make([]api.ConstructorChampionship, len(constructorChampionship.Items))
 	for i, driverChampionship := range constructorChampionship.Items {
 		respArray[i] = *s.modelAsApiConstructor(driverChampionship)
 	}
 
-	resp := &api.ConstructorResponse{
+	resp := &api.ConstructorChampionshipResponse{
 		Constructors: &respArray,
 		Total:        utils.Ptr(constructorChampionship.Total),
 	}
@@ -83,8 +83,8 @@ func (s *service) getConstructorsChampionshipFilters(
 	return filters, nil
 }
 
-func (s *service) modelAsApiConstructor(c *models.ConstructorChampionship) *api.Constructor {
-	return &api.Constructor{
+func (s *service) modelAsApiConstructor(c *models.ConstructorChampionship) *api.ConstructorChampionship {
+	return &api.ConstructorChampionship{
 		Id:       utils.Ptr(int64(c.Id)),
 		Name:     utils.Ptr(c.Name),
 		Points:   utils.Ptr(float32(c.Points)),

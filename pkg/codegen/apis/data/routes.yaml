@@ -47,12 +47,6 @@ paths:
             application/json:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
-        '404':
-          description: No seasons found
-          content:
-            application/json:
-              schema:
-                $ref: '../common/common.yaml#/components/schemas/message'
         '500':
           description: Internal server error
           content:
@@ -88,7 +82,7 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
         '404':
-          description: No races found
+          description: No races found for the specified season
           content:
             application/json:
               schema:
@@ -128,7 +122,7 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
         '404':
-          description: No results found
+          description: Race not found with the specified ID
           content:
             application/json:
               schema:
@@ -163,7 +157,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/driver_response'
+                $ref: '#/components/schemas/driver_championship_response'
         '400':
           description: Bad request
           content:
@@ -171,7 +165,7 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
         '404':
-          description: No drivers found
+          description: Championship not found with the specified year
           content:
             application/json:
               schema:
@@ -200,11 +194,11 @@ paths:
         - $ref: '#/components/parameters/query_name'
       responses:
         '200':
-          description: A list of all drivers for the specified season
+          description: A list of all constructors for the specified season
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/constructor_response'
+                $ref: '#/components/schemas/constructor_championship_response'
         '400':
           description: Bad request
           content:
@@ -212,11 +206,47 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
         '404':
-          description: No drivers found
+          description: Championship not found with the specified year
           content:
             application/json:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
+  /drivers:
+    get:
+      summary: Get all drivers
+      operationId: getDrivers
+      tags:
+        - drivers
+      parameters:
+        - $ref: '../common/common.yaml#/components/parameters/limit_param'
+        - $ref: '../common/common.yaml#/components/parameters/last_value'
+        - $ref: '../common/common.yaml#/components/parameters/last_id'
+        - $ref: '../common/common.yaml#/components/parameters/sort_by'
+        - $ref: '../common/common.yaml#/components/parameters/sort_direction'
+        - $ref: '#/components/parameters/query_name'
+        - $ref: '#/components/parameters/query_tag'
+        - $ref: '#/components/parameters/query_team'
+        - $ref: '#/components/parameters/query_nationality'
+      responses:
+        '200':
+          description: A list of all drivers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/driver_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
         '500':
           description: Internal server error
           content:
@@ -268,6 +298,13 @@ components:
       name: team
       in: query
       description: The team to filter by
+      required: false
+      schema:
+        type: string
+    query_nationality:
+      name: nationality
+      in: query
+      description: The nationality to filter by
       required: false
       schema:
         type: string
@@ -369,18 +406,18 @@ components:
         points:
           type: number
 
-    driver_response:
+    driver_championship_response:
       type: object
       properties:
         drivers:
           type: array
           items:
-            $ref: '#/components/schemas/driver'
+            $ref: '#/components/schemas/driver_championship'
         total:
           type: integer
           format: int64
 
-    driver:
+    driver_championship:
       type: object
       properties:
         id:
@@ -400,18 +437,39 @@ components:
         points:
           type: number
 
-    constructor_response:
+    driver_response:
+      type: object
+      properties:
+        drivers:
+          type: array
+          items:
+            $ref: '#/components/schemas/driver'
+        total:
+          type: integer
+          format: int64
+
+    driver:
+      type: object
+      properties:
+        name:
+          type: string
+        tag:
+          type: string
+        nationality:
+          type: string
+
+    constructor_championship_response:
       type: object
       properties:
         constructors:
           type: array
           items:
-            $ref: '#/components/schemas/constructor'
+            $ref: '#/components/schemas/constructor_championship'
         total:
           type: integer
           format: int64
 
-    constructor:
+    constructor_championship:
       type: object
       properties:
         id:

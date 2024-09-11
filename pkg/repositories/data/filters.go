@@ -45,3 +45,17 @@ type GetConstructorsChampionshipFilters struct {
 	// ConstructorName is the name of the constructor.
 	ConstructorName *string
 }
+
+type GetDriversFilters struct {
+	// Name is the name of the driver.
+	Name *string
+
+	// Tag is the tag of the driver.
+	Tag *string
+
+	// Team is the team of the driver.
+	Team *string
+
+	// Nationality is the nationality of the driver.
+	Nationality *string
+}

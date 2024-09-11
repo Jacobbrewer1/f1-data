@@ -8,22 +8,29 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-// Constructor defines the model for constructor.
-type Constructor struct {
+// ConstructorChampionship defines the model for constructor_championship.
+type ConstructorChampionship struct {
 	Id       *int64   `json:"id,omitempty"`
 	Name     *string  `json:"name,omitempty"`
 	Points   *float32 `json:"points,omitempty"`
 	Position *int64   `json:"position,omitempty"`
 }
 
-// ConstructorResponse defines the model for constructor_response.
-type ConstructorResponse struct {
-	Constructors *[]Constructor `json:"constructors,omitempty"`
-	Total        *int64         `json:"total,omitempty"`
+// ConstructorChampionshipResponse defines the model for constructor_championship_response.
+type ConstructorChampionshipResponse struct {
+	Constructors *[]ConstructorChampionship `json:"constructors,omitempty"`
+	Total        *int64                     `json:"total,omitempty"`
 }
 
 // Driver defines the model for driver.
 type Driver struct {
+	Name        *string `json:"name,omitempty"`
+	Nationality *string `json:"nationality,omitempty"`
+	Tag         *string `json:"tag,omitempty"`
+}
+
+// DriverChampionship defines the model for driver_championship.
+type DriverChampionship struct {
 	Id          *int64   `json:"id,omitempty"`
 	Name        *string  `json:"name,omitempty"`
 	Nationality *string  `json:"nationality,omitempty"`
@@ -31,6 +38,12 @@ type Driver struct {
 	Position    *int64   `json:"position,omitempty"`
 	Tag         *string  `json:"tag,omitempty"`
 	Team        *string  `json:"team,omitempty"`
+}
+
+// DriverChampionshipResponse defines the model for driver_championship_response.
+type DriverChampionshipResponse struct {
+	Drivers *[]DriverChampionship `json:"drivers,omitempty"`
+	Total   *int64                `json:"total,omitempty"`
 }
 
 // DriverResponse defines the model for driver_response.
@@ -91,6 +104,9 @@ type PathYear = int64
 
 // QueryName defines the model for query_name.
 type QueryName = string
+
+// QueryNationality defines the model for query_nationality.
+type QueryNationality = string
 
 // QueryTag defines the model for query_tag.
 type QueryTag = string
@@ -160,6 +176,39 @@ type GetDriversChampionshipParams struct {
 
 // GetDriversChampionshipParamsSortDir defines parameters for GetDriversChampionship.
 type GetDriversChampionshipParamsSortDir string
+
+// GetDriversParams defines parameters for GetDrivers.
+type GetDriversParams struct {
+	// Limit Report type
+	Limit *externalRef0.LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// LastVal Pagination details, last value of the sort column on the previous page.
+	LastVal *externalRef0.LastValue `form:"last_val,omitempty" json:"last_val,omitempty"`
+
+	// LastId Pagination details, last value of the id column on the previous page.
+	LastId *externalRef0.LastId `form:"last_id,omitempty" json:"last_id,omitempty"`
+
+	// SortBy Pagination details, sort column, if empty uses the id column.
+	SortBy *externalRef0.SortBy `form:"sort_by,omitempty" json:"sort_by,omitempty"`
+
+	// SortDir Pagination details, sorting order.
+	SortDir *GetDriversParamsSortDir `form:"sort_dir,omitempty" json:"sort_dir,omitempty"`
+
+	// Name The name to filter by
+	Name *QueryName `form:"name,omitempty" json:"name,omitempty"`
+
+	// Tag The tag to filter by
+	Tag *QueryTag `form:"tag,omitempty" json:"tag,omitempty"`
+
+	// Team The team to filter by
+	Team *QueryTeam `form:"team,omitempty" json:"team,omitempty"`
+
+	// Nationality The nationality to filter by
+	Nationality *QueryNationality `form:"nationality,omitempty" json:"nationality,omitempty"`
+}
+
+// GetDriversParamsSortDir defines parameters for GetDrivers.
+type GetDriversParamsSortDir string
 
 // GetRaceResultsParams defines parameters for GetRaceResults.
 type GetRaceResultsParams struct {

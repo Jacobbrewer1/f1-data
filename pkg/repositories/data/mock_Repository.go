@@ -44,6 +44,36 @@ func (_m *MockRepository) GetConstructorsChampionship(paginationDetails *pagefil
 	return r0, r1
 }
 
+// GetDrivers provides a mock function with given fields: paginationDetails, filters
+func (_m *MockRepository) GetDrivers(paginationDetails *pagefilter.PaginatorDetails, filters *GetDriversFilters) (*PaginationResponse[models.DriverChampionship], error) {
+	ret := _m.Called(paginationDetails, filters)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetDrivers")
+	}
+
+	var r0 *PaginationResponse[models.DriverChampionship]
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetDriversFilters) (*PaginationResponse[models.DriverChampionship], error)); ok {
+		return rf(paginationDetails, filters)
+	}
+	if rf, ok := ret.Get(0).(func(*pagefilter.PaginatorDetails, *GetDriversFilters) *PaginationResponse[models.DriverChampionship]); ok {
+		r0 = rf(paginationDetails, filters)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*PaginationResponse[models.DriverChampionship])
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*pagefilter.PaginatorDetails, *GetDriversFilters) error); ok {
+		r1 = rf(paginationDetails, filters)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetDriversChampionship provides a mock function with given fields: paginationDetails, filters
 func (_m *MockRepository) GetDriversChampionship(paginationDetails *pagefilter.PaginatorDetails, filters *GetDriversChampionshipFilters) (*PaginationResponse[models.DriverChampionship], error) {
 	ret := _m.Called(paginationDetails, filters)
