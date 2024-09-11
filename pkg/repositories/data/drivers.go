@@ -146,15 +146,9 @@ func (r *repository) GetDrivers(paginationDetails *pagefilter.PaginatorDetails, 
 		returnItems[i] = item.AsModel()
 	}
 
-	var total int64 = 0
-	err = pg.Counts(&total)
-	if err != nil {
-		return nil, fmt.Errorf("failed to count: %w", err)
-	}
-
 	resp := &PaginationResponse[models.DriverChampionship]{
 		Items: returnItems,
-		Total: total,
+		Total: int64(len(returnItems)),
 	}
 
 	return resp, nil
@@ -179,6 +173,11 @@ func (r *repository) getDriversFilters(filters *GetDriversFilters) *pagefilter.M
 
 	if filters.Team != nil {
 		f := repoFilter.NewDriverChampTeamLike(*filters.Team)
+		mf.Add(f)
+	}
+
+	if filters.Nationality != nil {
+		f := repoFilter.NewDriverChampNationalityLike(*filters.Nationality)
 		mf.Add(f)
 	}
 

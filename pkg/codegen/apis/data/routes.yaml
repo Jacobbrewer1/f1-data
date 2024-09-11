@@ -198,7 +198,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/constructor_response'
+                $ref: '#/components/schemas/constructor_championship_response'
         '400':
           description: Bad request
           content:
@@ -240,7 +240,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/driver_championship_response'
+                $ref: '#/components/schemas/driver_response'
         '400':
           description: Bad request
           content:
@@ -437,18 +437,39 @@ components:
         points:
           type: number
 
-    constructor_response:
+    driver_response:
+      type: object
+      properties:
+        drivers:
+          type: array
+          items:
+            $ref: '#/components/schemas/driver'
+        total:
+          type: integer
+          format: int64
+
+    driver:
+      type: object
+      properties:
+        name:
+          type: string
+        tag:
+          type: string
+        nationality:
+          type: string
+
+    constructor_championship_response:
       type: object
       properties:
         constructors:
           type: array
           items:
-            $ref: '#/components/schemas/constructor'
+            $ref: '#/components/schemas/constructor_championship'
         total:
           type: integer
           format: int64
 
-    constructor:
+    constructor_championship:
       type: object
       properties:
         id:

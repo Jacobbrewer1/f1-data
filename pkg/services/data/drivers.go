@@ -49,12 +49,12 @@ func (s *service) GetDriversChampionship(w http.ResponseWriter, r *http.Request,
 		}
 	}
 
-	respArray := make([]api.Driver, len(driversChampionship.Items))
+	respArray := make([]api.DriverChampionship, len(driversChampionship.Items))
 	for i, driverChampionship := range driversChampionship.Items {
-		respArray[i] = *s.modelAsApiDriver(driverChampionship)
+		respArray[i] = *s.modelAsApiDriverChampionship(driverChampionship)
 	}
 
-	resp := &api.DriverResponse{
+	resp := &api.DriverChampionshipResponse{
 		Drivers: &respArray,
 		Total:   utils.Ptr(driversChampionship.Total),
 	}
@@ -93,8 +93,8 @@ func (s *service) getDriversChampionshipFilters(
 	return filters, nil
 }
 
-func (s *service) modelAsApiDriver(m *models.DriverChampionship) *api.Driver {
-	return &api.Driver{
+func (s *service) modelAsApiDriverChampionship(m *models.DriverChampionship) *api.DriverChampionship {
+	return &api.DriverChampionship{
 		Id:          utils.Ptr(int64(m.Id)),
 		Name:        utils.Ptr(m.Driver),
 		Nationality: utils.Ptr(m.Nationality),
@@ -181,4 +181,12 @@ func (s *service) getDriversFilters(
 	}
 
 	return filters, nil
+}
+
+func (s *service) modelAsApiDriver(m *models.DriverChampionship) *api.Driver {
+	return &api.Driver{
+		Name:        utils.Ptr(m.Driver),
+		Nationality: utils.Ptr(m.Nationality),
+		Tag:         utils.Ptr(m.DriverTag),
+	}
 }

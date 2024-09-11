@@ -1127,7 +1127,7 @@ type ClientWithResponsesInterface interface {
 type GetConstructorsChampionshipResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ConstructorResponse
+	JSON200      *ConstructorChampionshipResponse
 	JSON400      *externalRef0.ErrorMessage
 	JSON404      *externalRef0.Message
 	JSON500      *externalRef0.ErrorMessage
@@ -1152,7 +1152,7 @@ func (r GetConstructorsChampionshipResponse) StatusCode() int {
 type GetDriversChampionshipResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *DriverResponse
+	JSON200      *DriverChampionshipResponse
 	JSON400      *externalRef0.ErrorMessage
 	JSON404      *externalRef0.Message
 	JSON500      *externalRef0.ErrorMessage
@@ -1341,7 +1341,7 @@ func ParseGetConstructorsChampionshipResponse(rsp *http.Response) (*GetConstruct
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ConstructorResponse
+		var dest ConstructorChampionshipResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1388,7 +1388,7 @@ func ParseGetDriversChampionshipResponse(rsp *http.Response) (*GetDriversChampio
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest DriverResponse
+		var dest DriverChampionshipResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

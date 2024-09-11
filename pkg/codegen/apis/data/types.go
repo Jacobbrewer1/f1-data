@@ -8,22 +8,29 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-// Constructor defines the model for constructor.
-type Constructor struct {
+// ConstructorChampionship defines the model for constructor_championship.
+type ConstructorChampionship struct {
 	Id       *int64   `json:"id,omitempty"`
 	Name     *string  `json:"name,omitempty"`
 	Points   *float32 `json:"points,omitempty"`
 	Position *int64   `json:"position,omitempty"`
 }
 
-// ConstructorResponse defines the model for constructor_response.
-type ConstructorResponse struct {
-	Constructors *[]Constructor `json:"constructors,omitempty"`
-	Total        *int64         `json:"total,omitempty"`
+// ConstructorChampionshipResponse defines the model for constructor_championship_response.
+type ConstructorChampionshipResponse struct {
+	Constructors *[]ConstructorChampionship `json:"constructors,omitempty"`
+	Total        *int64                     `json:"total,omitempty"`
 }
 
 // Driver defines the model for driver.
 type Driver struct {
+	Name        *string `json:"name,omitempty"`
+	Nationality *string `json:"nationality,omitempty"`
+	Tag         *string `json:"tag,omitempty"`
+}
+
+// DriverChampionship defines the model for driver_championship.
+type DriverChampionship struct {
 	Id          *int64   `json:"id,omitempty"`
 	Name        *string  `json:"name,omitempty"`
 	Nationality *string  `json:"nationality,omitempty"`
@@ -31,6 +38,12 @@ type Driver struct {
 	Position    *int64   `json:"position,omitempty"`
 	Tag         *string  `json:"tag,omitempty"`
 	Team        *string  `json:"team,omitempty"`
+}
+
+// DriverChampionshipResponse defines the model for driver_championship_response.
+type DriverChampionshipResponse struct {
+	Drivers *[]DriverChampionship `json:"drivers,omitempty"`
+	Total   *int64                `json:"total,omitempty"`
 }
 
 // DriverResponse defines the model for driver_response.
