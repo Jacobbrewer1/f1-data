@@ -133,7 +133,7 @@ github.com/hashicorp/vault/api
 # github.com/hashicorp/vault/api/auth/approle v0.7.0
 ## explicit; go 1.21
 github.com/hashicorp/vault/api/auth/approle
-# github.com/hashicorp/vault/api/auth/userpass v0.7.0
+# github.com/hashicorp/vault/api/auth/userpass v0.8.0
 ## explicit; go 1.21
 github.com/hashicorp/vault/api/auth/userpass
 # github.com/huandu/xstrings v1.4.0
