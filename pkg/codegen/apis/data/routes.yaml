@@ -331,6 +331,7 @@ components:
       properties:
         seasons:
           type: array
+          required: true
           items:
             $ref: '#/components/schemas/season'
         total:
@@ -352,6 +353,7 @@ components:
       properties:
         races:
           type: array
+          required: true
           items:
             $ref: '#/components/schemas/race'
         total:
@@ -375,6 +377,7 @@ components:
       properties:
         results:
           type: array
+          required: true
           items:
             $ref: '#/components/schemas/race_result'
         total:
@@ -411,6 +414,7 @@ components:
       properties:
         drivers:
           type: array
+          required: true
           items:
             $ref: '#/components/schemas/driver_championship'
         total:
@@ -442,6 +446,7 @@ components:
       properties:
         drivers:
           type: array
+          required: true
           items:
             $ref: '#/components/schemas/driver'
         total:
@@ -463,6 +468,7 @@ components:
       properties:
         constructors:
           type: array
+          required: true
           items:
             $ref: '#/components/schemas/constructor_championship'
         total:
