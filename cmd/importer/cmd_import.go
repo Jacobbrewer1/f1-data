@@ -84,22 +84,20 @@ func (i *importCmd) setup(ctx context.Context, v *viper.Viper) (db *repositories
 		return nil, errors.New("vault configuration not found")
 	}
 
-	vaultDb := &repositories.VaultDB{
-		Client:         nil,
-		Vip:            v,
-		Enabled:        false,
-		CurrentSecrets: nil,
-	}
-
 	slog.Info("Vault configuration found, attempting to connect")
-	vaultDb.Enabled = true
 
-	vc, err := vault.NewClientUserPass(v)
+	vc, err := vault.NewClient(
+		vault.WithContext(ctx),
+		vault.WithGeneratedVaultClient(v.GetString("vault.address")),
+		vault.WithUserPassAuth(
+			v.GetString("vault.auth.username"),
+			v.GetString("vault.auth.password"),
+		),
+		vault.WithKvv2Mount(v.GetString("vault.kvv2_mount")),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("error creating vault client: %w", err)
 	}
-
-	vaultDb.Client = vc
 
 	slog.Debug("Vault client created")
 
@@ -111,13 +109,19 @@ func (i *importCmd) setup(ctx context.Context, v *viper.Viper) (db *repositories
 	}
 
 	slog.Debug("Vault secrets retrieved")
-	vaultDb.CurrentSecrets = vs
-	db, err = repositories.ConnectDB(ctx, vaultDb)
+	dbConnector := repositories.NewDatabaseConnector(
+		repositories.WithViper(v),
+		repositories.WithVaultClient(vc),
+		repositories.WithCurrentSecrets(vs),
+		repositories.WithContext(ctx),
+	)
+
+	db, err = dbConnector.ConnectDB()
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to database: %w", err)
 	}
 
-	slog.Info("Database connection generate from vault secrets")
+	slog.Info("Database connection generated from vault secrets")
 
 	return db, nil
 }
