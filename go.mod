@@ -1,9 +1,12 @@
 module github.com/Jacobbrewer1/f1-data
 
-go 1.22
+go 1.23
+
+toolchain go1.23.1
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
+	github.com/Jacobbrewer1/vaulty v0.1.0
 	github.com/alexliesenfeld/health v0.8.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/gocolly/colly/v2 v2.1.0
@@ -18,7 +21,7 @@ require (
 	github.com/prometheus/client_golang v1.20.3
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
-	github.com/vektra/mockery/v2 v2.45.1
+	github.com/vektra/mockery/v2 v2.46.1
 	golang.org/x/crypto v0.27.0
 	golang.org/x/time v0.6.0
 )

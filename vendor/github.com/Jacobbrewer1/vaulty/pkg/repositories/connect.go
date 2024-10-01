@@ -8,34 +8,55 @@ import (
 	"os"
 	"time"
 
-	"github.com/Jacobbrewer1/f1-data/pkg/logging"
-	"github.com/Jacobbrewer1/f1-data/pkg/vault"
+	"github.com/Jacobbrewer1/vaulty/pkg/logging"
+	"github.com/Jacobbrewer1/vaulty/pkg/vaulty"
 	_ "github.com/go-sql-driver/mysql"
 	vault2 "github.com/hashicorp/vault/api"
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 )
 
-const (
-	EnvDbConnStr = "DB_CONN_STR"
-	EnvRedisHost = "REDIS_HOST"
-)
+type DatabaseConnector interface {
+	ConnectDB() (*Database, error)
+}
 
-type VaultDB struct {
-	Client         vault.Client
-	Vip            *viper.Viper
-	Enabled        bool
-	CurrentSecrets *vault.Secrets
+type databaseConnector struct {
+	ctx            context.Context
+	client         vaulty.Client
+	vip            *viper.Viper
+	currentSecrets *vault2.Secret
+}
+
+func NewDatabaseConnector(opts ...ConnectionOption) (DatabaseConnector, error) {
+	c := new(databaseConnector)
+
+	for _, opt := range opts {
+		opt(c)
+	}
+
+	if c.ctx == nil {
+		c.ctx = context.Background()
+	}
+
+	if c.client == nil {
+		return nil, errors.New("no vault client provided")
+	} else if c.vip == nil {
+		return nil, errors.New("no viper configuration provided")
+	} else if c.currentSecrets == nil {
+		return nil, errors.New("no current secrets provided")
+	}
+
+	return c, nil
 }
 
 // ConnectDB connects to the database
-func ConnectDB(ctx context.Context, v *VaultDB) (*Database, error) {
-	if !v.Vip.IsSet("vault") {
+func (d *databaseConnector) ConnectDB() (*Database, error) {
+	if !d.vip.IsSet("vault") {
 		return nil, errors.New("no vault configuration found")
 	}
 
-	v.Vip.Set("database.connection_string", generateConnectionStr(v.Vip, v.CurrentSecrets))
-	sqlxDb, err := createConnection(v.Vip)
+	d.vip.Set("database.connection_string", generateConnectionStr(d.vip, d.currentSecrets))
+	sqlxDb, err := createConnection(d.vip)
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to database: %w", err)
 	}
@@ -43,29 +64,29 @@ func ConnectDB(ctx context.Context, v *VaultDB) (*Database, error) {
 	db := NewDatabase(sqlxDb)
 
 	go func() {
-		err := vault.RenewLease(ctx, v.Client, v.Vip.GetString("vault.database.path"), v.CurrentSecrets.Secret, func() (*vault2.Secret, error) {
+		err := vaulty.RenewLease(d.ctx, d.client, d.vip.GetString("vault.database.path"), d.currentSecrets, func() (*vault2.Secret, error) {
 			slog.Warn("Vault lease expired, reconnecting to database")
 
-			vs, err := v.Client.GetSecret(ctx, v.Vip.GetString("vault.database.path"))
+			vs, err := d.client.GetSecret(d.ctx, d.vip.GetString("vault.database.path"))
 			if err != nil {
 				return nil, fmt.Errorf("error getting secrets from vault: %w", err)
 			}
 
-			dbConnectionString := generateConnectionStr(v.Vip, vs)
-			v.Vip.Set("database.connection_string", dbConnectionString)
+			dbConnectionString := generateConnectionStr(d.vip, vs)
+			d.vip.Set("database.connection_string", dbConnectionString)
 
-			newDb, err := createConnection(v.Vip)
+			newDb, err := createConnection(d.vip)
 			if err != nil {
 				return nil, fmt.Errorf("error connecting to database: %w", err)
 			}
 
-			if err := db.Reconnect(ctx, newDb); err != nil {
+			if err := db.Reconnect(d.ctx, newDb); err != nil {
 				return nil, fmt.Errorf("error reconnecting to database: %w", err)
 			}
 
 			slog.Info("Database reconnected")
 
-			return vs.Secret, nil
+			return vs, nil
 		})
 		if err != nil {
 			slog.Error("Error renewing vault lease", slog.String(logging.KeyError, err.Error()))
@@ -101,7 +122,7 @@ func createConnection(v *viper.Viper) (*sqlx.DB, error) {
 	return db, nil
 }
 
-func generateConnectionStr(v *viper.Viper, vs *vault.Secrets) string {
+func generateConnectionStr(v *viper.Viper, vs *vault2.Secret) string {
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?timeout=90s&multiStatements=true&parseTime=true",
 		vs.Data["username"],
 		vs.Data["password"],

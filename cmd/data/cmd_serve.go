@@ -12,11 +12,11 @@ import (
 
 	api "github.com/Jacobbrewer1/f1-data/pkg/codegen/apis/data"
 	"github.com/Jacobbrewer1/f1-data/pkg/logging"
-	"github.com/Jacobbrewer1/f1-data/pkg/repositories"
 	repo "github.com/Jacobbrewer1/f1-data/pkg/repositories/data"
 	svc "github.com/Jacobbrewer1/f1-data/pkg/services/data"
 	uhttp "github.com/Jacobbrewer1/f1-data/pkg/utils/http"
-	"github.com/Jacobbrewer1/f1-data/pkg/vault"
+	"github.com/Jacobbrewer1/vaulty/pkg/repositories"
+	"github.com/Jacobbrewer1/vaulty/pkg/vaulty"
 	"github.com/google/subcommands"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -103,35 +103,38 @@ func (s *serveCmd) setup(ctx context.Context, r *mux.Router) (err error) {
 		return errors.New("vault configuration not found")
 	}
 
-	vaultDb := &repositories.VaultDB{
-		Client:         nil,
-		Vip:            v,
-		Enabled:        false,
-		CurrentSecrets: nil,
-	}
-
 	slog.Info("Vault configuration found, attempting to connect")
-	vaultDb.Enabled = true
-
-	vc, err := vault.NewClientUserPass(v)
+	vc, err := vaulty.NewClient(
+		vaulty.WithContext(ctx),
+		vaulty.WithGeneratedVaultClient(v.GetString("vault.address")),
+		vaulty.WithUserPassAuth(
+			v.GetString("vault.auth.username"),
+			v.GetString("vault.auth.password"),
+		),
+	)
 	if err != nil {
 		return fmt.Errorf("error creating vault client: %w", err)
 	}
-
-	vaultDb.Client = vc
-
 	slog.Debug("Vault client created")
 
 	vs, err := vc.GetSecret(ctx, v.GetString("vault.database.path"))
-	if errors.Is(err, vault.ErrSecretNotFound) {
+	if errors.Is(err, vaulty.ErrSecretNotFound) {
 		return fmt.Errorf("secrets not found in vault: %s", v.GetString("vault.database.path"))
 	} else if err != nil {
 		return fmt.Errorf("error getting secrets from vault: %w", err)
 	}
 
 	slog.Debug("Vault secrets retrieved")
-	vaultDb.CurrentSecrets = vs
-	db, err := repositories.ConnectDB(ctx, vaultDb)
+	dbConnector, err := repositories.NewDatabaseConnector(
+		repositories.WithViper(v),
+		repositories.WithVaultClient(vc),
+		repositories.WithCurrentSecrets(vs),
+	)
+	if err != nil {
+		return fmt.Errorf("error creating database connector: %w", err)
+	}
+
+	db, err := dbConnector.ConnectDB()
 	if err != nil {
 		return fmt.Errorf("error connecting to database: %w", err)
 	}
