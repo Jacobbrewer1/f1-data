@@ -29,4 +29,3 @@ mocks:
 			(cd $$d && go generate); \
 		fi \
 	done
-	cd ./pkg/vault && go generate
