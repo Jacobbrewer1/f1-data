@@ -1,7 +1,7 @@
 package importer
 
 import (
-	"github.com/Jacobbrewer1/f1-data/pkg/repositories"
+	"github.com/Jacobbrewer1/vaulty/repositories"
 )
 
 type repository struct {
