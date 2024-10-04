@@ -1,14 +1,14 @@
-package vault
+package vaulty
 
 import (
 	"context"
 	"fmt"
 	"log/slog"
 
-	vault "github.com/hashicorp/vault/api"
+	hashiVault "github.com/hashicorp/vault/api"
 )
 
-func monitorWatcher(ctx context.Context, name string, watcher *vault.LifetimeWatcher) (renewResult, error) {
+func monitorWatcher(ctx context.Context, name string, watcher *hashiVault.LifetimeWatcher) (renewResult, error) {
 	for {
 		select {
 		case <-ctx.Done():

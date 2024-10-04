@@ -8,10 +8,10 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/Jacobbrewer1/f1-data/pkg/repositories"
 	"github.com/Jacobbrewer1/f1-data/pkg/repositories/importer"
 	importerSvc "github.com/Jacobbrewer1/f1-data/pkg/services/importer"
-	"github.com/Jacobbrewer1/f1-data/pkg/vault"
+	"github.com/Jacobbrewer1/vaulty"
+	"github.com/Jacobbrewer1/vaulty/repositories"
 	"github.com/google/subcommands"
 	"github.com/spf13/viper"
 )
@@ -84,38 +84,46 @@ func (i *importCmd) setup(ctx context.Context, v *viper.Viper) (db *repositories
 		return nil, errors.New("vault configuration not found")
 	}
 
-	vaultDb := &repositories.VaultDB{
-		Client:         nil,
-		Vip:            v,
-		Enabled:        false,
-		CurrentSecrets: nil,
-	}
-
 	slog.Info("Vault configuration found, attempting to connect")
-	vaultDb.Enabled = true
 
-	vc, err := vault.NewClientUserPass(v)
+	vc, err := vaulty.NewClient(
+		vaulty.WithContext(ctx),
+		vaulty.WithGeneratedVaultClient(v.GetString("vault.address")),
+		vaulty.WithUserPassAuth(
+			v.GetString("vault.auth.username"),
+			v.GetString("vault.auth.password"),
+		),
+		vaulty.WithKvv2Mount(v.GetString("vault.kvv2_mount")),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("error creating vault client: %w", err)
 	}
 
-	vaultDb.Client = vc
-
 	slog.Debug("Vault client created")
 
 	vs, err := vc.GetSecret(ctx, v.GetString("vault.database.path"))
-	if errors.Is(err, vault.ErrSecretNotFound) {
+	if errors.Is(err, vaulty.ErrSecretNotFound) {
 		return nil, fmt.Errorf("secrets not found in vault: %s", v.GetString("vault.database.path"))
 	} else if err != nil {
 		return nil, fmt.Errorf("error getting secrets from vault: %w", err)
 	}
 
-	slog.Debug("Vault secrets retrieved")
-	vaultDb.CurrentSecrets = vs
-	db, err = repositories.ConnectDB(ctx, vaultDb)
+	dbConnector, err := repositories.NewDatabaseConnector(
+		repositories.WithContext(ctx),
+		repositories.WithVaultClient(vc),
+		repositories.WithCurrentSecrets(vs),
+		repositories.WithViper(v),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error creating database connector: %w", err)
+	}
+
+	db, err = dbConnector.ConnectDB()
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to database: %w", err)
 	}
+
+	slog.Debug("Vault secrets retrieved")
 
 	slog.Info("Database connection generate from vault secrets")
 

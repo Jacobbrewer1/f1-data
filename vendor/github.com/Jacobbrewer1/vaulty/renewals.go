@@ -1,4 +1,4 @@
-package vault
+package vaulty
 
 import (
 	"context"
@@ -6,8 +6,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/Jacobbrewer1/f1-data/pkg/logging"
-	vault "github.com/hashicorp/vault/api"
+	hashiVault "github.com/hashicorp/vault/api"
 )
 
 // renewResult is a bitmask which could contain one or more of the values below
@@ -34,7 +33,7 @@ const (
 // this which are outside the scope of this code sample.
 //
 // ref: https://www.vaultproject.io/docs/enterprise/consistency#vault-1-7-mitigations
-func RenewLease(ctx context.Context, client Client, name string, credentials *vault.Secret, renewFunc RenewalFunc) error {
+func RenewLease(ctx context.Context, client ClientHandler, name string, credentials *hashiVault.Secret, renewFunc RenewalFunc) error {
 	slog.Debug("renewing lease", slog.String("secret", name))
 
 	currentCreds := credentials
@@ -52,7 +51,7 @@ func RenewLease(ctx context.Context, client Client, name string, credentials *va
 		err = handleWatcherResult(res, func() {
 			newCreds, err := renewFunc()
 			if err != nil {
-				slog.Error("unable to renew credentials", slog.String(logging.KeyError, err.Error()))
+				slog.Error("unable to renew credentials", slog.String(loggingKeyError, err.Error()))
 				os.Exit(1) // Forces new credentials to be fetched
 			}
 
@@ -66,8 +65,8 @@ func RenewLease(ctx context.Context, client Client, name string, credentials *va
 	}
 }
 
-func leaseRenew(ctx context.Context, client Client, name string, credentials *vault.Secret) (renewResult, error) {
-	credentialsWatcher, err := client.Client().NewLifetimeWatcher(&vault.LifetimeWatcherInput{
+func leaseRenew(ctx context.Context, client ClientHandler, name string, credentials *hashiVault.Secret) (renewResult, error) {
+	credentialsWatcher, err := client.Client().NewLifetimeWatcher(&hashiVault.LifetimeWatcherInput{
 		Secret:    credentials,
 		Increment: 3600,
 	})
