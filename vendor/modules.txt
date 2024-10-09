@@ -282,7 +282,7 @@ github.com/subosito/gotenv
 # github.com/temoto/robotstxt v1.1.1
 ## explicit; go 1.11
 github.com/temoto/robotstxt
-# github.com/vektra/mockery/v2 v2.46.1
+# github.com/vektra/mockery/v2 v2.46.2
 ## explicit; go 1.23
 github.com/vektra/mockery/v2
 github.com/vektra/mockery/v2/cmd
