@@ -55,8 +55,8 @@ func (s *service) GetDriversChampionship(w http.ResponseWriter, r *http.Request,
 	}
 
 	resp := &api.DriverChampionshipResponse{
-		Drivers: &respArray,
-		Total:   utils.Ptr(driversChampionship.Total),
+		Drivers: respArray,
+		Total:   driversChampionship.Total,
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
@@ -145,8 +145,8 @@ func (s *service) GetDrivers(w http.ResponseWriter, r *http.Request, params api.
 	}
 
 	resp := &api.DriverResponse{
-		Drivers: &respArray,
-		Total:   utils.Ptr(drivers.Total),
+		Drivers: respArray,
+		Total:   drivers.Total,
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)

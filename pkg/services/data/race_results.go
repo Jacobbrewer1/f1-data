@@ -61,8 +61,8 @@ func (s *service) GetRaceResults(w http.ResponseWriter, r *http.Request, raceId 
 	}
 
 	resp := &api.RaceResultResponse{
-		Results: &respArray,
-		Total:   utils.Ptr(raceResults.Total),
+		Results: respArray,
+		Total:   raceResults.Total,
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
