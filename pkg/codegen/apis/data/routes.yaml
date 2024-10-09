@@ -328,6 +328,9 @@ components:
   schemas:
     season_response:
       type: object
+      required:
+        - seasons
+        - total
       properties:
         seasons:
           type: array
@@ -349,6 +352,9 @@ components:
 
     race_response:
       type: object
+      required:
+        - races
+        - total
       properties:
         races:
           type: array
@@ -372,6 +378,9 @@ components:
 
     race_result_response:
       type: object
+      required:
+        - results
+        - total
       properties:
         results:
           type: array
@@ -408,6 +417,9 @@ components:
 
     driver_championship_response:
       type: object
+      required:
+        - drivers
+        - total
       properties:
         drivers:
           type: array
@@ -439,6 +451,9 @@ components:
 
     driver_response:
       type: object
+      required:
+        - drivers
+        - total
       properties:
         drivers:
           type: array
@@ -460,6 +475,9 @@ components:
 
     constructor_championship_response:
       type: object
+      required:
+        - constructors
+        - total
       properties:
         constructors:
           type: array

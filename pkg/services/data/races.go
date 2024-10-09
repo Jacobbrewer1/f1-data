@@ -56,8 +56,8 @@ func (s *service) GetSeasonRaces(w http.ResponseWriter, r *http.Request, year ap
 	}
 
 	resp := &api.RaceResponse{
-		Races: &respArray,
-		Total: utils.Ptr(seasonRaces.Total),
+		Races: respArray,
+		Total: seasonRaces.Total,
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)

@@ -18,8 +18,8 @@ type ConstructorChampionship struct {
 
 // ConstructorChampionshipResponse defines the model for constructor_championship_response.
 type ConstructorChampionshipResponse struct {
-	Constructors *[]ConstructorChampionship `json:"constructors,omitempty"`
-	Total        *int64                     `json:"total,omitempty"`
+	Constructors []ConstructorChampionship `json:"constructors"`
+	Total        int64                     `json:"total"`
 }
 
 // Driver defines the model for driver.
@@ -42,14 +42,14 @@ type DriverChampionship struct {
 
 // DriverChampionshipResponse defines the model for driver_championship_response.
 type DriverChampionshipResponse struct {
-	Drivers *[]DriverChampionship `json:"drivers,omitempty"`
-	Total   *int64                `json:"total,omitempty"`
+	Drivers []DriverChampionship `json:"drivers"`
+	Total   int64                `json:"total"`
 }
 
 // DriverResponse defines the model for driver_response.
 type DriverResponse struct {
-	Drivers *[]Driver `json:"drivers,omitempty"`
-	Total   *int64    `json:"total,omitempty"`
+	Drivers []Driver `json:"drivers"`
+	Total   int64    `json:"total"`
 }
 
 // Race defines the model for race.
@@ -61,8 +61,8 @@ type Race struct {
 
 // RaceResponse defines the model for race_response.
 type RaceResponse struct {
-	Races *[]Race `json:"races,omitempty"`
-	Total *int64  `json:"total,omitempty"`
+	Races []Race `json:"races"`
+	Total int64  `json:"total"`
 }
 
 // RaceResult defines the model for race_result.
@@ -80,8 +80,8 @@ type RaceResult struct {
 
 // RaceResultResponse defines the model for race_result_response.
 type RaceResultResponse struct {
-	Results *[]RaceResult `json:"results,omitempty"`
-	Total   *int64        `json:"total,omitempty"`
+	Results []RaceResult `json:"results"`
+	Total   int64        `json:"total"`
 }
 
 // Season defines the model for season.
@@ -92,8 +92,8 @@ type Season struct {
 
 // SeasonResponse defines the model for season_response.
 type SeasonResponse struct {
-	Seasons *[]Season `json:"seasons,omitempty"`
-	Total   *int64    `json:"total,omitempty"`
+	Seasons []Season `json:"seasons"`
+	Total   int64    `json:"total"`
 }
 
 // PathRaceId defines the model for path_race_id.
