@@ -55,8 +55,8 @@ func (s *service) GetConstructorsChampionship(w http.ResponseWriter, r *http.Req
 	}
 
 	resp := &api.ConstructorChampionshipResponse{
-		Constructors: &respArray,
-		Total:        utils.Ptr(constructorChampionship.Total),
+		Constructors: respArray,
+		Total:        constructorChampionship.Total,
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
