@@ -463,6 +463,8 @@ components:
       properties:
         constructors:
           type: array
+          minItems: 0
+          nullable: false
           items:
             $ref: '#/components/schemas/constructor_championship'
         total:
