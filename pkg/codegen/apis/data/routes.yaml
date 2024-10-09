@@ -460,11 +460,10 @@ components:
 
     constructor_championship_response:
       type: object
+      required: ['constructors']
       properties:
         constructors:
           type: array
-          minItems: 0
-          nullable: false
           items:
             $ref: '#/components/schemas/constructor_championship'
         total:
