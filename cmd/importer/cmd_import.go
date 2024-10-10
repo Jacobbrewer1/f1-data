@@ -101,7 +101,7 @@ func (i *importCmd) setup(ctx context.Context, v *viper.Viper) (db *repositories
 
 	slog.Debug("Vault client created")
 
-	vs, err := vc.GetSecret(ctx, v.GetString("vault.database.path"))
+	vs, err := vc.Path(v.GetString("vault.database.role"), vaulty.WithPrefix(v.GetString("vault.database.path"))).GetSecret(ctx)
 	if errors.Is(err, vaulty.ErrSecretNotFound) {
 		return nil, fmt.Errorf("secrets not found in vault: %s", v.GetString("vault.database.path"))
 	} else if err != nil {

@@ -2,7 +2,6 @@ package vaulty
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -22,17 +21,8 @@ type ClientHandler interface {
 type Client interface {
 	ClientHandler
 
-	// GetKvSecretV2 returns a map of secrets for the given path.
-	GetKvSecretV2(ctx context.Context, name string) (*hashiVault.KVSecret, error)
-
-	// GetSecret returns a map of secrets for the given path.
-	GetSecret(ctx context.Context, path string) (*hashiVault.Secret, error)
-
-	// TransitEncrypt encrypts the given data.
-	TransitEncrypt(ctx context.Context, data string) (*hashiVault.Secret, error)
-
-	// TransitDecrypt decrypts the given data.
-	TransitDecrypt(ctx context.Context, data string) (string, error)
+	// Path returns the secret path for the given name.
+	Path(name string, opts ...PathOption) Repository
 }
 
 type (
@@ -105,54 +95,16 @@ func (c *client) Client() *hashiVault.Client {
 	return c.v
 }
 
-func (c *client) GetKvSecretV2(ctx context.Context, name string) (*hashiVault.KVSecret, error) {
-	secret, err := c.v.KVv2(c.kvv2Mount).Get(ctx, name)
-	if err != nil {
-		return nil, fmt.Errorf("unable to read secret: %w", err)
-	} else if secret == nil {
-		return nil, ErrSecretNotFound
-	}
-	return secret, nil
-}
-
-func (c *client) GetSecret(ctx context.Context, path string) (*hashiVault.Secret, error) {
-	secret, err := c.v.Logical().ReadWithContext(ctx, path)
-	if err != nil {
-		return nil, fmt.Errorf("unable to read secrets: %w", err)
-	} else if secret == nil {
-		return nil, ErrSecretNotFound
-	}
-	return secret, nil
-}
-
-func (c *client) TransitEncrypt(ctx context.Context, data string) (*hashiVault.Secret, error) {
-	plaintext := base64.StdEncoding.EncodeToString([]byte(data))
-
-	// Encrypt the data using the transit engine
-	encryptData, err := c.v.Logical().WriteWithContext(ctx, c.transitPathEncrypt, map[string]any{
-		"plaintext": plaintext,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("unable to encrypt data: %w", err)
+func (c *client) Path(name string, opts ...PathOption) Repository {
+	p := &SecretPath{
+		r:     c,
+		mount: c.kvv2Mount, // Default to kvv2
+		name:  name,
 	}
 
-	return encryptData, nil
-}
-
-func (c *client) TransitDecrypt(ctx context.Context, data string) (string, error) {
-	// Decrypt the data using the transit engine
-	decryptData, err := c.v.Logical().WriteWithContext(ctx, c.transitPathDecrypt, map[string]any{
-		"ciphertext": data,
-	})
-	if err != nil {
-		return "", fmt.Errorf("unable to decrypt data: %w", err)
+	for _, opt := range opts {
+		opt(p)
 	}
 
-	// Decode the base64 encoded data
-	decodedData, err := base64.StdEncoding.DecodeString(decryptData.Data["plaintext"].(string))
-	if err != nil {
-		return "", fmt.Errorf("unable to decode data: %w", err)
-	}
-
-	return string(decodedData), nil
+	return p
 }
