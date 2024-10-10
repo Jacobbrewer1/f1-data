@@ -6,26 +6,12 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/Jacobbrewer1/f1-data/pkg/models"
 	"github.com/jmoiron/sqlx"
-)
-
-const (
-	defaultPageLimit = 100
-	maxLimit         = 20000
-
-	orderAsc  = "asc"
-	orderDesc = "desc"
-
-	sqlComparatorAsc  = "ASC"
-	sqlComparatorDesc = "DESC"
-	sqlOperatorAsc    = ">"
-	sqlOperatorDesc   = "<"
 )
 
 // Paginator is the struct that provides the paging.
 type Paginator struct {
-	db      models.DB
+	db      DB
 	idKey   string
 	table   string
 	filter  Filter
@@ -33,7 +19,7 @@ type Paginator struct {
 }
 
 // NewPaginator creates a new paginator
-func NewPaginator(db models.DB, table, idk string, f Filter) *Paginator {
+func NewPaginator(db DB, table, idk string, f Filter) *Paginator {
 	if f == nil {
 		f = NewMultiFilter()
 	}
@@ -66,10 +52,10 @@ func DetailsFromRequest(req *http.Request) (*PaginatorDetails, error) {
 
 	return &PaginatorDetails{
 		Limit:   limit,
-		LastVal: q.Get("last_val"),
-		LastID:  q.Get("last_id"),
-		SortBy:  q.Get("sort_by"),
-		SortDir: q.Get("sort_dir"),
+		LastVal: q.Get(QueryLastVal),
+		LastID:  q.Get(QueryLastID),
+		SortBy:  q.Get(QuerySortBy),
+		SortDir: q.Get(QuerySortDir),
 	}, nil
 }
 
@@ -123,18 +109,43 @@ func (p *Paginator) First() (string, error) {
 
 	// Be aware of SQL injection if modifying the below SQL. Any parameters in the sprintf
 	// MUST not be allowed to be created by external input.
-	sql := fmt.Sprintf(`
-		SELECT t.%s
-		FROM %s t
-		%s
-		WHERE 1
-		%s
-		%s
-		ORDER BY t.%s %s, t.%s ASC
-		LIMIT 1`, p.details.SortBy, p.table, jSQL, wSQL, gSQL, p.details.SortBy, p.details.sortComparator, p.idKey)
-	args := append(jArgs, wArgs...)
+	sqlBuilder := new(strings.Builder)
+	sqlBuilder.WriteString("SELECT t.")
+	sqlBuilder.WriteString(p.details.SortBy)
+	sqlBuilder.WriteString(" \n")
+	sqlBuilder.WriteString("FROM ")
+	sqlBuilder.WriteString(p.table)
+	sqlBuilder.WriteString(" t \n")
 
+	if jSQL != "" {
+		sqlBuilder.WriteString(jSQL)
+		sqlBuilder.WriteString(" \n")
+	}
+
+	sqlBuilder.WriteString("WHERE (1 = 1) \n")
+	if wSQL != "" {
+		sqlBuilder.WriteString("AND (\n")
+		sqlBuilder.WriteString(trimWherePrefix(wSQL))
+		sqlBuilder.WriteString("\n)\n")
+	}
+
+	if gSQL != "" {
+		sqlBuilder.WriteString(gSQL)
+		sqlBuilder.WriteString(" \n")
+	}
+
+	sqlBuilder.WriteString("ORDER BY t.")
+	sqlBuilder.WriteString(p.details.SortBy)
+	sqlBuilder.WriteString(" ")
+	sqlBuilder.WriteString(p.details.sortComparator)
+	sqlBuilder.WriteString(", t.")
+	sqlBuilder.WriteString(p.idKey)
+	sqlBuilder.WriteString(" ASC \n")
+	sqlBuilder.WriteString("LIMIT 1")
+
+	args := append(jArgs, wArgs...)
 	var err error
+	sql := sqlBuilder.String()
 	sql, args, err = sqlx.In(sql, args...)
 	if err != nil {
 		return "", fmt.Errorf("first sql in: %w", err)
@@ -165,18 +176,42 @@ func (p *Paginator) Pivot() (string, error) {
 
 	// Be aware of SQL injection if modifying the below SQL. Any parameters in the sprintf
 	// MUST not be allowed to be created by external input.
-	sql := fmt.Sprintf(`
-		SELECT t.%s
-		FROM %s t
-		%s
-		WHERE (t.%s = ? AND t.%s >= ?)
-		%s
-		%s
-		LIMIT 1
-	`, p.details.SortBy, p.table, jSQL, p.details.SortBy, p.idKey, wSQL, gSQL)
+	sqlBuilder := new(strings.Builder)
+	sqlBuilder.WriteString("SELECT t.")
+	sqlBuilder.WriteString(p.details.SortBy)
+	sqlBuilder.WriteString(" \n")
+	sqlBuilder.WriteString("FROM ")
+	sqlBuilder.WriteString(p.table)
+	sqlBuilder.WriteString(" t \n")
+
+	if jSQL != "" {
+		sqlBuilder.WriteString(jSQL)
+		sqlBuilder.WriteString(" \n")
+	}
+
+	sqlBuilder.WriteString("WHERE (t.")
+	sqlBuilder.WriteString(p.details.SortBy)
+	sqlBuilder.WriteString(" = ? AND t.")
+	sqlBuilder.WriteString(p.idKey)
+	sqlBuilder.WriteString(" >= ?) \n")
+
+	if wSQL != "" {
+		sqlBuilder.WriteString("AND (\n")
+		sqlBuilder.WriteString(trimWherePrefix(wSQL))
+		sqlBuilder.WriteString("\n)\n")
+	}
+
+	if gSQL != "" {
+		sqlBuilder.WriteString(gSQL)
+		sqlBuilder.WriteString(" \n")
+	}
+
+	sqlBuilder.WriteString("LIMIT 1")
+
 	args := append(jArgs, p.details.LastVal, p.details.LastID)
 	args = append(args, wArgs...)
 
+	sql := sqlBuilder.String()
 	var err error
 	sql, args, err = sqlx.In(sql, args...)
 	if err != nil {
@@ -246,20 +281,57 @@ func (p *Paginator) Retrieve(pivot string, dest interface{}) error {
 
 	// Be aware of SQL injection if modifying the below SQL. Any parameters in the sprintf
 	// MUST not be allowed to be created by external input.
-	sql := fmt.Sprintf(`
-		SELECT %s
-		FROM %s t
-		%s
-		WHERE (t.%s %s ? OR (t.%s = ? AND t.%s > ?))
-		%s
-		%s
-		ORDER BY t.%s %s, t.%s ASC
-		LIMIT ?
-	`, cols.String(), p.table, jSQL, p.details.SortBy, p.details.sortOperator, p.details.SortBy, p.idKey, wSQL, gSQL, p.details.SortBy, p.details.sortComparator, p.idKey)
+	sqlBuilder := new(strings.Builder)
+	sqlBuilder.WriteString("SELECT ")
+	sqlBuilder.WriteString(cols.String())
+	sqlBuilder.WriteString(" \n")
+	sqlBuilder.WriteString("FROM ")
+	sqlBuilder.WriteString(p.table)
+	sqlBuilder.WriteString(" t \n")
+
+	if jSQL != "" {
+		sqlBuilder.WriteString(jSQL)
+		sqlBuilder.WriteString(" \n")
+	}
+
+	sqlBuilder.WriteString("WHERE (t.")
+	sqlBuilder.WriteString(p.details.SortBy)
+	sqlBuilder.WriteString(" ")
+	sqlBuilder.WriteString(p.details.sortOperator)
+	sqlBuilder.WriteString(" ? OR (t.")
+	sqlBuilder.WriteString(p.details.SortBy)
+	sqlBuilder.WriteString(" = ? AND t.")
+	sqlBuilder.WriteString(p.idKey)
+	sqlBuilder.WriteString(" > ?)) \n")
+
+	if wSQL != "" {
+		sqlBuilder.WriteString("AND (\n")
+		sqlBuilder.WriteString(trimWherePrefix(wSQL))
+		sqlBuilder.WriteString("\n)\n")
+	}
+
+	if gSQL != "" {
+		sqlBuilder.WriteString(gSQL)
+		sqlBuilder.WriteString(" \n")
+	}
+
+	sqlBuilder.WriteString("ORDER BY t.")
+	sqlBuilder.WriteString(p.details.SortBy)
+	sqlBuilder.WriteString(" ")
+	sqlBuilder.WriteString(p.details.sortComparator)
+	sqlBuilder.WriteString(", t.")
+	sqlBuilder.WriteString(p.idKey)
+	sqlBuilder.WriteString(" ASC \n")
+
 	args := append(jArgs, pivot, pivot, p.details.LastID)
 	args = append(args, wArgs...)
-	args = append(args, p.details.Limit)
 
+	if p.details.Limit > 0 {
+		sqlBuilder.WriteString("LIMIT ?")
+		args = append(args, p.details.Limit)
+	}
+
+	sql := sqlBuilder.String()
 	var err error
 	sql, args, err = sqlx.In(sql, args...)
 	if err != nil {
@@ -286,17 +358,33 @@ func (p *Paginator) Counts(dest *int64) error {
 
 	// Be aware of SQL injection if modifying the below SQL. Any parameters in the sprintf
 	// MUST not be allowed to be created by external input.
-	sql := fmt.Sprintf(`
-		SELECT COUNT(*)
-		FROM %s t
-		%s
-		WHERE (1=1)
-		%s
-		%s
-	`, p.table, jSQL, wSQL, gSQL)
-	args := jArgs
-	args = append(args, wArgs...)
+	sqlBuilder := new(strings.Builder)
+	sqlBuilder.WriteString("SELECT COUNT(*) \n")
+	sqlBuilder.WriteString("FROM ")
+	sqlBuilder.WriteString(p.table)
+	sqlBuilder.WriteString(" t \n")
 
+	if jSQL != "" {
+		sqlBuilder.WriteString(jSQL)
+		sqlBuilder.WriteString(" \n")
+	}
+
+	sqlBuilder.WriteString("WHERE (1=1) \n")
+
+	if wSQL != "" {
+		sqlBuilder.WriteString("AND (\n")
+		sqlBuilder.WriteString(trimWherePrefix(wSQL))
+		sqlBuilder.WriteString("\n)\n")
+	}
+
+	if gSQL != "" {
+		sqlBuilder.WriteString(gSQL)
+		sqlBuilder.WriteString(" \n")
+	}
+
+	sql := sqlBuilder.String()
+
+	args := append(jArgs, wArgs...)
 	var err error
 	sql, args, err = sqlx.In(sql, args...)
 	if err != nil {
@@ -309,4 +397,12 @@ func (p *Paginator) Counts(dest *int64) error {
 	}
 
 	return nil
+}
+
+func trimWherePrefix(w string) string {
+	if strings.HasPrefix(w, string(WhereTypeAnd)) || strings.HasPrefix(w, string(WhereTypeOr)) {
+		w = strings.TrimPrefix(w, string(WhereTypeAnd))
+		w = strings.TrimPrefix(w, string(WhereTypeOr))
+	}
+	return strings.TrimSpace(w)
 }

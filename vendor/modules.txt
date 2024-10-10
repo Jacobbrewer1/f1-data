@@ -2,6 +2,10 @@
 ## explicit; go 1.20
 filippo.io/edwards25519
 filippo.io/edwards25519/field
+# github.com/Jacobbrewer1/pagefilter v0.1.1
+## explicit; go 1.23
+github.com/Jacobbrewer1/pagefilter
+github.com/Jacobbrewer1/pagefilter/common
 # github.com/Jacobbrewer1/vaulty v0.1.2
 ## explicit; go 1.23
 github.com/Jacobbrewer1/vaulty

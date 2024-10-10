@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strconv"
 
-	baseapi "github.com/Jacobbrewer1/f1-data/pkg/codegen/apis/common"
+	"github.com/Jacobbrewer1/pagefilter/common"
 )
 
 var (
@@ -43,11 +43,11 @@ func getLimit(q url.Values) (limit int, err error) {
 // GetPaginatorDetails loads paginator details from a request. Requests have each pagination detail determined
 // separately by codegen.
 func GetPaginatorDetails(
-	limit *baseapi.LimitParam,
-	lastVal *baseapi.LastValue,
-	lastID *baseapi.LastId,
-	sortBy *baseapi.SortBy,
-	sortDir *baseapi.SortDirection,
+	limit *common.LimitParam,
+	lastVal *common.LastValue,
+	lastID *common.LastId,
+	sortBy *common.SortBy,
+	sortDir *common.SortDirection,
 ) *PaginatorDetails {
 	d := new(PaginatorDetails)
 
@@ -78,6 +78,7 @@ func GetPaginatorDetails(
 	return d
 }
 
+// RemoveLimit removes the limit from the paginator details.
 func (p *PaginatorDetails) RemoveLimit() {
 	p.Limit = -1
 }

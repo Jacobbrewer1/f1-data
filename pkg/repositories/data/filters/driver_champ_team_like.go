@@ -12,5 +12,5 @@ func NewDriverChampTeamLike(teamLike string) *DriverChampTeamLike {
 
 // Where creates the where query.
 func (s *DriverChampTeamLike) Where() (string, []interface{}) {
-	return `AND t.team LIKE ?`, []interface{}{"%" + s.tl + "%"}
+	return `t.team LIKE ?`, []interface{}{"%" + s.tl + "%"}
 }

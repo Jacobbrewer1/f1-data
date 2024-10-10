@@ -11,5 +11,5 @@ func NewSeasonYearMax(yearMax int) *SeasonYearMax {
 
 // Where creates the where query.
 func (s *SeasonYearMax) Where() (string, []interface{}) {
-	return `AND t.year <= ?`, []interface{}{s.ym}
+	return `t.year <= ?`, []interface{}{s.ym}
 }
