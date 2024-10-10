@@ -120,7 +120,7 @@ func (s *serveCmd) setup(ctx context.Context, r *mux.Router) (err error) {
 
 	slog.Debug("Vault client created")
 
-	vs, err := vc.GetSecret(ctx, v.GetString("vault.database.path"))
+	vs, err := vc.Path(v.GetString("vault.database.role"), vaulty.WithPrefix(v.GetString("vault.database.path"))).GetSecret(ctx)
 	if errors.Is(err, vaulty.ErrSecretNotFound) {
 		return fmt.Errorf("secrets not found in vault: %s", v.GetString("vault.database.path"))
 	} else if err != nil {
