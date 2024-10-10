@@ -14,5 +14,5 @@ func NewRaceResultRaceID(raceID int) *RaceResultRaceID {
 
 // Where returns the where clause for the filter.
 func (r *RaceResultRaceID) Where() (string, []interface{}) {
-	return `AND t.race_id = ?`, []interface{}{r.raceID}
+	return `t.race_id = ?`, []interface{}{r.raceID}
 }

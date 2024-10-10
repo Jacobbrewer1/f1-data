@@ -9,10 +9,10 @@ import (
 	api "github.com/Jacobbrewer1/f1-data/pkg/codegen/apis/data"
 	"github.com/Jacobbrewer1/f1-data/pkg/logging"
 	"github.com/Jacobbrewer1/f1-data/pkg/models"
-	"github.com/Jacobbrewer1/f1-data/pkg/pagefilter"
 	repo "github.com/Jacobbrewer1/f1-data/pkg/repositories/data"
 	"github.com/Jacobbrewer1/f1-data/pkg/utils"
 	uhttp "github.com/Jacobbrewer1/f1-data/pkg/utils/http"
+	"github.com/Jacobbrewer1/pagefilter"
 )
 
 func (s *service) GetConstructorsChampionship(w http.ResponseWriter, r *http.Request, year api.PathYear, params api.GetConstructorsChampionshipParams) {

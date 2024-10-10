@@ -21,5 +21,5 @@ func (r *RaceResultSeasonYear) Join() (string, []interface{}) {
 
 // Where returns the where clause for the filter.
 func (r *RaceResultSeasonYear) Where() (string, []interface{}) {
-	return `AND s.year = ?`, []interface{}{r.y}
+	return `s.year = ?`, []interface{}{r.y}
 }

@@ -11,5 +11,5 @@ func NewSeasonYearMin(yearMin int) *SeasonYearMin {
 
 // Where creates the where query.
 func (s *SeasonYearMin) Where() (string, []interface{}) {
-	return `AND t.year >= ?`, []interface{}{s.ym}
+	return `t.year >= ?`, []interface{}{s.ym}
 }

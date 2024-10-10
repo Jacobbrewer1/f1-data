@@ -11,5 +11,5 @@ func NewSeasonYear(year int) *SeasonYear {
 
 // Where creates the where query.
 func (s *SeasonYear) Where() (string, []interface{}) {
-	return `AND t.year = ?`, []interface{}{s.y}
+	return `t.year = ?`, []interface{}{s.y}
 }

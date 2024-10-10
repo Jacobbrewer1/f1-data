@@ -12,5 +12,5 @@ func NewDriverChampTagLike(tagLike string) *DriverChampTagLike {
 
 // Where creates the where query.
 func (s *DriverChampTagLike) Where() (string, []interface{}) {
-	return `AND t.driver_tag LIKE ?`, []interface{}{"%" + s.t + "%"}
+	return `t.driver_tag LIKE ?`, []interface{}{"%" + s.t + "%"}
 }

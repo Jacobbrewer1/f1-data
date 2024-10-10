@@ -1,0 +1,67 @@
+openapi: 3.0.0
+components:
+  parameters:
+    limit_param:
+      name: limit
+      in: query
+      description: Report type
+      schema:
+        type: string
+    last_value:
+      name: last_val
+      in: query
+      description: Pagination details, last value of the sort column on the previous page.
+      schema:
+        type: string
+    last_id:
+      name: last_id
+      in: query
+      description: Pagination details, last value of the id column on the previous page.
+      schema:
+        type: string
+    sort_by:
+      name: sort_by
+      in: query
+      description: Pagination details, sort column, if empty uses the id column.
+      schema:
+        type: string
+        example: modified_at
+    sort_direction:
+      name: sort_dir
+      in: query
+      description: Pagination details, sorting order.
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: asc
+    from_date:
+      name: from_date
+      in: query
+      description: Filter by date, from date.
+      schema:
+        type: string
+        format: date
+    since:
+      name: since
+      in: query
+      description: Filter by the duration, since the current date. (E.g. 1d, 1w, 1m, 1y)
+      schema:
+        type: string
+  schemas:
+    message:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Example message'
+    error_message:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Example error message'
+        error:
+          type: string
+          example: 'Example error'

@@ -18,5 +18,5 @@ func (s *RaceYear) Join() (string, []interface{}) {
 
 // Where creates the where query.
 func (s *RaceYear) Where() (string, []interface{}) {
-	return `AND s.year = ?`, []interface{}{s.ry}
+	return `s.year = ?`, []interface{}{s.ry}
 }

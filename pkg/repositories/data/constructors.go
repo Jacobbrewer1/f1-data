@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/Jacobbrewer1/f1-data/pkg/models"
-	"github.com/Jacobbrewer1/f1-data/pkg/pagefilter"
 	repoFilter "github.com/Jacobbrewer1/f1-data/pkg/repositories/data/filters"
+	"github.com/Jacobbrewer1/pagefilter"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

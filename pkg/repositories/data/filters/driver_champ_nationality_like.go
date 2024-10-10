@@ -12,5 +12,5 @@ func NewDriverChampNationalityLike(nationalityLike string) *DriverChampNationali
 
 // Where creates the where query.
 func (s *DriverChampNationalityLike) Where() (string, []interface{}) {
-	return `AND t.nationality LIKE ?`, []interface{}{"%" + s.nl + "%"}
+	return `t.nationality LIKE ?`, []interface{}{"%" + s.nl + "%"}
 }

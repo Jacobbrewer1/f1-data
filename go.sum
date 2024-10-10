@@ -4,6 +4,8 @@ filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DATA-DOG/go-sqlmock v1.5.2 h1:OcvFkGmslmlZibjAjaHm3L//6LiuBgolP7OputlJIzU=
 github.com/DATA-DOG/go-sqlmock v1.5.2/go.mod h1:88MAG/4G7SMwSE3CeA0ZKzrT5CiOU3OJ+JlNzwDqpNU=
+github.com/Jacobbrewer1/pagefilter v0.1.1 h1:w2eu2OaWbdq1RNaEtKRs6SzjHRWYXmQeWPQ3Hhe6zuI=
+github.com/Jacobbrewer1/pagefilter v0.1.1/go.mod h1:BRAt3gMwk5xhGK4/b9lkWYuIhBqSsdgYF130XNg/Rwk=
 github.com/Jacobbrewer1/vaulty v0.1.2 h1:ys3q0SRhzBWqQGt9rjSmQG6f9nqEwWoWgYkwBNiNYGk=
 github.com/Jacobbrewer1/vaulty v0.1.2/go.mod h1:/bHJ9C6tp+2J3cqD6FHv0Uzibu+q8kLTuKjx3B7twdw=
 github.com/PuerkitoBio/goquery v1.5.1 h1:PSPBGne8NIUWw+/7vFBV+kG2J/5MOjbzc7154OaKCSE=
