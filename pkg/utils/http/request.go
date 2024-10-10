@@ -2,7 +2,11 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -41,4 +45,41 @@ func RequestIDFromContext(ctx context.Context) string {
 		return ""
 	}
 	return v
+}
+
+func GenerateOrCopyRequestIDMux() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			newCtx := GenerateOrCopyRequestID(r.Context(), r)
+			r = r.WithContext(newCtx)
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func GenerateOrCopyRequestID(ctx context.Context, r *http.Request) context.Context {
+	if requestID := r.Header.Get(requestIDHeader); requestID != "" {
+		return RequestIDRawToContext(ctx, requestID)
+	}
+
+	return GenerateRequestIDToContext(r)
+}
+
+// RequestIDRawToContext copies the provided request ID into the provided context.
+func RequestIDRawToContext(ctx context.Context, requestID string) context.Context {
+	return context.WithValue(ctx, requestIDHeaderKey, requestID)
+}
+
+// GenerateRequestIDToContext generates a new request ID and copies it into the provided context.
+func GenerateRequestIDToContext(r *http.Request) context.Context {
+	return RequestIDRawToContext(r.Context(), generateRequestID(r))
+}
+
+// generateRequestID Generate a new request ID based on the request contents and the source IP.
+func generateRequestID(r *http.Request) string {
+	str := r.Method + r.URL.Path + r.RemoteAddr
+	str += r.Header.Get("User-Agent")
+	str += fmt.Sprintf("%d", time.Now().Unix())
+
+	return uuid.NewSHA1(uuid.New(), []byte(str)).String()
 }
