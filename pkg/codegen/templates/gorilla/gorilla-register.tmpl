@@ -34,7 +34,7 @@ func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOpti
     }
 
     router.Use(uhttp.AuthHeaderToContextMux())
-    router.Use(uhttp.RequestIDToContextMux())
+    router.Use(uhttp.GenerateOrCopyRequestIDMux())
 
 {{ range . }}
     {{- $authed := .Spec.Security }}
@@ -60,7 +60,7 @@ func RegisterUnauthedHandlers(router *mux.Router, si ServerInterface, opts ...Se
     }
 
     router.Use(uhttp.AuthHeaderToContextMux())
-    router.Use(uhttp.RequestIDToContextMux())
+    router.Use(uhttp.GenerateOrCopyRequestIDMux())
 
     // We do not have a gateway preparer here as no auth is sent.
     {{ range . }}

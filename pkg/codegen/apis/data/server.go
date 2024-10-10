@@ -82,6 +82,7 @@ type ServerOption func(s *ServerInterfaceWrapper)
 func (siw *ServerInterfaceWrapper) GetConstructorsChampionship(w http.ResponseWriter, r *http.Request) {
 	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
+	cw.Header().Set("X-Request-ID", uhttp.RequestIDFromContext(ctx))
 
 	defer func() {
 		if siw.metricsMiddleware != nil {
@@ -162,6 +163,7 @@ func (siw *ServerInterfaceWrapper) GetConstructorsChampionship(w http.ResponseWr
 func (siw *ServerInterfaceWrapper) GetDriversChampionship(w http.ResponseWriter, r *http.Request) {
 	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
+	cw.Header().Set("X-Request-ID", uhttp.RequestIDFromContext(ctx))
 
 	defer func() {
 		if siw.metricsMiddleware != nil {
@@ -258,6 +260,7 @@ func (siw *ServerInterfaceWrapper) GetDriversChampionship(w http.ResponseWriter,
 func (siw *ServerInterfaceWrapper) GetDrivers(w http.ResponseWriter, r *http.Request) {
 	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
+	cw.Header().Set("X-Request-ID", uhttp.RequestIDFromContext(ctx))
 
 	defer func() {
 		if siw.metricsMiddleware != nil {
@@ -353,6 +356,7 @@ func (siw *ServerInterfaceWrapper) GetDrivers(w http.ResponseWriter, r *http.Req
 func (siw *ServerInterfaceWrapper) GetRaceResults(w http.ResponseWriter, r *http.Request) {
 	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
+	cw.Header().Set("X-Request-ID", uhttp.RequestIDFromContext(ctx))
 
 	defer func() {
 		if siw.metricsMiddleware != nil {
@@ -425,6 +429,7 @@ func (siw *ServerInterfaceWrapper) GetRaceResults(w http.ResponseWriter, r *http
 func (siw *ServerInterfaceWrapper) GetSeasons(w http.ResponseWriter, r *http.Request) {
 	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
+	cw.Header().Set("X-Request-ID", uhttp.RequestIDFromContext(ctx))
 
 	defer func() {
 		if siw.metricsMiddleware != nil {
@@ -512,6 +517,7 @@ func (siw *ServerInterfaceWrapper) GetSeasons(w http.ResponseWriter, r *http.Req
 func (siw *ServerInterfaceWrapper) GetSeasonRaces(w http.ResponseWriter, r *http.Request) {
 	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
+	cw.Header().Set("X-Request-ID", uhttp.RequestIDFromContext(ctx))
 
 	defer func() {
 		if siw.metricsMiddleware != nil {
@@ -676,7 +682,7 @@ func RegisterUnauthedHandlers(router *mux.Router, si ServerInterface, opts ...Se
 	}
 
 	router.Use(uhttp.AuthHeaderToContextMux())
-	router.Use(uhttp.RequestIDToContextMux())
+	router.Use(uhttp.GenerateOrCopyRequestIDMux())
 
 	// We do not have a gateway preparer here as no auth is sent.
 
