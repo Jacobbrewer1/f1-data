@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/Jacobbrewer1/f1-data/pkg/logging"
-	uhttp "github.com/Jacobbrewer1/f1-data/pkg/utils/http"
+	"github.com/Jacobbrewer1/uhttp"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -46,9 +46,9 @@ var (
 
 // metricsMiddleware is run after the request is completed
 func metricsMiddleware(w http.ResponseWriter, r *http.Request) {
-	cw, ok := w.(*uhttp.ClientWriter)
+	cw, ok := w.(*uhttp.ResponseWriter)
 	if !ok {
-		cw = uhttp.NewClientWriter(w)
+		cw = uhttp.NewResponseWriter(w)
 	}
 
 	path := ""

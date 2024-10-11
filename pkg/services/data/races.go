@@ -11,8 +11,8 @@ import (
 	"github.com/Jacobbrewer1/f1-data/pkg/models"
 	repo "github.com/Jacobbrewer1/f1-data/pkg/repositories/data"
 	"github.com/Jacobbrewer1/f1-data/pkg/utils"
-	uhttp "github.com/Jacobbrewer1/f1-data/pkg/utils/http"
 	"github.com/Jacobbrewer1/pagefilter"
+	"github.com/Jacobbrewer1/uhttp"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 

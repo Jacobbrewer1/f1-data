@@ -14,7 +14,7 @@ import (
 	"github.com/Jacobbrewer1/f1-data/pkg/logging"
 	repo "github.com/Jacobbrewer1/f1-data/pkg/repositories/data"
 	svc "github.com/Jacobbrewer1/f1-data/pkg/services/data"
-	uhttp "github.com/Jacobbrewer1/f1-data/pkg/utils/http"
+	"github.com/Jacobbrewer1/uhttp"
 	"github.com/Jacobbrewer1/vaulty"
 	"github.com/Jacobbrewer1/vaulty/repositories"
 	"github.com/google/subcommands"
