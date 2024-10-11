@@ -46,9 +46,12 @@ type ServerOption func(s *ServerInterfaceWrapper)
 
 // {{$opid}} operation middleware
 func (siw *ServerInterfaceWrapper) {{$opid}}(w http.ResponseWriter, r *http.Request) {
-  cw := uhttp.NewClientWriter(w)
   ctx := r.Context()
-  cw.Header().Set("X-Request-ID", uhttp.RequestIDFromContext(ctx))
+  cw := uhttp.NewResponseWriter(w,
+    uhttp.WithDefaultStatusCode(http.StatusOK),
+    uhttp.WithDefaultHeader("X-Request-ID", uhttp.RequestIDFromContext(ctx)),
+    uhttp.WithDefaultHeader(uhttp.HeaderContentType, uhttp.ContentTypeJSON),
+  )
 
   defer func() {
     if siw.metricsMiddleware != nil {

@@ -1,19 +1,17 @@
-package http
+package uhttp
 
 import (
 	"log/slog"
 	"net/http"
-
-	"github.com/Jacobbrewer1/f1-data/pkg/logging"
 )
 
 // NotFoundHandler returns a handler that returns a 404 response.
 func NotFoundHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		msg := NewMessage(MsgNotFound)
-		err := Encode(w, http.StatusNotFound, msg)
+		err := EncodeJSON(w, http.StatusNotFound, msg)
 		if err != nil {
-			slog.Error("Error encoding response", slog.String(logging.KeyError, err.Error()))
+			slog.Error("Error encoding response", slog.String(loggingKeyError, err.Error()))
 		}
 	}
 }
@@ -22,9 +20,9 @@ func NotFoundHandler() http.HandlerFunc {
 func MethodNotAllowedHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		msg := NewMessage(MsgMethodNotAllowed)
-		err := Encode(w, http.StatusMethodNotAllowed, msg)
+		err := EncodeJSON(w, http.StatusMethodNotAllowed, msg)
 		if err != nil {
-			slog.Error("Error encoding response", slog.String(logging.KeyError, err.Error()))
+			slog.Error("Error encoding response", slog.String(loggingKeyError, err.Error()))
 		}
 	}
 }
@@ -33,9 +31,17 @@ func MethodNotAllowedHandler() http.HandlerFunc {
 func UnauthorizedHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		msg := NewMessage(MsgUnauthorized)
-		err := Encode(w, http.StatusUnauthorized, msg)
+		err := EncodeJSON(w, http.StatusUnauthorized, msg)
 		if err != nil {
-			slog.Error("Error encoding response", slog.String(logging.KeyError, err.Error()))
+			slog.Error("Error encoding response", slog.String(loggingKeyError, err.Error()))
 		}
+	}
+}
+
+func GenericErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
+	msg := NewErrorMessage(MsgBadRequest, err)
+	encErr := EncodeJSON(w, http.StatusBadRequest, msg)
+	if encErr != nil {
+		slog.Error("Error encoding response", slog.String(loggingKeyError, encErr.Error()))
 	}
 }

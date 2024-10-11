@@ -11,8 +11,8 @@ import (
 	"github.com/Jacobbrewer1/f1-data/pkg/models"
 	repo "github.com/Jacobbrewer1/f1-data/pkg/repositories/data"
 	"github.com/Jacobbrewer1/f1-data/pkg/utils"
-	uhttp "github.com/Jacobbrewer1/f1-data/pkg/utils/http"
 	"github.com/Jacobbrewer1/pagefilter"
+	"github.com/Jacobbrewer1/uhttp"
 )
 
 func (s *service) GetConstructorsChampionship(w http.ResponseWriter, r *http.Request, year api.PathYear, params api.GetConstructorsChampionshipParams) {

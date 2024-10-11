@@ -1,4 +1,4 @@
-package http
+package uhttp
 
 import (
 	"encoding/json"
@@ -7,8 +7,14 @@ import (
 	"net/http"
 )
 
+// Encode defaults to JSON encoding
 func Encode[T any](w http.ResponseWriter, status int, v T) error {
-	w.Header().Set("Content-Type", "application/json")
+	return EncodeJSON(w, status, v)
+}
+
+// EncodeJSON encodes a response as JSON
+func EncodeJSON[T any](w http.ResponseWriter, status int, v T) error {
+	w.Header().Set(ContentTypeJSON, ContentTypeJSON)
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(v); err != nil {
 		return fmt.Errorf("encode json: %w", err)
@@ -16,7 +22,7 @@ func Encode[T any](w http.ResponseWriter, status int, v T) error {
 	return nil
 }
 
-func DecodeJSONBody[T any](r *http.Request, v *T) error {
+func DecodeRequestJSON[T any](r *http.Request, v *T) error {
 	return DecodeJSON[T](r.Body, v)
 }
 

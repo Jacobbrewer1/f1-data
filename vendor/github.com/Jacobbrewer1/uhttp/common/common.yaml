@@ -1,0 +1,18 @@
+openapi: 3.0.0
+components:
+  schemas:
+    message:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Example message'
+    error_message:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Example error message'
+        error:
+          type: string
+          example: 'Example error'

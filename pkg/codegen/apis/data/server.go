@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	uhttp "github.com/Jacobbrewer1/f1-data/pkg/utils/http"
+	"github.com/Jacobbrewer1/uhttp"
 	"github.com/gorilla/mux"
 	"github.com/oapi-codegen/runtime"
 )
@@ -80,9 +80,12 @@ type ServerOption func(s *ServerInterfaceWrapper)
 
 // GetConstructorsChampionship operation middleware
 func (siw *ServerInterfaceWrapper) GetConstructorsChampionship(w http.ResponseWriter, r *http.Request) {
-	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
-	cw.Header().Set("X-Request-ID", uhttp.RequestIDFromContext(ctx))
+	cw := uhttp.NewResponseWriter(w,
+		uhttp.WithDefaultStatusCode(http.StatusOK),
+		uhttp.WithDefaultHeader("X-Request-ID", uhttp.RequestIDFromContext(ctx)),
+		uhttp.WithDefaultHeader(uhttp.HeaderContentType, uhttp.ContentTypeJSON),
+	)
 
 	defer func() {
 		if siw.metricsMiddleware != nil {
@@ -161,9 +164,12 @@ func (siw *ServerInterfaceWrapper) GetConstructorsChampionship(w http.ResponseWr
 
 // GetDriversChampionship operation middleware
 func (siw *ServerInterfaceWrapper) GetDriversChampionship(w http.ResponseWriter, r *http.Request) {
-	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
-	cw.Header().Set("X-Request-ID", uhttp.RequestIDFromContext(ctx))
+	cw := uhttp.NewResponseWriter(w,
+		uhttp.WithDefaultStatusCode(http.StatusOK),
+		uhttp.WithDefaultHeader("X-Request-ID", uhttp.RequestIDFromContext(ctx)),
+		uhttp.WithDefaultHeader(uhttp.HeaderContentType, uhttp.ContentTypeJSON),
+	)
 
 	defer func() {
 		if siw.metricsMiddleware != nil {
@@ -258,9 +264,12 @@ func (siw *ServerInterfaceWrapper) GetDriversChampionship(w http.ResponseWriter,
 
 // GetDrivers operation middleware
 func (siw *ServerInterfaceWrapper) GetDrivers(w http.ResponseWriter, r *http.Request) {
-	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
-	cw.Header().Set("X-Request-ID", uhttp.RequestIDFromContext(ctx))
+	cw := uhttp.NewResponseWriter(w,
+		uhttp.WithDefaultStatusCode(http.StatusOK),
+		uhttp.WithDefaultHeader("X-Request-ID", uhttp.RequestIDFromContext(ctx)),
+		uhttp.WithDefaultHeader(uhttp.HeaderContentType, uhttp.ContentTypeJSON),
+	)
 
 	defer func() {
 		if siw.metricsMiddleware != nil {
@@ -354,9 +363,12 @@ func (siw *ServerInterfaceWrapper) GetDrivers(w http.ResponseWriter, r *http.Req
 
 // GetRaceResults operation middleware
 func (siw *ServerInterfaceWrapper) GetRaceResults(w http.ResponseWriter, r *http.Request) {
-	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
-	cw.Header().Set("X-Request-ID", uhttp.RequestIDFromContext(ctx))
+	cw := uhttp.NewResponseWriter(w,
+		uhttp.WithDefaultStatusCode(http.StatusOK),
+		uhttp.WithDefaultHeader("X-Request-ID", uhttp.RequestIDFromContext(ctx)),
+		uhttp.WithDefaultHeader(uhttp.HeaderContentType, uhttp.ContentTypeJSON),
+	)
 
 	defer func() {
 		if siw.metricsMiddleware != nil {
@@ -427,9 +439,12 @@ func (siw *ServerInterfaceWrapper) GetRaceResults(w http.ResponseWriter, r *http
 
 // GetSeasons operation middleware
 func (siw *ServerInterfaceWrapper) GetSeasons(w http.ResponseWriter, r *http.Request) {
-	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
-	cw.Header().Set("X-Request-ID", uhttp.RequestIDFromContext(ctx))
+	cw := uhttp.NewResponseWriter(w,
+		uhttp.WithDefaultStatusCode(http.StatusOK),
+		uhttp.WithDefaultHeader("X-Request-ID", uhttp.RequestIDFromContext(ctx)),
+		uhttp.WithDefaultHeader(uhttp.HeaderContentType, uhttp.ContentTypeJSON),
+	)
 
 	defer func() {
 		if siw.metricsMiddleware != nil {
@@ -515,9 +530,12 @@ func (siw *ServerInterfaceWrapper) GetSeasons(w http.ResponseWriter, r *http.Req
 
 // GetSeasonRaces operation middleware
 func (siw *ServerInterfaceWrapper) GetSeasonRaces(w http.ResponseWriter, r *http.Request) {
-	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
-	cw.Header().Set("X-Request-ID", uhttp.RequestIDFromContext(ctx))
+	cw := uhttp.NewResponseWriter(w,
+		uhttp.WithDefaultStatusCode(http.StatusOK),
+		uhttp.WithDefaultHeader("X-Request-ID", uhttp.RequestIDFromContext(ctx)),
+		uhttp.WithDefaultHeader(uhttp.HeaderContentType, uhttp.ContentTypeJSON),
+	)
 
 	defer func() {
 		if siw.metricsMiddleware != nil {
