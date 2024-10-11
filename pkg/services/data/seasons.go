@@ -16,7 +16,9 @@ import (
 )
 
 func (s *service) GetSeasons(w http.ResponseWriter, r *http.Request, params api.GetSeasonsParams) {
-	var sortDir *common.SortDirection
+	l := logging.LoggerFromRequest(r)
+
+	sortDir := new(common.SortDirection)
 	if params.SortDir != nil {
 		sortDir = (*common.SortDirection)(params.SortDir)
 	}
@@ -29,7 +31,7 @@ func (s *service) GetSeasons(w http.ResponseWriter, r *http.Request, params api.
 
 	filts, err := s.getSeasonsFilters(params.Year, params.YearMin, params.YearMax)
 	if err != nil {
-		slog.Error("Failed to parse filters", slog.String(logging.KeyError, err.Error()))
+		l.Error("Failed to parse filters", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "failed to parse filters", err)
 		return
 	}
@@ -61,7 +63,7 @@ func (s *service) GetSeasons(w http.ResponseWriter, r *http.Request, params api.
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
 	if err != nil {
-		slog.Error("Error encoding seasons", slog.String(logging.KeyError, err.Error()))
+		l.Error("Error encoding seasons", slog.String(logging.KeyError, err.Error()))
 		return
 	}
 }
