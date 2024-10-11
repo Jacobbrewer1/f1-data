@@ -16,7 +16,9 @@ import (
 )
 
 func (s *service) GetDriversChampionship(w http.ResponseWriter, r *http.Request, year api.PathYear, params api.GetDriversChampionshipParams) {
-	var sortDir *common.SortDirection
+	l := logging.LoggerFromRequest(r)
+
+	sortDir := new(common.SortDirection)
 	if params.SortDir != nil {
 		sortDir = (*common.SortDirection)(params.SortDir)
 	}
@@ -29,7 +31,7 @@ func (s *service) GetDriversChampionship(w http.ResponseWriter, r *http.Request,
 
 	filts, err := s.getDriversChampionshipFilters(&year, params.Name, params.Tag, params.Team)
 	if err != nil {
-		slog.Error("Failed to parse filters", slog.String(logging.KeyError, err.Error()))
+		l.Error("Failed to parse filters", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "failed to parse filters", err)
 		return
 	}
@@ -61,7 +63,7 @@ func (s *service) GetDriversChampionship(w http.ResponseWriter, r *http.Request,
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
 	if err != nil {
-		slog.Error("Error encoding season to user", slog.String(logging.KeyError, err.Error()))
+		l.Error("Error encoding season to user", slog.String(logging.KeyError, err.Error()))
 		return
 	}
 }
@@ -106,7 +108,9 @@ func (s *service) modelAsApiDriverChampionship(m *models.DriverChampionship) *ap
 }
 
 func (s *service) GetDrivers(w http.ResponseWriter, r *http.Request, params api.GetDriversParams) {
-	var sortDir *common.SortDirection
+	l := logging.LoggerFromRequest(r)
+
+	sortDir := new(common.SortDirection)
 	if params.SortDir != nil {
 		sortDir = (*common.SortDirection)(params.SortDir)
 	}
@@ -119,7 +123,7 @@ func (s *service) GetDrivers(w http.ResponseWriter, r *http.Request, params api.
 
 	filts, err := s.getDriversFilters(params.Name, params.Tag, params.Team, params.Nationality)
 	if err != nil {
-		slog.Error("Failed to parse filters", slog.String(logging.KeyError, err.Error()))
+		l.Error("Failed to parse filters", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "failed to parse filters", err)
 		return
 	}
@@ -133,7 +137,7 @@ func (s *service) GetDrivers(w http.ResponseWriter, r *http.Request, params api.
 				Total: 0,
 			}
 		default:
-			slog.Error("Error getting drivers", slog.String(logging.KeyError, err.Error()))
+			l.Error("Error getting drivers", slog.String(logging.KeyError, err.Error()))
 			uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting drivers", err)
 			return
 		}
@@ -151,7 +155,7 @@ func (s *service) GetDrivers(w http.ResponseWriter, r *http.Request, params api.
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
 	if err != nil {
-		slog.Error("Error encoding drivers to user", slog.String(logging.KeyError, err.Error()))
+		l.Error("Error encoding drivers to user", slog.String(logging.KeyError, err.Error()))
 		return
 	}
 }

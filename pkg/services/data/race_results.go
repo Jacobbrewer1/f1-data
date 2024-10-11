@@ -16,7 +16,9 @@ import (
 )
 
 func (s *service) GetRaceResults(w http.ResponseWriter, r *http.Request, raceId api.PathRaceId, params api.GetRaceResultsParams) {
-	var sortDir *common.SortDirection
+	l := logging.LoggerFromRequest(r)
+
+	sortDir := new(common.SortDirection)
 	if params.SortDir != nil {
 		sortDir = (*common.SortDirection)(params.SortDir)
 	}
@@ -35,7 +37,7 @@ func (s *service) GetRaceResults(w http.ResponseWriter, r *http.Request, raceId 
 
 	filts, err := s.getRaceResultFilters(&raceId)
 	if err != nil {
-		slog.Error("Failed to parse filters", slog.String(logging.KeyError, err.Error()))
+		l.Error("Failed to parse filters", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "failed to parse filters", err)
 		return
 	}
@@ -49,7 +51,7 @@ func (s *service) GetRaceResults(w http.ResponseWriter, r *http.Request, raceId 
 				Total: 0,
 			}
 		default:
-			slog.Error("Error getting season races", slog.String(logging.KeyError, err.Error()))
+			l.Error("Error getting season races", slog.String(logging.KeyError, err.Error()))
 			uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting season", err)
 			return
 		}
@@ -67,7 +69,7 @@ func (s *service) GetRaceResults(w http.ResponseWriter, r *http.Request, raceId 
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
 	if err != nil {
-		slog.Error("Error encoding season to user", slog.String(logging.KeyError, err.Error()))
+		l.Error("Error encoding season to user", slog.String(logging.KeyError, err.Error()))
 		return
 	}
 }

@@ -7,12 +7,6 @@ const (
 	// KeyError represents the key for the error.
 	KeyError = `err`
 
-	// KeyStack represents the key for the stack.
-	KeyStack = `stack`
-
-	// KeyDal represents the key for the data access layer.
-	KeyDal = `dal`
-
-	// KeyHash represents the key for the hash.
-	KeyHash = `hash`
+	// KeyRequestID represents the key for the request ID.
+	KeyRequestID = `request_id`
 )

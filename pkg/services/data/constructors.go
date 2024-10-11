@@ -16,7 +16,9 @@ import (
 )
 
 func (s *service) GetConstructorsChampionship(w http.ResponseWriter, r *http.Request, year api.PathYear, params api.GetConstructorsChampionshipParams) {
-	var sortDir *common.SortDirection
+	l := logging.LoggerFromRequest(r)
+
+	sortDir := new(common.SortDirection)
 	if params.SortDir != nil {
 		sortDir = (*common.SortDirection)(params.SortDir)
 	}
@@ -29,7 +31,7 @@ func (s *service) GetConstructorsChampionship(w http.ResponseWriter, r *http.Req
 
 	filts, err := s.getConstructorsChampionshipFilters(&year, params.Name)
 	if err != nil {
-		slog.Error("Failed to parse filters", slog.String(logging.KeyError, err.Error()))
+		l.Error("Failed to parse filters", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "failed to parse filters", err)
 		return
 	}
@@ -43,7 +45,7 @@ func (s *service) GetConstructorsChampionship(w http.ResponseWriter, r *http.Req
 				Total: 0,
 			}
 		default:
-			slog.Error("Error getting drivers championship", slog.String(logging.KeyError, err.Error()))
+			l.Error("Error getting drivers championship", slog.String(logging.KeyError, err.Error()))
 			uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting drivers championship", err)
 			return
 		}
@@ -61,7 +63,7 @@ func (s *service) GetConstructorsChampionship(w http.ResponseWriter, r *http.Req
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
 	if err != nil {
-		slog.Error("Error encoding drivers championship to user", slog.String(logging.KeyError, err.Error()))
+		l.Error("Error encoding drivers championship to user", slog.String(logging.KeyError, err.Error()))
 		return
 	}
 }
