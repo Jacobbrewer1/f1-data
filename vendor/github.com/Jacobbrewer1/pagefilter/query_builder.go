@@ -1,12 +1,18 @@
 package pagefilter
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
+)
+
+var (
+	// ErrNoDestination is returned when the destination is nil
+	ErrNoDestination = errors.New("destination is nil")
 )
 
 // Paginator is the struct that provides the paging.
@@ -228,22 +234,31 @@ func (p *Paginator) Pivot() (string, error) {
 }
 
 // Retrieve pulls the next page given the pivot point and requires a destination *[]struct to load the data into.
-func (p *Paginator) Retrieve(pivot string, dest interface{}) error {
+func (p *Paginator) Retrieve(pivot string, dest any) error {
+	if dest == nil {
+		return ErrNoDestination
+	}
+
 	// Gracefully locate all the columns to load.
 	t := reflect.TypeOf(dest)
 	if t.Kind() != reflect.Ptr {
 		return fmt.Errorf("unexpected type %s (expected pointer)", t.Kind())
 	}
-	if t = t.Elem(); t.Kind() != reflect.Slice {
+	t = t.Elem()
+	if t.Kind() != reflect.Slice {
 		return fmt.Errorf("unexpected type %s (expected slice)", t.Kind())
 	}
-	if t = t.Elem(); t.Kind() != reflect.Struct {
-		return fmt.Errorf("unexpected type %s (expected struct)", t.Kind())
+	elemType := t.Elem()
+	if elemType.Kind() == reflect.Ptr {
+		elemType = elemType.Elem()
+	}
+	if elemType.Kind() != reflect.Struct {
+		return fmt.Errorf("unexpected type %s (expected struct)", elemType.Kind())
 	}
 
 	var cols strings.Builder
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
+	for i := 0; i < elemType.NumField(); i++ {
+		field := elemType.Field(i)
 		dbTag := field.Tag.Get("db")
 		switch dbTag {
 		case "":
@@ -254,6 +269,16 @@ func (p *Paginator) Retrieve(pivot string, dest interface{}) error {
 
 		if cols.Len() > 0 {
 			cols.WriteString(", ")
+		}
+
+		// If the db tag contains "autoinc" or "pk" then we need to use the first part of the db tag
+		// as the column name and the second part as the alias. This is because the db tag is used to
+		// generate the SQL query and the SQL query must be valid.
+		//
+		// e.g. `db:"id,autoinc,pk"` will generate "t.id 'id'" in the SQL query
+		if strings.Contains(dbTag, ",autoinc") || strings.Contains(dbTag, ",pk") {
+			cols.WriteString("t." + strings.Split(dbTag, ",")[0])
+			continue
 		}
 
 		// In order for our db tag to remain compatible with the sql db tag mapper

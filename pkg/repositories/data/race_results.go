@@ -32,7 +32,7 @@ func (r *repository) GetRaceResults(paginationDetails *pagefilter.PaginatorDetai
 		}
 	}
 
-	items := make([]raceResult, 0)
+	items := make([]*models.RaceResult, 0)
 	err = pg.Retrieve(pvt, &items)
 	if err != nil {
 		switch {
@@ -43,11 +43,6 @@ func (r *repository) GetRaceResults(paginationDetails *pagefilter.PaginatorDetai
 		}
 	}
 
-	returnItems := make([]*models.RaceResult, len(items))
-	for i, item := range items {
-		returnItems[i] = item.AsModel()
-	}
-
 	var total int64 = 0
 	err = pg.Counts(&total)
 	if err != nil {
@@ -55,7 +50,7 @@ func (r *repository) GetRaceResults(paginationDetails *pagefilter.PaginatorDetai
 	}
 
 	resp := &PaginationResponse[models.RaceResult]{
-		Items: returnItems,
+		Items: items,
 		Total: total,
 	}
 

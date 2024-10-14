@@ -36,7 +36,7 @@ func (r *repository) GetSeasonRaces(paginationDetails *pagefilter.PaginatorDetai
 		}
 	}
 
-	items := make([]race, 0)
+	items := make([]*models.Race, 0)
 	err = pg.Retrieve(pvt, &items)
 	if err != nil {
 		switch {
@@ -47,11 +47,6 @@ func (r *repository) GetSeasonRaces(paginationDetails *pagefilter.PaginatorDetai
 		}
 	}
 
-	returnItems := make([]*models.Race, len(items))
-	for i, item := range items {
-		returnItems[i] = item.AsModel()
-	}
-
 	var total int64 = 0
 	err = pg.Counts(&total)
 	if err != nil {
@@ -59,7 +54,7 @@ func (r *repository) GetSeasonRaces(paginationDetails *pagefilter.PaginatorDetai
 	}
 
 	resp := &PaginationResponse[models.Race]{
-		Items: returnItems,
+		Items: items,
 		Total: total,
 	}
 

@@ -49,19 +49,3 @@ components:
       description: Filter by the duration, since the current date. (E.g. 1d, 1w, 1m, 1y)
       schema:
         type: string
-  schemas:
-    message:
-      type: object
-      properties:
-        message:
-          type: string
-          example: 'Example message'
-    error_message:
-      type: object
-      properties:
-        message:
-          type: string
-          example: 'Example error message'
-        error:
-          type: string
-          example: 'Example error'
