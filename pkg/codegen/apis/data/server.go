@@ -686,6 +686,24 @@ func wrapHandler(handler http.HandlerFunc, middlewares ...mux.MiddlewareFunc) ht
 	return wrappedHandler
 }
 
+// RegisterHandlers registers the api handlers.
+func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOption) {
+	wrapper := ServerInterfaceWrapper{
+		handler: si,
+	}
+
+	for _, opt := range opts {
+		if opt == nil {
+			continue
+		}
+		opt(&wrapper)
+	}
+
+	router.Use(uhttp.AuthHeaderToContextMux())
+	router.Use(uhttp.GenerateOrCopyRequestIDMux())
+
+}
+
 // RegisterUnauthedHandlers registers any api handlers which do not have any authentication on them. Most services will not have any.
 func RegisterUnauthedHandlers(router *mux.Router, si ServerInterface, opts ...ServerOption) {
 	wrapper := ServerInterfaceWrapper{

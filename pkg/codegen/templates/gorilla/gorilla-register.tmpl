@@ -11,15 +11,14 @@ func wrapHandler(handler http.HandlerFunc, middlewares ...mux.MiddlewareFunc) ht
 	return wrappedHandler
 }
 
-{{ $unauthedExists := false}}
+{{ $unauthedExists := false }}
 {{ range . }}
-    {{ $unauth := not .Spec.Security }}
-    {{ if $unauth }}
+    {{ $auth := .Spec.Security }}
+    {{ if not $auth }}
         {{ $unauthedExists = true }}
     {{ end -}}
 {{ end -}}
 
-{{ if not $unauthedExists }}
 // RegisterHandlers registers the api handlers.
 func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOption) {
     wrapper := ServerInterfaceWrapper{
@@ -43,7 +42,6 @@ func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOpti
     {{ end -}}
 {{ end -}}
 }
-{{ end }}
 
 {{ if $unauthedExists }}
 // RegisterUnauthedHandlers registers any api handlers which do not have any authentication on them. Most services will not have any.
