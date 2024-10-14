@@ -45,7 +45,7 @@ func (r *repository) GetDriversChampionship(paginationDetails *pagefilter.Pagina
 		}
 	}
 
-	items := make([]driverChampionship, 0)
+	items := make([]*models.DriverChampionship, 0)
 	err = pg.Retrieve(pvt, &items)
 	if err != nil {
 		switch {
@@ -56,11 +56,6 @@ func (r *repository) GetDriversChampionship(paginationDetails *pagefilter.Pagina
 		}
 	}
 
-	returnItems := make([]*models.DriverChampionship, len(items))
-	for i, item := range items {
-		returnItems[i] = item.AsModel()
-	}
-
 	var total int64 = 0
 	err = pg.Counts(&total)
 	if err != nil {
@@ -68,7 +63,7 @@ func (r *repository) GetDriversChampionship(paginationDetails *pagefilter.Pagina
 	}
 
 	resp := &PaginationResponse[models.DriverChampionship]{
-		Items: returnItems,
+		Items: items,
 		Total: total,
 	}
 
@@ -130,7 +125,7 @@ func (r *repository) GetDrivers(paginationDetails *pagefilter.PaginatorDetails, 
 		}
 	}
 
-	items := make([]driverChampionship, 0)
+	items := make([]*models.DriverChampionship, 0)
 	err = pg.Retrieve(pvt, &items)
 	if err != nil {
 		switch {
@@ -141,14 +136,9 @@ func (r *repository) GetDrivers(paginationDetails *pagefilter.PaginatorDetails, 
 		}
 	}
 
-	returnItems := make([]*models.DriverChampionship, len(items))
-	for i, item := range items {
-		returnItems[i] = item.AsModel()
-	}
-
 	resp := &PaginationResponse[models.DriverChampionship]{
-		Items: returnItems,
-		Total: int64(len(returnItems)),
+		Items: items,
+		Total: int64(len(items)),
 	}
 
 	return resp, nil

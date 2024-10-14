@@ -7,17 +7,6 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-// ErrorMessage defines the model for error_message.
-type ErrorMessage struct {
-	Error   *string `json:"error,omitempty"`
-	Message *string `json:"message,omitempty"`
-}
-
-// Message defines the model for message.
-type Message struct {
-	Message *string `json:"message,omitempty"`
-}
-
 // FromDate defines the model for from_date.
 type FromDate = openapi_types.Date
 
