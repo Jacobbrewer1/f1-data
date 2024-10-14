@@ -86,7 +86,7 @@ jobs:
       - name: Upload the report
         # Run this step on all PR's even if the linting fails
         if: ${{ failure() && github.event_name == 'pull_request' }}
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@v3
         with:
           # Full file path to the plan output
           filePath: ${{ github.workspace }}/pr-report.md
