@@ -26,4 +26,34 @@ func (m *{{ $struct }}) Update(db DB) error {
 
     return nil
 }
+
+func (m *{{ $struct }}) Patch(db DB, newT *{{ $struct }}) error {
+    if newT == nil {
+        return errors.New("new {{ .Name }} is nil")
+    }
+
+	res, err := patcher.NewDiffSQLPatch(m, newT, patcher.WithTable("{{ .Name }}"))
+	if err != nil {
+		return fmt.Errorf("new diff sql patch: %w", err)
+	}
+
+	sqlstr, args, err := res.GenerateSQL()
+	if err != nil {
+		switch {
+		case errors.Is(err, patcher.ErrNoChanges):
+			return nil
+		default:
+			return fmt.Errorf("failed to create patch: %w", err)
+		}
+	}
+
+	DBLog(sqlstr, args...)
+	_, err = db.Exec(sqlstr, args...)
+	if err != nil {
+		return fmt.Errorf("failed to execute patch: %w", err)
+	}
+
+	return nil
+}
+
 {{- end -}}

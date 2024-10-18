@@ -40,18 +40,15 @@ func InsertMany{{ $struct }}s(db DB, ms ...*{{ $struct }}) error {
     t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("insert_many_{{ $struct | structify -}}"))
     defer t.ObserveDuration()
 
-    {{ $autoinc := autoinc_column . -}}
-    {{- $cols := non_autoinc_columns . -}}
-    var sqlstr = "INSERT INTO {{ .Name }} (" +
-        "{{ range $i, $column := $cols }}{{ if $i }},{{ end }}`{{ $column.Name }}`{{ end }}" +
-        ") VALUES"
-
-    var args []interface{}
+    vals := make([]any, 0, len(ms))
     for _, m := range ms {
-        sqlstr += " (" +
-            "{{ range $i, $column := $cols }}{{ if $i }},{{ end }}?{{ end }}" +
-            "),"
-        args = append(args, {{ range $i, $column := $cols }}{{ if $i }}, {{ end }}m.{{ $column.Name | structify }}{{ end }})
+        // Dereference the pointer to get the struct value.
+        vals = append(vals, []any{*m})
+    }
+
+    sqlstr, args, err := inserter.NewBatch(vals, inserter.WithTable("{{ .Name }}")).GenerateSQL()
+    if err != nil {
+        return fmt.Errorf("failed to create batch insert: %w", err)
     }
 
     DBLog(sqlstr, args...)

@@ -4,6 +4,11 @@
 package models
 
 import (
+	"errors"
+	"fmt"
+
+	"github.com/Jacobbrewer1/patcher"
+	"github.com/Jacobbrewer1/patcher/inserter"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -12,9 +17,6 @@ type Season struct {
 	Id   int `db:"id,autoinc,pk"`
 	Year int `db:"year"`
 }
-
-// SeasonColumns is the sorted column names for the type Season
-var SeasonColumns = []string{"Id", "Year"}
 
 // Insert inserts the Season to the database.
 func (m *Season) Insert(db DB) error {
@@ -50,16 +52,15 @@ func InsertManySeasons(db DB, ms ...*Season) error {
 	t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("insert_many_Season"))
 	defer t.ObserveDuration()
 
-	var sqlstr = "INSERT INTO season (" +
-		"`year`" +
-		") VALUES"
-
-	var args []interface{}
+	vals := make([]any, 0, len(ms))
 	for _, m := range ms {
-		sqlstr += " (" +
-			"?" +
-			"),"
-		args = append(args, m.Year)
+		// Dereference the pointer to get the struct value.
+		vals = append(vals, []any{*m})
+	}
+
+	sqlstr, args, err := inserter.NewBatch(vals, inserter.WithTable("season")).GenerateSQL()
+	if err != nil {
+		return fmt.Errorf("failed to create batch insert: %w", err)
 	}
 
 	DBLog(sqlstr, args...)
@@ -105,6 +106,35 @@ func (m *Season) Update(db DB) error {
 		return err
 	} else if i <= 0 {
 		return ErrNoAffectedRows
+	}
+
+	return nil
+}
+
+func (m *Season) Patch(db DB, newT *Season) error {
+	if newT == nil {
+		return errors.New("new season is nil")
+	}
+
+	res, err := patcher.NewDiffSQLPatch(m, newT, patcher.WithTable("season"))
+	if err != nil {
+		return fmt.Errorf("new diff sql patch: %w", err)
+	}
+
+	sqlstr, args, err := res.GenerateSQL()
+	if err != nil {
+		switch {
+		case errors.Is(err, patcher.ErrNoChanges):
+			return nil
+		default:
+			return fmt.Errorf("failed to create patch: %w", err)
+		}
+	}
+
+	DBLog(sqlstr, args...)
+	_, err = db.Exec(sqlstr, args...)
+	if err != nil {
+		return fmt.Errorf("failed to execute patch: %w", err)
 	}
 
 	return nil

@@ -7,8 +7,14 @@ pr-approval:
 	go build ./...
 	go vet ./...
 	go test ./...
-codegen:
+codegen: deps
 	@echo "Generating code"
-	go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
-
 	go generate ./...
+deps:
+	go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
+	go install github.com/charmbracelet/gum@latest
+	go install golang.org/x/tools/cmd/goimports@latest
+models:
+	go generate ./pkg/models
+apis:
+	go generate ./pkg/codegen/...

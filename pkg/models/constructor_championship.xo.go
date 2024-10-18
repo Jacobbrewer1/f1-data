@@ -4,6 +4,11 @@
 package models
 
 import (
+	"errors"
+	"fmt"
+
+	"github.com/Jacobbrewer1/patcher"
+	"github.com/Jacobbrewer1/patcher/inserter"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -15,9 +20,6 @@ type ConstructorChampionship struct {
 	Name     string  `db:"name"`
 	Points   float64 `db:"points"`
 }
-
-// ConstructorChampionshipColumns is the sorted column names for the type ConstructorChampionship
-var ConstructorChampionshipColumns = []string{"Id", "Name", "Points", "Position", "SeasonId"}
 
 // Insert inserts the ConstructorChampionship to the database.
 func (m *ConstructorChampionship) Insert(db DB) error {
@@ -53,16 +55,15 @@ func InsertManyConstructorChampionships(db DB, ms ...*ConstructorChampionship) e
 	t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("insert_many_ConstructorChampionship"))
 	defer t.ObserveDuration()
 
-	var sqlstr = "INSERT INTO constructor_championship (" +
-		"`season_id`,`position`,`name`,`points`" +
-		") VALUES"
-
-	var args []interface{}
+	vals := make([]any, 0, len(ms))
 	for _, m := range ms {
-		sqlstr += " (" +
-			"?,?,?,?" +
-			"),"
-		args = append(args, m.SeasonId, m.Position, m.Name, m.Points)
+		// Dereference the pointer to get the struct value.
+		vals = append(vals, []any{*m})
+	}
+
+	sqlstr, args, err := inserter.NewBatch(vals, inserter.WithTable("constructor_championship")).GenerateSQL()
+	if err != nil {
+		return fmt.Errorf("failed to create batch insert: %w", err)
 	}
 
 	DBLog(sqlstr, args...)
@@ -108,6 +109,35 @@ func (m *ConstructorChampionship) Update(db DB) error {
 		return err
 	} else if i <= 0 {
 		return ErrNoAffectedRows
+	}
+
+	return nil
+}
+
+func (m *ConstructorChampionship) Patch(db DB, newT *ConstructorChampionship) error {
+	if newT == nil {
+		return errors.New("new constructor_championship is nil")
+	}
+
+	res, err := patcher.NewDiffSQLPatch(m, newT, patcher.WithTable("constructor_championship"))
+	if err != nil {
+		return fmt.Errorf("new diff sql patch: %w", err)
+	}
+
+	sqlstr, args, err := res.GenerateSQL()
+	if err != nil {
+		switch {
+		case errors.Is(err, patcher.ErrNoChanges):
+			return nil
+		default:
+			return fmt.Errorf("failed to create patch: %w", err)
+		}
+	}
+
+	DBLog(sqlstr, args...)
+	_, err = db.Exec(sqlstr, args...)
+	if err != nil {
+		return fmt.Errorf("failed to execute patch: %w", err)
 	}
 
 	return nil
@@ -191,9 +221,9 @@ func ConstructorChampionshipById(db DB, id int) (*ConstructorChampionship, error
 	return &m, nil
 }
 
-// GetSeason Gets an instance of Season
+// GetSeasonIdSeason Gets an instance of Season
 //
 // Generated from constraint team_championship_season_id_fk
-func (m *ConstructorChampionship) GetSeason(db DB) (*Season, error) {
+func (m *ConstructorChampionship) GetSeasonIdSeason(db DB) (*Season, error) {
 	return SeasonById(db, m.SeasonId)
 }

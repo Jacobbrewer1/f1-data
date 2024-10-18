@@ -4,8 +4,12 @@
 package models
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
+	"github.com/Jacobbrewer1/patcher"
+	"github.com/Jacobbrewer1/patcher/inserter"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -16,9 +20,6 @@ type Race struct {
 	GrandPrix string    `db:"grand_prix"`
 	Date      time.Time `db:"date"`
 }
-
-// RaceColumns is the sorted column names for the type Race
-var RaceColumns = []string{"Date", "GrandPrix", "Id", "SeasonId"}
 
 // Insert inserts the Race to the database.
 func (m *Race) Insert(db DB) error {
@@ -54,16 +55,15 @@ func InsertManyRaces(db DB, ms ...*Race) error {
 	t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("insert_many_Race"))
 	defer t.ObserveDuration()
 
-	var sqlstr = "INSERT INTO race (" +
-		"`season_id`,`grand_prix`,`date`" +
-		") VALUES"
-
-	var args []interface{}
+	vals := make([]any, 0, len(ms))
 	for _, m := range ms {
-		sqlstr += " (" +
-			"?,?,?" +
-			"),"
-		args = append(args, m.SeasonId, m.GrandPrix, m.Date)
+		// Dereference the pointer to get the struct value.
+		vals = append(vals, []any{*m})
+	}
+
+	sqlstr, args, err := inserter.NewBatch(vals, inserter.WithTable("race")).GenerateSQL()
+	if err != nil {
+		return fmt.Errorf("failed to create batch insert: %w", err)
 	}
 
 	DBLog(sqlstr, args...)
@@ -109,6 +109,35 @@ func (m *Race) Update(db DB) error {
 		return err
 	} else if i <= 0 {
 		return ErrNoAffectedRows
+	}
+
+	return nil
+}
+
+func (m *Race) Patch(db DB, newT *Race) error {
+	if newT == nil {
+		return errors.New("new race is nil")
+	}
+
+	res, err := patcher.NewDiffSQLPatch(m, newT, patcher.WithTable("race"))
+	if err != nil {
+		return fmt.Errorf("new diff sql patch: %w", err)
+	}
+
+	sqlstr, args, err := res.GenerateSQL()
+	if err != nil {
+		switch {
+		case errors.Is(err, patcher.ErrNoChanges):
+			return nil
+		default:
+			return fmt.Errorf("failed to create patch: %w", err)
+		}
+	}
+
+	DBLog(sqlstr, args...)
+	_, err = db.Exec(sqlstr, args...)
+	if err != nil {
+		return fmt.Errorf("failed to execute patch: %w", err)
 	}
 
 	return nil
@@ -192,9 +221,9 @@ func RaceById(db DB, id int) (*Race, error) {
 	return &m, nil
 }
 
-// GetSeason Gets an instance of Season
+// GetSeasonIdSeason Gets an instance of Season
 //
 // Generated from constraint race_season_id_fk
-func (m *Race) GetSeason(db DB) (*Season, error) {
+func (m *Race) GetSeasonIdSeason(db DB) (*Season, error) {
 	return SeasonById(db, m.SeasonId)
 }
