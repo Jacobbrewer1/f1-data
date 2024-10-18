@@ -6,6 +6,8 @@ github.com/DATA-DOG/go-sqlmock v1.5.2 h1:OcvFkGmslmlZibjAjaHm3L//6LiuBgolP7Oputl
 github.com/DATA-DOG/go-sqlmock v1.5.2/go.mod h1:88MAG/4G7SMwSE3CeA0ZKzrT5CiOU3OJ+JlNzwDqpNU=
 github.com/Jacobbrewer1/pagefilter v0.1.2 h1:DA38QdTky17w0JidjzzEBNxd636gbYsLIWjs7j5Tb20=
 github.com/Jacobbrewer1/pagefilter v0.1.2/go.mod h1:BRAt3gMwk5xhGK4/b9lkWYuIhBqSsdgYF130XNg/Rwk=
+github.com/Jacobbrewer1/patcher v0.1.5 h1:FoEL4iKBj/OAqFpMFEODyE0qy+tJiOrtCZIOL4+flno=
+github.com/Jacobbrewer1/patcher v0.1.5/go.mod h1:MUf6gjg3RDLgyFcN4gzMfPs2XizP3r3lwOz76Gr//bA=
 github.com/Jacobbrewer1/uhttp v0.0.2 h1:YAuyeazGeZNrqsxJV8AzsUUhBpCqKzjRt3cEzFIWjgA=
 github.com/Jacobbrewer1/uhttp v0.0.2/go.mod h1:cVM1VijWZPmOb2IcWMC0tB6Nzx+6QCkRyTbXXhaOeic=
 github.com/Jacobbrewer1/vaulty v0.1.2 h1:ys3q0SRhzBWqQGt9rjSmQG6f9nqEwWoWgYkwBNiNYGk=

@@ -6,6 +6,7 @@ toolchain go1.23.1
 
 require (
 	github.com/Jacobbrewer1/pagefilter v0.1.2
+	github.com/Jacobbrewer1/patcher v0.1.5
 	github.com/Jacobbrewer1/uhttp v0.0.2
 	github.com/Jacobbrewer1/vaulty v0.1.2
 	github.com/alexliesenfeld/health v0.8.0

@@ -73,9 +73,16 @@ jobs:
           npm install -g ibm-openapi-validator
           npm install @ibm-cloud/openapi-ruleset
 
-      - name: Install JQ
+      - name: Install Dependencies
         run: |
           sudo apt-get install jq
+
+      - name: Install GUM
+        run: |
+          sudo mkdir -p /etc/apt/keyrings
+          curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+          echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
+          sudo apt update && sudo apt install gum
 
       - name: Lint OpenAPI
         shell: bash
@@ -86,12 +93,12 @@ jobs:
       - name: Upload the report
         # Run this step on all PR's even if the linting fails
         if: ${{ failure() && github.event_name == 'pull_request' }}
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@v3
         with:
           # Full file path to the plan output
-          filePath: ${{ github.workspace }}/pr-report.md
-          pr_number: ${{ github.event.pull_request.number }}
-          create_if_not_exists: true
+          file-path: ${{ github.workspace }}/pr-report.md
+          pr-number: ${{ github.event.pull_request.number }}
+          create-if-not-exists: true
 
   code-approval:
     name: "Code Approval"
@@ -131,6 +138,12 @@ jobs:
         env:
           GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: git config --global url."https://x:${GITHUB_API_TOKEN}@github.com".insteadOf "https://github.com"
+
+      - name: "Install goschema"
+        run: |
+          wget https://github.com/Jacobbrewer1/goschema/releases/download/v0.0.1/goschema
+          chmod +x goschema
+          mv goschema /usr/local/bin
 
       - name: "Run Code Generation"
         run: make codegen
