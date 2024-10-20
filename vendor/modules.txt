@@ -2,7 +2,7 @@
 ## explicit; go 1.20
 filippo.io/edwards25519
 filippo.io/edwards25519/field
-# github.com/Jacobbrewer1/pagefilter v0.1.2
+# github.com/Jacobbrewer1/pagefilter v0.1.3
 ## explicit; go 1.23
 github.com/Jacobbrewer1/pagefilter
 github.com/Jacobbrewer1/pagefilter/common
@@ -294,7 +294,7 @@ github.com/subosito/gotenv
 # github.com/temoto/robotstxt v1.1.1
 ## explicit; go 1.11
 github.com/temoto/robotstxt
-# github.com/vektra/mockery/v2 v2.46.2
+# github.com/vektra/mockery/v2 v2.46.3
 ## explicit; go 1.23
 github.com/vektra/mockery/v2
 github.com/vektra/mockery/v2/cmd
