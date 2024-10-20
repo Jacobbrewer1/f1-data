@@ -31,18 +31,6 @@ func WithGeneratedVaultClient(vaultAddress string) ClientOption {
 	}
 }
 
-func WithTransitEncrypt(path string) ClientOption {
-	return func(c *client) {
-		c.transitPathEncrypt = path
-	}
-}
-
-func WithTransitDecrypt(path string) ClientOption {
-	return func(c *client) {
-		c.transitPathDecrypt = path
-	}
-}
-
 func WithAppRoleAuth(roleID, secretID string) ClientOption {
 	return func(c *client) {
 		c.auth = func(v *hashiVault.Client) (*hashiVault.Secret, error) {

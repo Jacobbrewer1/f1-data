@@ -7,12 +7,12 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/Jacobbrewer1/f1-data/pkg/logging"
-	"github.com/Jacobbrewer1/f1-data/pkg/models"
-	repo "github.com/Jacobbrewer1/f1-data/pkg/repositories/importer"
 	"github.com/gocolly/colly/v2"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/jacobbrewer1/f1-data/pkg/logging"
+	"github.com/jacobbrewer1/f1-data/pkg/models"
+	repo "github.com/jacobbrewer1/f1-data/pkg/repositories/importer"
 )
 
 func (s *service) processRace(raceId int, url *url.URL) error {

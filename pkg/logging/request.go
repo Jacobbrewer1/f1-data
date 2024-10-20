@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/Jacobbrewer1/uhttp"
+	"github.com/jacobbrewer1/uhttp"
 )
 
 func LoggerFromRequest(r *http.Request) *slog.Logger {

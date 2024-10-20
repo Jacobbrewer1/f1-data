@@ -4,7 +4,7 @@
 package data
 
 import (
-	externalRef0 "github.com/Jacobbrewer1/f1-data/pkg/codegen/apis/common"
+	externalRef0 "github.com/jacobbrewer1/f1-data/pkg/codegen/apis/common"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 

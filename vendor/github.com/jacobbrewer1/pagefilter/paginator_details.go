@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/Jacobbrewer1/pagefilter/common"
+	"github.com/jacobbrewer1/pagefilter/common"
 )
 
 var (
@@ -26,7 +26,7 @@ type PaginatorDetails struct {
 
 func getLimit(q url.Values) (limit int, err error) {
 	limit = defaultPageLimit
-	if limitStr := q.Get("limit"); limitStr != "" {
+	if limitStr := q.Get(QueryLimit); limitStr != "" {
 		if limit, err = strconv.Atoi(limitStr); err != nil {
 			return -1, fmt.Errorf("invalid limit: %w", err)
 		}

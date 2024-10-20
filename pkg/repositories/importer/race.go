@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/Jacobbrewer1/f1-data/pkg/models"
+	"github.com/jacobbrewer1/f1-data/pkg/models"
 )
 
 var (

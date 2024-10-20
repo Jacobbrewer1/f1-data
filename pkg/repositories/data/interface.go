@@ -1,8 +1,8 @@
 package data
 
 import (
-	"github.com/Jacobbrewer1/f1-data/pkg/models"
-	"github.com/Jacobbrewer1/pagefilter"
+	"github.com/jacobbrewer1/f1-data/pkg/models"
+	"github.com/jacobbrewer1/pagefilter"
 )
 
 type Repository interface {

@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Jacobbrewer1/f1-data/pkg/logging"
-	"github.com/Jacobbrewer1/uhttp"
 	"github.com/gorilla/mux"
+	"github.com/jacobbrewer1/f1-data/pkg/logging"
+	"github.com/jacobbrewer1/uhttp"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )

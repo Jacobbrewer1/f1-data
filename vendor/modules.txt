@@ -2,22 +2,6 @@
 ## explicit; go 1.20
 filippo.io/edwards25519
 filippo.io/edwards25519/field
-# github.com/Jacobbrewer1/pagefilter v0.1.2
-## explicit; go 1.23
-github.com/Jacobbrewer1/pagefilter
-github.com/Jacobbrewer1/pagefilter/common
-# github.com/Jacobbrewer1/patcher v0.1.5
-## explicit; go 1.22
-github.com/Jacobbrewer1/patcher
-github.com/Jacobbrewer1/patcher/inserter
-# github.com/Jacobbrewer1/uhttp v0.0.2
-## explicit; go 1.23
-github.com/Jacobbrewer1/uhttp
-github.com/Jacobbrewer1/uhttp/common
-# github.com/Jacobbrewer1/vaulty v0.1.2
-## explicit; go 1.23
-github.com/Jacobbrewer1/vaulty
-github.com/Jacobbrewer1/vaulty/repositories
 # github.com/PuerkitoBio/goquery v1.5.1
 ## explicit; go 1.13
 github.com/PuerkitoBio/goquery
@@ -158,6 +142,22 @@ github.com/iancoleman/strcase
 # github.com/inconshreveable/mousetrap v1.1.0
 ## explicit; go 1.18
 github.com/inconshreveable/mousetrap
+# github.com/jacobbrewer1/pagefilter v0.1.4
+## explicit; go 1.23
+github.com/jacobbrewer1/pagefilter
+github.com/jacobbrewer1/pagefilter/common
+# github.com/jacobbrewer1/patcher v0.1.6
+## explicit; go 1.22
+github.com/jacobbrewer1/patcher
+github.com/jacobbrewer1/patcher/inserter
+# github.com/jacobbrewer1/uhttp v0.0.4
+## explicit; go 1.23
+github.com/jacobbrewer1/uhttp
+github.com/jacobbrewer1/uhttp/common
+# github.com/jacobbrewer1/vaulty v0.1.3
+## explicit; go 1.23
+github.com/jacobbrewer1/vaulty
+github.com/jacobbrewer1/vaulty/repositories
 # github.com/jinzhu/copier v0.3.5
 ## explicit; go 1.13
 github.com/jinzhu/copier
@@ -294,7 +294,7 @@ github.com/subosito/gotenv
 # github.com/temoto/robotstxt v1.1.1
 ## explicit; go 1.11
 github.com/temoto/robotstxt
-# github.com/vektra/mockery/v2 v2.46.2
+# github.com/vektra/mockery/v2 v2.46.3
 ## explicit; go 1.23
 github.com/vektra/mockery/v2
 github.com/vektra/mockery/v2/cmd

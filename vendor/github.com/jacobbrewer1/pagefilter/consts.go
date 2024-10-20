@@ -32,4 +32,8 @@ const (
 	QuerySortBy  = "sort_by"
 	QuerySortDir = "sort_dir"
 	QueryLimit   = "limit"
+
+	dbTagAutoIncrement = "autoinc"
+	dbTagPrimaryKey    = "pk"
+	dbTagDefault       = "default"
 )

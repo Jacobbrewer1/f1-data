@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Jacobbrewer1/vaulty/repositories"
 	"github.com/alexliesenfeld/health"
+	"github.com/jacobbrewer1/vaulty/repositories"
 )
 
 func healthHandler(db *repositories.Database) http.Handler {

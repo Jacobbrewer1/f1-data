@@ -24,12 +24,12 @@ func (c *SecretPath) path() string {
 	return c.name
 }
 
-func (c *SecretPath) pathWithType(t string) string {
+func (c *SecretPath) pathWithType(k string) string {
 	if c.prefix != "" {
-		return fmt.Sprintf("%s/%s/%s", c.prefix, t, c.name)
+		return fmt.Sprintf("%s/%s/%s", c.prefix, k, c.name)
 	}
 
-	return fmt.Sprintf("%s/%s", t, c.name)
+	return fmt.Sprintf("%s/%s", k, c.name)
 }
 
 func (c *SecretPath) GetKvSecretV2(ctx context.Context) (*hashiVault.KVSecret, error) {
@@ -56,8 +56,8 @@ func (c *SecretPath) TransitEncrypt(ctx context.Context, data string) (*hashiVau
 	plaintext := base64.StdEncoding.EncodeToString([]byte(data))
 
 	// Encrypt the data using the transit engine
-	encryptData, err := c.r.Client().Logical().WriteWithContext(ctx, c.pathWithType(pathTypeTransitEncrypt), map[string]any{
-		TransitPlainText: plaintext,
+	encryptData, err := c.r.Client().Logical().WriteWithContext(ctx, c.pathWithType(pathKeyTransitEncrypt), map[string]any{
+		TransitKeyPlainText: plaintext,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("unable to encrypt data: %w", err)
@@ -68,15 +68,15 @@ func (c *SecretPath) TransitEncrypt(ctx context.Context, data string) (*hashiVau
 
 func (c *SecretPath) TransitDecrypt(ctx context.Context, data string) (string, error) {
 	// Decrypt the data using the transit engine
-	decryptData, err := c.r.Client().Logical().WriteWithContext(ctx, c.pathWithType(pathTypeTransitDecrypt), map[string]any{
-		TransitCipherText: data,
+	decryptData, err := c.r.Client().Logical().WriteWithContext(ctx, c.pathWithType(pathKeyTransitDecrypt), map[string]any{
+		TransitKeyCipherText: data,
 	})
 	if err != nil {
 		return "", fmt.Errorf("unable to decrypt data: %w", err)
 	}
 
 	// Decode the base64 encoded data
-	decodedData, err := base64.StdEncoding.DecodeString(decryptData.Data[TransitPlainText].(string))
+	decodedData, err := base64.StdEncoding.DecodeString(decryptData.Data[TransitKeyPlainText].(string))
 	if err != nil {
 		return "", fmt.Errorf("unable to decode data: %w", err)
 	}

@@ -4,7 +4,7 @@
 
 The Data API is a RESTful API that provides access to the F1 data stored in the database. The API allows users to query
 the data using various filters and retrieve the results in JSON format; you are able to check out the documentation for
-the API [here](https://github.com/Jacobbrewer1/f1-data-docs).
+the API [here](https://github.com/jacobbrewer1/f1-data-docs).
 
 ## Setup
 

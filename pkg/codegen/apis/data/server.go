@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Jacobbrewer1/uhttp"
+	"github.com/jacobbrewer1/uhttp"
 	"github.com/gorilla/mux"
 	"github.com/oapi-codegen/runtime"
 )

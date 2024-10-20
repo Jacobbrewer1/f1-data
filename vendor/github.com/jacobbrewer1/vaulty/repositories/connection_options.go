@@ -3,8 +3,8 @@ package repositories
 import (
 	"context"
 
-	"github.com/Jacobbrewer1/vaulty"
 	hashiVault "github.com/hashicorp/vault/api"
+	"github.com/jacobbrewer1/vaulty"
 	"github.com/spf13/viper"
 )
 

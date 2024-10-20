@@ -33,9 +33,6 @@ type (
 type client struct {
 	ctx context.Context
 
-	transitPathEncrypt string
-	transitPathDecrypt string
-
 	kvv2Mount string
 
 	auth loginFunc
