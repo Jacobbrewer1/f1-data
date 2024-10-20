@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/Jacobbrewer1/f1-data/pkg/models"
-	repo "github.com/Jacobbrewer1/f1-data/pkg/repositories/importer"
+	"github.com/jacobbrewer1/f1-data/pkg/models"
+	repo "github.com/jacobbrewer1/f1-data/pkg/repositories/importer"
 )
 
 func (s *service) Import(from, to int) error {

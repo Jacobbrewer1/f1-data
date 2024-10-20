@@ -1,8 +1,8 @@
 package data
 
 import (
-	api "github.com/Jacobbrewer1/f1-data/pkg/codegen/apis/data"
-	"github.com/Jacobbrewer1/f1-data/pkg/repositories/data"
+	api "github.com/jacobbrewer1/f1-data/pkg/codegen/apis/data"
+	"github.com/jacobbrewer1/f1-data/pkg/repositories/data"
 )
 
 type service struct {

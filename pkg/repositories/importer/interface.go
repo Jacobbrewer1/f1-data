@@ -1,6 +1,6 @@
 package importer
 
-import "github.com/Jacobbrewer1/f1-data/pkg/models"
+import "github.com/jacobbrewer1/f1-data/pkg/models"
 
 type Repository interface {
 	// GetSeasonByYear returns a season by year

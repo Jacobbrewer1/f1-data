@@ -141,7 +141,7 @@ jobs:
 
       - name: "Install goschema"
         run: |
-          wget https://github.com/Jacobbrewer1/goschema/releases/download/v0.0.1/goschema
+          wget https://github.com/jacobbrewer1/goschema/releases/download/v0.0.1/goschema
           chmod +x goschema
           mv goschema /usr/local/bin
 

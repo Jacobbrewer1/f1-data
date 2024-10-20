@@ -8,11 +8,11 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/Jacobbrewer1/f1-data/pkg/repositories/importer"
-	importerSvc "github.com/Jacobbrewer1/f1-data/pkg/services/importer"
-	"github.com/Jacobbrewer1/vaulty"
-	"github.com/Jacobbrewer1/vaulty/repositories"
 	"github.com/google/subcommands"
+	"github.com/jacobbrewer1/f1-data/pkg/repositories/importer"
+	importerSvc "github.com/jacobbrewer1/f1-data/pkg/services/importer"
+	"github.com/jacobbrewer1/vaulty"
+	"github.com/jacobbrewer1/vaulty/repositories"
 	"github.com/spf13/viper"
 )
 

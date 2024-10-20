@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/Jacobbrewer1/uhttp/common"
+	"github.com/jacobbrewer1/uhttp/common"
 )
 
 // NewMessage creates a new Message.

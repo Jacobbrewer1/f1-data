@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Jacobbrewer1/patcher"
-	"github.com/Jacobbrewer1/patcher/inserter"
+	"github.com/jacobbrewer1/patcher"
+	"github.com/jacobbrewer1/patcher/inserter"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

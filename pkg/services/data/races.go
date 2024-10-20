@@ -5,14 +5,14 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/Jacobbrewer1/f1-data/pkg/codegen/apis/common"
-	api "github.com/Jacobbrewer1/f1-data/pkg/codegen/apis/data"
-	"github.com/Jacobbrewer1/f1-data/pkg/logging"
-	"github.com/Jacobbrewer1/f1-data/pkg/models"
-	repo "github.com/Jacobbrewer1/f1-data/pkg/repositories/data"
-	"github.com/Jacobbrewer1/f1-data/pkg/utils"
-	"github.com/Jacobbrewer1/pagefilter"
-	"github.com/Jacobbrewer1/uhttp"
+	"github.com/jacobbrewer1/f1-data/pkg/codegen/apis/common"
+	api "github.com/jacobbrewer1/f1-data/pkg/codegen/apis/data"
+	"github.com/jacobbrewer1/f1-data/pkg/logging"
+	"github.com/jacobbrewer1/f1-data/pkg/models"
+	repo "github.com/jacobbrewer1/f1-data/pkg/repositories/data"
+	"github.com/jacobbrewer1/f1-data/pkg/utils"
+	"github.com/jacobbrewer1/pagefilter"
+	"github.com/jacobbrewer1/uhttp"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 

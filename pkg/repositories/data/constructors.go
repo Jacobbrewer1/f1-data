@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Jacobbrewer1/f1-data/pkg/models"
-	repoFilter "github.com/Jacobbrewer1/f1-data/pkg/repositories/data/filters"
-	"github.com/Jacobbrewer1/pagefilter"
+	"github.com/jacobbrewer1/f1-data/pkg/models"
+	repoFilter "github.com/jacobbrewer1/f1-data/pkg/repositories/data/filters"
+	"github.com/jacobbrewer1/pagefilter"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

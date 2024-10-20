@@ -1,6 +1,6 @@
 package importer
 
-import "github.com/Jacobbrewer1/f1-data/pkg/repositories/importer"
+import "github.com/jacobbrewer1/f1-data/pkg/repositories/importer"
 
 type Service interface {
 	Import(from, to int) error

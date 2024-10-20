@@ -3,7 +3,7 @@
 package importer
 
 import (
-	models "github.com/Jacobbrewer1/f1-data/pkg/models"
+	models "github.com/jacobbrewer1/f1-data/pkg/models"
 	mock "github.com/stretchr/testify/mock"
 )
 

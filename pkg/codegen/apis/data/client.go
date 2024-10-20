@@ -12,7 +12,7 @@ import (
 	"net/url"
 	"strings"
 
-	externalRef0 "github.com/Jacobbrewer1/f1-data/pkg/codegen/apis/common"
+	externalRef0 "github.com/jacobbrewer1/f1-data/pkg/codegen/apis/common"
 	"github.com/oapi-codegen/runtime"
 )
 

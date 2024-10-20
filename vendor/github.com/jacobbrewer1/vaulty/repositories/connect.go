@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/Jacobbrewer1/vaulty"
 	_ "github.com/go-sql-driver/mysql"
 	hashiVault "github.com/hashicorp/vault/api"
+	"github.com/jacobbrewer1/vaulty"
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 )
