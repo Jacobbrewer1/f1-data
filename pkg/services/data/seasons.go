@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/jacobbrewer1/f1-data/pkg/codegen/apis/common"
 	api "github.com/jacobbrewer1/f1-data/pkg/codegen/apis/data"
 	"github.com/jacobbrewer1/f1-data/pkg/logging"
 	"github.com/jacobbrewer1/f1-data/pkg/models"
@@ -18,11 +17,12 @@ import (
 func (s *service) GetSeasons(w http.ResponseWriter, r *http.Request, params api.GetSeasonsParams) {
 	l := logging.LoggerFromRequest(r)
 
-	sortDir := new(common.SortDirection)
-	if params.SortDir != nil {
-		sortDir = (*common.SortDirection)(params.SortDir)
+	paginationDetails, err := pagefilter.DetailsFromRequest(r)
+	if err != nil {
+		l.Error("Failed to get pagination details", slog.String(logging.KeyError, err.Error()))
+		uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "failed to get pagination details", err)
+		return
 	}
-	paginationDetails := pagefilter.GetPaginatorDetails(params.Limit, params.LastVal, params.LastId, params.SortBy, sortDir)
 
 	// If the limit is not set, remove it from the pagination details.
 	if params.Limit == nil {
