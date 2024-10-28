@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +16,7 @@ import (
 	"github.com/jacobbrewer1/f1-data/pkg/logging"
 	"github.com/jacobbrewer1/f1-data/pkg/models"
 	repo "github.com/jacobbrewer1/f1-data/pkg/repositories/importer"
+	"github.com/jacobbrewer1/patcher"
 )
 
 func (s *service) ImportSeasonRaces(year int) error {
@@ -76,6 +78,8 @@ func (s *service) ImportSeasonRaces(year int) error {
 			return
 		} else if existingRace != nil {
 			newRace.Id = existingRace.Id
+		} else if existingRace == nil {
+			existingRace = new(models.Race)
 		}
 
 		newRace.SeasonId = season.Id
@@ -90,19 +94,31 @@ func (s *service) ImportSeasonRaces(year int) error {
 			return
 		}
 
-		opts := cmpopts.IgnoreFields(models.Race{}, "Id")
-		if diff := cmp.Diff(existingRace, newRace, opts); diff == "" {
-			slog.Debug("Races are the same",
-				slog.String("grand_prix", e.Text),
-				slog.String("year", fmt.Sprintf("%d", year)),
-				slog.String("diff", diff),
-			)
-		} else {
-			slog.Debug("Races are different",
-				slog.String("grand_prix", e.Text),
-				slog.String("year", fmt.Sprintf("%d", year)),
-				slog.String("diff", diff),
-			)
+		// Create a copy of the existing
+		var existingRaceCopy models.Race
+		if existingRace != nil {
+			existingRaceCopy = *existingRace
+		}
+
+		if err := patcher.LoadDiff(existingRace, newRace); err != nil {
+			slog.Error("Error loading diff", slog.String(logging.KeyError, err.Error()))
+			return
+		}
+
+		if !reflect.DeepEqual(*existingRace, existingRaceCopy) {
+			// Race is different, save it.
+
+			if !reflect.DeepEqual(existingRaceCopy, models.Race{}) {
+				// Get the difference between the two structs and log it.
+				opts := cmpopts.IgnoreFields(models.Race{}, "Id")
+				diff := cmp.Diff(existingRace, existingRaceCopy, opts)
+
+				slog.Debug("Races are different",
+					slog.String("grand_prix", e.Text),
+					slog.String("year", fmt.Sprintf("%d", year)),
+					slog.String("diff", diff),
+				)
+			}
 
 			err = s.r.SaveRace(newRace)
 			if err != nil {
@@ -176,6 +192,8 @@ func (s *service) ImportSeasonDriversChamps(year int) error {
 				return
 			} else if existingDriver != nil {
 				newDriver.Id = existingDriver.Id
+			} else if existingDriver == nil {
+				existingDriver = new(models.DriverChampionship)
 			}
 
 			newDriver.SeasonId = season.Id
@@ -198,19 +216,32 @@ func (s *service) ImportSeasonDriversChamps(year int) error {
 			}
 			newDriver.Points = points
 
-			opts := cmpopts.IgnoreFields(models.DriverChampionship{}, "Id")
-			if diff := cmp.Diff(existingDriver, newDriver, opts); diff == "" {
-				slog.Debug("Drivers are the same",
-					slog.String("driver", driverName),
-					slog.String("year", fmt.Sprintf("%d", year)),
-					slog.String("diff", diff),
-				)
-			} else {
-				slog.Debug("Drivers are different",
-					slog.String("driver", driverName),
-					slog.String("year", fmt.Sprintf("%d", year)),
-					slog.String("diff", diff),
-				)
+			// Create a copy of the existing
+			var existingDriverCopy models.DriverChampionship
+			if existingDriver != nil {
+				existingDriverCopy = *existingDriver
+			}
+
+			if err := patcher.LoadDiff(existingDriver, newDriver); err != nil {
+				slog.Error("Error loading diff", slog.String(logging.KeyError, err.Error()))
+				return
+			}
+
+			if !reflect.DeepEqual(*existingDriver, existingDriverCopy) {
+				// Drivers are different, log the difference and save the new driver.
+
+				// Only log the difference if the drive is not currently in the database.
+				if !reflect.DeepEqual(existingDriverCopy, models.DriverChampionship{}) {
+					// Get the difference between the two structs and log it.
+					opts := cmpopts.IgnoreFields(models.DriverChampionship{}, "Id")
+					diff := cmp.Diff(existingDriver, existingDriverCopy, opts)
+
+					slog.Debug("Drivers are different",
+						slog.String("driver", driverName),
+						slog.String("year", fmt.Sprintf("%d", year)),
+						slog.String("diff", diff),
+					)
+				}
 
 				err = s.r.SaveDriver(newDriver)
 				if err != nil {
@@ -250,13 +281,17 @@ func (s *service) ImportSeasonConstructorsChamps(year int) error {
 				return
 			}
 
+			constructorName := children[1]
+
 			newConstructor := new(models.ConstructorChampionship)
-			existingConstructor, err := s.r.GetConstructorByName(season.Id, children[1])
+			existingConstructor, err := s.r.GetConstructorByName(season.Id, constructorName)
 			if err != nil && !errors.Is(err, repo.ErrConstructorNotFound) {
 				slog.Error("Error getting driver", slog.String(logging.KeyError, err.Error()))
 				return
 			} else if existingConstructor != nil {
 				newConstructor.Id = existingConstructor.Id
+			} else if existingConstructor == nil {
+				existingConstructor = new(models.ConstructorChampionship)
 			}
 
 			newConstructor.SeasonId = season.Id
@@ -276,25 +311,39 @@ func (s *service) ImportSeasonConstructorsChamps(year int) error {
 			}
 			newConstructor.Points = points
 
-			opts := cmpopts.IgnoreFields(models.ConstructorChampionship{}, "Id")
-			if diff := cmp.Diff(existingConstructor, newConstructor, opts); diff == "" {
-				slog.Debug("Constructors are the same",
-					slog.String("constructor", children[1]),
-					slog.String("year", fmt.Sprintf("%d", year)),
-					slog.String("diff", diff),
-				)
-			} else {
+			// Create a copy of the existing
+			var existingConstructorCopy models.ConstructorChampionship
+			if existingConstructor != nil {
+				existingConstructorCopy = *existingConstructor
+			}
+
+			if err := patcher.LoadDiff(existingConstructor, newConstructor); err != nil {
+				slog.Error("Error loading diff", slog.String(logging.KeyError, err.Error()))
+				return
+			}
+
+			if reflect.DeepEqual(*existingConstructor, existingConstructorCopy) {
+				return
+			}
+
+			if !reflect.DeepEqual(existingConstructorCopy, models.ConstructorChampionship{}) {
+				// Constructors are different, log the difference and save the new constructor.
+
+				// Get the difference between the two structs and log it.
+				opts := cmpopts.IgnoreFields(models.ConstructorChampionship{}, "Id")
+				diff := cmp.Diff(existingConstructor, newConstructor, opts)
+
 				slog.Debug("Constructors are different",
 					slog.String("constructor", children[1]),
 					slog.String("year", fmt.Sprintf("%d", year)),
 					slog.String("diff", diff),
 				)
+			}
 
-				err = s.r.SaveConstructor(newConstructor)
-				if err != nil {
-					slog.Error("Error saving driver", slog.String(logging.KeyError, err.Error()))
-					return
-				}
+			err = s.r.SaveConstructor(newConstructor)
+			if err != nil {
+				slog.Error("Error saving driver", slog.String(logging.KeyError, err.Error()))
+				return
 			}
 		})
 	})
