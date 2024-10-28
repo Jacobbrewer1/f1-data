@@ -62,7 +62,7 @@ func (s *service) Import(from, to int) error {
 			defer wg.Done()
 			err := s.ImportSeasonConstructorsChamps(i)
 			if err != nil {
-				slog.Error(fmt.Sprintf("error importing season %d constructors championship: %v", err))
+				slog.Error(fmt.Sprintf("error importing season %d constructors championship: %v", i, err))
 				return
 			}
 
