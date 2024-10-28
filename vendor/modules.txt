@@ -146,7 +146,7 @@ github.com/inconshreveable/mousetrap
 ## explicit; go 1.23
 github.com/jacobbrewer1/pagefilter
 github.com/jacobbrewer1/pagefilter/common
-# github.com/jacobbrewer1/patcher v0.1.6
+# github.com/jacobbrewer1/patcher v0.1.9
 ## explicit; go 1.22
 github.com/jacobbrewer1/patcher
 github.com/jacobbrewer1/patcher/inserter
