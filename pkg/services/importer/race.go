@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
+	"reflect"
 	"strconv"
 
 	"github.com/gocolly/colly/v2"
@@ -13,6 +14,7 @@ import (
 	"github.com/jacobbrewer1/f1-data/pkg/logging"
 	"github.com/jacobbrewer1/f1-data/pkg/models"
 	repo "github.com/jacobbrewer1/f1-data/pkg/repositories/importer"
+	"github.com/jacobbrewer1/patcher"
 )
 
 func (s *service) processRace(raceId int, url *url.URL) error {
@@ -33,6 +35,7 @@ func (s *service) processRace(raceId int, url *url.URL) error {
 	c.OnHTML("tbody", func(e *colly.HTMLElement) {
 		e.ForEach("tr", func(_ int, el *colly.HTMLElement) {
 			raceResult := new(models.RaceResult)
+			raceResult.RaceId = raceId
 			existingRaceResult := new(models.RaceResult)
 
 			el.ForEach("p", func(_ int, elm *colly.HTMLElement) {
@@ -89,27 +92,36 @@ func (s *service) processRace(raceId int, url *url.URL) error {
 			})
 			i = 0
 
-			raceResult.Id = existingRaceResult.Id
-			raceResult.RaceId = raceId
+			// Create a copy of the existing
 
-			opts := cmpopts.IgnoreFields(models.RaceResult{}, "Id")
-			if diff := cmp.Diff(existingRaceResult, raceResult, opts); diff == "" {
-				slog.Debug("Race Results are the same",
-					slog.String("driver", raceResult.Driver),
-					slog.Int("race_id", raceId),
-					slog.String("diff", diff),
-				)
-			} else {
+			var existingRaceResultCopy models.RaceResult
+			if existingRaceResult != nil {
+				existingRaceResultCopy = *existingRaceResult
+			}
+
+			if err := patcher.LoadDiff(existingRaceResult, raceResult); err != nil {
+				slog.Error("Error loading diff", slog.String(logging.KeyError, err.Error()))
+			}
+
+			if reflect.DeepEqual(*existingRaceResult, existingRaceResultCopy) {
+				return
+			}
+
+			if reflect.DeepEqual(*existingRaceResult, existingRaceResultCopy) {
+				// What is the difference between the two structs?
+				opts := cmpopts.IgnoreFields(models.RaceResult{}, "Id")
+				diff := cmp.Diff(existingRaceResult, existingRaceResultCopy, opts)
+
 				slog.Debug("Race Results are different",
 					slog.String("driver", raceResult.Driver),
 					slog.Int("race_id", raceId),
 					slog.String("diff", diff),
 				)
+			}
 
-				err := s.r.SaveRaceResult(raceResult)
-				if err != nil {
-					slog.Error("Error saving race result", slog.String(logging.KeyError, err.Error()))
-				}
+			err := s.r.SaveRaceResult(raceResult)
+			if err != nil {
+				slog.Error("Error saving race result", slog.String(logging.KeyError, err.Error()))
 			}
 		})
 	})
