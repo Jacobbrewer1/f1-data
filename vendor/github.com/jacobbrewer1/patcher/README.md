@@ -23,13 +23,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/Jacobbrewer1/patcher"
+	"github.com/jacobbrewer1/patcher"
 )
 
 type Person struct {
-	ID   *int    `db:"id"`
+	ID   *int    `db:"-"`
 	Name *string `db:"name"`
-	Age  *int    `db:"age"`
 }
 
 type PersonWhere struct {
@@ -47,14 +46,14 @@ func (p *PersonWhere) Where() (string, []any) {
 }
 
 func main() {
-	const jsonStr = `{"name": "John", "age": 25}`
+	const jsonStr = `{"id": 1, "name": "john"}`
 
 	person := new(Person)
 	if err := json.Unmarshal([]byte(jsonStr), person); err != nil {
 		panic(err)
 	}
 
-	condition := NewPersonWhere(1)
+	condition := NewPersonWhere(*person.ID)
 
 	sqlStr, args, err := patcher.GenerateSQL(
 		person,
@@ -65,9 +64,20 @@ func main() {
 		panic(err)
 	}
 
+	// Output:
+	// UPDATE people
+	// SET name = ?
+	// WHERE (1 = 1)
+	//   AND (
+	//     id = ?
+	//     )
 	fmt.Println(sqlStr)
+	
+	// Output:
+	// ["John", 1]
 	fmt.Println(args)
 }
+
 ```
 
 This will output:
@@ -90,6 +100,61 @@ with the args:
 
 #### Struct diffs
 
+The Patcher library has functionality where you are able to inject changes from one struct to another. This is
+configurable to include Zero values and Nil values if requested. Please see the
+example [here](./examples/loader_with_opts) for the detailed example. Below is an example on how you can utilize this
+method with the default behaviour (Please see the comment attached to the `LoadDiff` [method](./loader.go) for the
+default behaviour).
+
+Example:
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/jacobbrewer1/patcher"
+)
+
+type Something struct {
+	Number       int
+	Text         string
+	PrePopulated string
+	NewText      string
+}
+
+func main() {
+	s := Something{
+		Number:       5,
+		Text:         "Hello",
+		PrePopulated: "PrePopulated",
+	}
+
+	n := Something{
+		Number:  6,
+		Text:    "Old Text",
+		NewText: "New Text",
+	}
+
+	// The patcher.LoadDiff function will apply the changes from n to s.
+	if err := patcher.LoadDiff(&s, &n); err != nil {
+		panic(err)
+	}
+
+	// Output:
+	// 6
+	// Old Text
+	// PrePopulated
+	// New Text
+	fmt.Println(s.Number)
+	fmt.Println(s.Text)
+	fmt.Println(s.PrePopulated)
+	fmt.Println(s.NewText)
+}
+
+```
+
 If you would like to generate an update script from two structs, you can use the `NewDiffSQLPatch` function. This
 function will generate an update script from the two structs.
 
@@ -101,7 +166,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/Jacobbrewer1/patcher"
+	"github.com/jacobbrewer1/patcher"
 )
 
 type Something struct {
