@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jacobbrewer1/f1-data/pkg/models"
 )
@@ -31,6 +32,8 @@ func (r *repository) GetDriverByName(seasonId int, name string) (*models.DriverC
 }
 
 func (r *repository) SaveDriver(driver *models.DriverChampionship) error {
+	driver.UpdatedAt = time.Now().UTC()
+
 	err := driver.SaveOrUpdate(r.db)
 	if err != nil {
 		switch {

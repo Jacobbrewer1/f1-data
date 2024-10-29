@@ -19,6 +19,7 @@ type Race struct {
 	SeasonId  int       `db:"season_id"`
 	GrandPrix string    `db:"grand_prix"`
 	Date      time.Time `db:"date"`
+	UpdatedAt time.Time `db:"updated_at,default"`
 }
 
 // Insert inserts the Race to the database.
@@ -27,13 +28,13 @@ func (m *Race) Insert(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO race (" +
-		"`season_id`, `grand_prix`, `date`" +
+		"`season_id`, `grand_prix`, `date`, `updated_at`" +
 		") VALUES (" +
-		"?, ?, ?" +
+		"?, ?, ?, ?" +
 		")"
 
-	DBLog(sqlstr, m.SeasonId, m.GrandPrix, m.Date)
-	res, err := db.Exec(sqlstr, m.SeasonId, m.GrandPrix, m.Date)
+	DBLog(sqlstr, m.SeasonId, m.GrandPrix, m.Date, m.UpdatedAt)
+	res, err := db.Exec(sqlstr, m.SeasonId, m.GrandPrix, m.Date, m.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -95,11 +96,11 @@ func (m *Race) Update(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "UPDATE race " +
-		"SET `season_id` = ?, `grand_prix` = ?, `date` = ? " +
+		"SET `season_id` = ?, `grand_prix` = ?, `date` = ?, `updated_at` = ? " +
 		"WHERE `id` = ?"
 
-	DBLog(sqlstr, m.SeasonId, m.GrandPrix, m.Date, m.Id)
-	res, err := db.Exec(sqlstr, m.SeasonId, m.GrandPrix, m.Date, m.Id)
+	DBLog(sqlstr, m.SeasonId, m.GrandPrix, m.Date, m.UpdatedAt, m.Id)
+	res, err := db.Exec(sqlstr, m.SeasonId, m.GrandPrix, m.Date, m.UpdatedAt, m.Id)
 	if err != nil {
 		return err
 	}
@@ -150,14 +151,14 @@ func (m *Race) InsertWithUpdate(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO race (" +
-		"`season_id`, `grand_prix`, `date`" +
+		"`season_id`, `grand_prix`, `date`, `updated_at`" +
 		") VALUES (" +
-		"?, ?, ?" +
+		"?, ?, ?, ?" +
 		") ON DUPLICATE KEY UPDATE " +
-		"`season_id` = VALUES(`season_id`), `grand_prix` = VALUES(`grand_prix`), `date` = VALUES(`date`)"
+		"`season_id` = VALUES(`season_id`), `grand_prix` = VALUES(`grand_prix`), `date` = VALUES(`date`), `updated_at` = VALUES(`updated_at`)"
 
-	DBLog(sqlstr, m.SeasonId, m.GrandPrix, m.Date)
-	res, err := db.Exec(sqlstr, m.SeasonId, m.GrandPrix, m.Date)
+	DBLog(sqlstr, m.SeasonId, m.GrandPrix, m.Date, m.UpdatedAt)
+	res, err := db.Exec(sqlstr, m.SeasonId, m.GrandPrix, m.Date, m.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -208,7 +209,7 @@ func RaceById(db DB, id int) (*Race, error) {
 	t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("insert_Race"))
 	defer t.ObserveDuration()
 
-	const sqlstr = "SELECT `id`, `season_id`, `grand_prix`, `date` " +
+	const sqlstr = "SELECT `id`, `season_id`, `grand_prix`, `date`, `updated_at` " +
 		"FROM race " +
 		"WHERE `id` = ?"
 

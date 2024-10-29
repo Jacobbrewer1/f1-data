@@ -6,6 +6,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jacobbrewer1/patcher"
 	"github.com/jacobbrewer1/patcher/inserter"
@@ -14,11 +15,12 @@ import (
 
 // ConstructorChampionship represents a row from 'constructor_championship'.
 type ConstructorChampionship struct {
-	Id       int     `db:"id,autoinc,pk"`
-	SeasonId int     `db:"season_id"`
-	Position int     `db:"position"`
-	Name     string  `db:"name"`
-	Points   float64 `db:"points"`
+	Id        int       `db:"id,autoinc,pk"`
+	SeasonId  int       `db:"season_id"`
+	Position  int       `db:"position"`
+	Name      string    `db:"name"`
+	Points    float64   `db:"points"`
+	UpdatedAt time.Time `db:"updated_at,default"`
 }
 
 // Insert inserts the ConstructorChampionship to the database.
@@ -27,13 +29,13 @@ func (m *ConstructorChampionship) Insert(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO constructor_championship (" +
-		"`season_id`, `position`, `name`, `points`" +
+		"`season_id`, `position`, `name`, `points`, `updated_at`" +
 		") VALUES (" +
-		"?, ?, ?, ?" +
+		"?, ?, ?, ?, ?" +
 		")"
 
-	DBLog(sqlstr, m.SeasonId, m.Position, m.Name, m.Points)
-	res, err := db.Exec(sqlstr, m.SeasonId, m.Position, m.Name, m.Points)
+	DBLog(sqlstr, m.SeasonId, m.Position, m.Name, m.Points, m.UpdatedAt)
+	res, err := db.Exec(sqlstr, m.SeasonId, m.Position, m.Name, m.Points, m.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -95,11 +97,11 @@ func (m *ConstructorChampionship) Update(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "UPDATE constructor_championship " +
-		"SET `season_id` = ?, `position` = ?, `name` = ?, `points` = ? " +
+		"SET `season_id` = ?, `position` = ?, `name` = ?, `points` = ?, `updated_at` = ? " +
 		"WHERE `id` = ?"
 
-	DBLog(sqlstr, m.SeasonId, m.Position, m.Name, m.Points, m.Id)
-	res, err := db.Exec(sqlstr, m.SeasonId, m.Position, m.Name, m.Points, m.Id)
+	DBLog(sqlstr, m.SeasonId, m.Position, m.Name, m.Points, m.UpdatedAt, m.Id)
+	res, err := db.Exec(sqlstr, m.SeasonId, m.Position, m.Name, m.Points, m.UpdatedAt, m.Id)
 	if err != nil {
 		return err
 	}
@@ -150,14 +152,14 @@ func (m *ConstructorChampionship) InsertWithUpdate(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO constructor_championship (" +
-		"`season_id`, `position`, `name`, `points`" +
+		"`season_id`, `position`, `name`, `points`, `updated_at`" +
 		") VALUES (" +
-		"?, ?, ?, ?" +
+		"?, ?, ?, ?, ?" +
 		") ON DUPLICATE KEY UPDATE " +
-		"`season_id` = VALUES(`season_id`), `position` = VALUES(`position`), `name` = VALUES(`name`), `points` = VALUES(`points`)"
+		"`season_id` = VALUES(`season_id`), `position` = VALUES(`position`), `name` = VALUES(`name`), `points` = VALUES(`points`), `updated_at` = VALUES(`updated_at`)"
 
-	DBLog(sqlstr, m.SeasonId, m.Position, m.Name, m.Points)
-	res, err := db.Exec(sqlstr, m.SeasonId, m.Position, m.Name, m.Points)
+	DBLog(sqlstr, m.SeasonId, m.Position, m.Name, m.Points, m.UpdatedAt)
+	res, err := db.Exec(sqlstr, m.SeasonId, m.Position, m.Name, m.Points, m.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -208,7 +210,7 @@ func ConstructorChampionshipById(db DB, id int) (*ConstructorChampionship, error
 	t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("insert_ConstructorChampionship"))
 	defer t.ObserveDuration()
 
-	const sqlstr = "SELECT `id`, `season_id`, `position`, `name`, `points` " +
+	const sqlstr = "SELECT `id`, `season_id`, `position`, `name`, `points`, `updated_at` " +
 		"FROM constructor_championship " +
 		"WHERE `id` = ?"
 

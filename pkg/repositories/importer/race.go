@@ -3,6 +3,7 @@ package importer
 import (
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/jacobbrewer1/f1-data/pkg/models"
 )
@@ -13,6 +14,7 @@ var (
 )
 
 func (r *repository) SaveRace(race *models.Race) error {
+	race.UpdatedAt = time.Now().UTC()
 	err := race.SaveOrUpdate(r.db)
 	if err != nil {
 		switch {

@@ -8,6 +8,7 @@ create table driver_championship
     nationality varchar(3)    not null,
     team        varchar(255)  not null,
     points      decimal(6, 2) not null,
+    updated_at  datetime      not null default now(),
     primary key (id),
     constraint driver_championship_season_id_fk
         foreign key (season_id) references season (id)
