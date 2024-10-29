@@ -5,10 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"slices"
 	"strings"
 )
 
-const tagName = "db"
+const (
+	DefaultDbTagName = "db"
+)
 
 var (
 	// ErrNoChanges is returned when no changes are detected between the old and new objects
@@ -16,15 +19,8 @@ var (
 )
 
 func NewSQLPatch(resource any, opts ...PatchOpt) *SQLPatch {
-	sqlPatch := new(SQLPatch)
-	sqlPatch.tagName = tagName
-
-	for _, opt := range opts {
-		opt(sqlPatch)
-	}
-
+	sqlPatch := newPatchDefaults(opts...)
 	sqlPatch.patchGen(resource)
-
 	return sqlPatch
 }
 
@@ -52,22 +48,48 @@ func (s *SQLPatch) patchGen(resource any) {
 		fVal := rVal.Field(i)
 		tag := fType.Tag.Get(s.tagName)
 
-		// skip nil properties (not going to be patched), skip unexported fields, skip fields to be skipped for SQL
-		if fVal.Kind() == reflect.Ptr && (fVal.IsNil() || fType.PkgPath != "" || tag == "-") {
+		// Skip unexported fields
+		if !fType.IsExported() {
 			continue
-		} else if fVal.Kind() != reflect.Ptr && fVal.IsZero() {
-			// skip zero values for non-pointer fields as we have no way to differentiate between zero values and nil pointers
+		}
+
+		// Skip fields that are to be ignored
+		if s.checkSkipField(fType) {
 			continue
+		} else if fVal.Kind() == reflect.Ptr && (fVal.IsNil() && !s.includeNilValues) {
+			continue
+		} else if fVal.Kind() != reflect.Ptr && (fVal.IsZero() && !s.includeZeroValues) {
+			continue
+		}
+
+		patcherOptsTag := fType.Tag.Get(TagOptsName)
+		if patcherOptsTag != "" {
+			patcherOpts := strings.Split(patcherOptsTag, TagOptSeparator)
+			if slices.Contains(patcherOpts, TagOptSkip) {
+				continue
+			}
 		}
 
 		// if no tag is set, use the field name
-		if tag == "" {
-			tag = strings.ToLower(fType.Name)
+		if tag == TagOptSkip {
+			continue
+		} else if tag == "" {
+			tag = fType.Name
 		}
-		// and make the tag lowercase in the end
-		tag = strings.ToLower(tag)
 
-		s.fields = append(s.fields, tag+" = ?")
+		addField := func() {
+			s.fields = append(s.fields, tag+" = ?")
+		}
+
+		if fVal.Kind() == reflect.Ptr && fVal.IsNil() && s.includeNilValues {
+			s.args = append(s.args, nil)
+			addField()
+			continue
+		} else if fVal.Kind() == reflect.Ptr && fVal.IsNil() {
+			continue
+		}
+
+		addField()
 
 		var val reflect.Value
 		if fVal.Kind() == reflect.Ptr {
@@ -87,9 +109,11 @@ func (s *SQLPatch) patchGen(resource any) {
 				boolArg = 1
 			}
 			s.args = append(s.args, boolArg)
+		case reflect.Float32, reflect.Float64:
+			s.args = append(s.args, val.Float())
 		default:
 			// This is intentionally a panic as this is a programming error and should be fixed by the developer
-			panic("unhandled default case")
+			panic(fmt.Sprintf("unsupported type: %s", val.Kind()))
 		}
 	}
 }
@@ -121,7 +145,7 @@ func (s *SQLPatch) GenerateSQL() (string, []any, error) {
 	sqlBuilder.WriteString("AND (\n")
 
 	// If the where clause starts with "AND" or "OR", we need to remove it
-	where := s.where.String()
+	where := s.whereSql.String()
 	if strings.HasPrefix(where, string(WhereTypeAnd)) || strings.HasPrefix(where, string(WhereTypeOr)) {
 		where = strings.TrimPrefix(where, string(WhereTypeAnd))
 		where = strings.TrimPrefix(where, string(WhereTypeOr))
@@ -175,7 +199,8 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 	// copy the old object into the copy
 	reflect.ValueOf(oldCopy).Elem().Set(reflect.ValueOf(old).Elem())
 
-	if err := LoadDiff(old, newT); err != nil {
+	patch := newPatchDefaults(opts...)
+	if err := patch.loadDiff(old, newT); err != nil {
 		return nil, fmt.Errorf("load diff: %w", err)
 	}
 
@@ -189,21 +214,23 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 		oldField := reflect.ValueOf(old).Elem().Field(i)
 		copyField := reflect.ValueOf(oldCopy).Elem().Field(i)
 
-		if oldField.Kind() == reflect.Ptr && oldField.IsNil() {
+		if oldField.Kind() == reflect.Ptr && (oldField.IsNil() && copyField.IsNil() && !patch.includeZeroValues) {
 			continue
-		} else if oldField.Kind() != reflect.Ptr && oldField.IsZero() {
+		} else if oldField.Kind() != reflect.Ptr && (oldField.IsZero() && copyField.IsZero() && !patch.includeZeroValues) {
 			continue
 		}
 
 		if reflect.DeepEqual(oldField.Interface(), copyField.Interface()) {
-			if oldField.Kind() == reflect.Ptr {
-				oldField.Set(reflect.Zero(oldField.Type()))
-				continue
+			// Field is the same, set it to zero or nil. Add it to be ignored in the patch
+			if patch.ignoreFields == nil {
+				patch.ignoreFields = make([]string, 0)
 			}
-			oldField.Set(reflect.New(oldField.Type()).Elem())
+			patch.ignoreFields = append(patch.ignoreFields, strings.ToLower(reflect.ValueOf(old).Elem().Type().Field(i).Name))
 			continue
 		}
 	}
 
-	return NewSQLPatch(old, opts...), nil
+	patch.patchGen(old)
+
+	return patch, nil
 }
