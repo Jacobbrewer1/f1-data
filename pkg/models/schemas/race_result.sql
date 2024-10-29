@@ -10,6 +10,7 @@ create table race_result
     laps          int           not null,
     time_retired  varchar(100)  not null,
     points        decimal(4, 2) not null,
+    updated_at    datetime      not null default now(),
     primary key (id),
     constraint race_result_race_id_fk
         foreign key (race_id) references race (id)

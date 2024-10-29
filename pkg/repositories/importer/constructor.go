@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jacobbrewer1/f1-data/pkg/models"
 )
@@ -31,6 +32,7 @@ func (r *repository) GetConstructorByName(seasonId int, name string) (*models.Co
 }
 
 func (r *repository) SaveConstructor(constructor *models.ConstructorChampionship) error {
+	constructor.UpdatedAt = time.Now().UTC()
 	err := constructor.SaveOrUpdate(r.db)
 	if err != nil {
 		switch {
