@@ -13,7 +13,3 @@ alter table driver_championship add system versioning;
 alter table constructor_championship drop system versioning;
 alter table constructor_championship add column updated_at datetime not null default now();
 alter table constructor_championship add system versioning;
-
-alter table season drop system versioning;
-alter table season add column updated_at datetime not null default now();
-alter table season add system versioning;
