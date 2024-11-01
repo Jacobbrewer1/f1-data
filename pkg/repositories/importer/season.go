@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/jacobbrewer1/f1-data/pkg/models"
 )
@@ -15,8 +14,6 @@ var (
 )
 
 func (r *repository) SaveSeason(season *models.Season) error {
-	season.UpdatedAt = time.Now().UTC()
-
 	err := season.SaveOrUpdate(r.db)
 	if err != nil {
 		switch {

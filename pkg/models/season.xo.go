@@ -6,7 +6,6 @@ package models
 import (
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/jacobbrewer1/patcher"
 	"github.com/jacobbrewer1/patcher/inserter"
@@ -15,9 +14,8 @@ import (
 
 // Season represents a row from 'season'.
 type Season struct {
-	Id        int       `db:"id,autoinc,pk"`
-	Year      int       `db:"year"`
-	UpdatedAt time.Time `db:"updated_at,default"`
+	Id   int `db:"id,autoinc,pk"`
+	Year int `db:"year"`
 }
 
 // Insert inserts the Season to the database.
@@ -26,13 +24,13 @@ func (m *Season) Insert(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO season (" +
-		"`year`, `updated_at`" +
+		"`year`" +
 		") VALUES (" +
-		"?, ?" +
+		"?" +
 		")"
 
-	DBLog(sqlstr, m.Year, m.UpdatedAt)
-	res, err := db.Exec(sqlstr, m.Year, m.UpdatedAt)
+	DBLog(sqlstr, m.Year)
+	res, err := db.Exec(sqlstr, m.Year)
 	if err != nil {
 		return err
 	}
@@ -94,11 +92,11 @@ func (m *Season) Update(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "UPDATE season " +
-		"SET `year` = ?, `updated_at` = ? " +
+		"SET `year` = ? " +
 		"WHERE `id` = ?"
 
-	DBLog(sqlstr, m.Year, m.UpdatedAt, m.Id)
-	res, err := db.Exec(sqlstr, m.Year, m.UpdatedAt, m.Id)
+	DBLog(sqlstr, m.Year, m.Id)
+	res, err := db.Exec(sqlstr, m.Year, m.Id)
 	if err != nil {
 		return err
 	}
@@ -149,14 +147,14 @@ func (m *Season) InsertWithUpdate(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO season (" +
-		"`year`, `updated_at`" +
+		"`year`" +
 		") VALUES (" +
-		"?, ?" +
+		"?" +
 		") ON DUPLICATE KEY UPDATE " +
-		"`year` = VALUES(`year`), `updated_at` = VALUES(`updated_at`)"
+		"`year` = VALUES(`year`)"
 
-	DBLog(sqlstr, m.Year, m.UpdatedAt)
-	res, err := db.Exec(sqlstr, m.Year, m.UpdatedAt)
+	DBLog(sqlstr, m.Year)
+	res, err := db.Exec(sqlstr, m.Year)
 	if err != nil {
 		return err
 	}
@@ -207,7 +205,7 @@ func SeasonById(db DB, id int) (*Season, error) {
 	t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("insert_Season"))
 	defer t.ObserveDuration()
 
-	const sqlstr = "SELECT `id`, `year`, `updated_at` " +
+	const sqlstr = "SELECT `id`, `year` " +
 		"FROM season " +
 		"WHERE `id` = ?"
 
