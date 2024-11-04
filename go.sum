@@ -133,8 +133,8 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/jacobbrewer1/pagefilter v0.1.4 h1:yo+F4qsmu1DHo0mIcoBHeofIufO0HnUW7/9eaqN0K1s=
 github.com/jacobbrewer1/pagefilter v0.1.4/go.mod h1:6tTrmLumsrhUuDuvOSU8PEFP3n1IXifeAt+A3+Pr9jk=
-github.com/jacobbrewer1/patcher v0.1.9 h1:tefNIK4l3lOYnHlG5VeT4xLYsyfZNQPAOlBrNhMeOIE=
-github.com/jacobbrewer1/patcher v0.1.9/go.mod h1:VsVaZhwRCQpmKu1kPfV0qf35xRdjE8ecdkNrb0RrK3U=
+github.com/jacobbrewer1/patcher v0.1.10 h1:k0T4/hW6F5r5bQ+WDzeaBg0u5ykAr6shQ7Z1P8YUfyU=
+github.com/jacobbrewer1/patcher v0.1.10/go.mod h1:DbPetwfn5Fgarwn5VOjALRjNflSX0rbkGssZ0cRsOlo=
 github.com/jacobbrewer1/uhttp v0.0.4 h1:3RrRmz0fjsnLKuAs5fkflOcsjuBFoL0XvC6Xct/TDCk=
 github.com/jacobbrewer1/uhttp v0.0.4/go.mod h1:qwLAdGw4SLYJY2MS0sE1m/w1ILTr61bjwRtlbGwqo5c=
 github.com/jacobbrewer1/vaulty v0.1.3 h1:0L3JnmzqcxL91COVMUkT+HWje3jTy9YjYbpFOyGmHBo=
