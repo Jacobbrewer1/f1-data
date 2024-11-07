@@ -18,6 +18,7 @@ fi
 all=false
 clean=false
 forced=false
+silent=false
 
 # Get the flags passed to the script and set the variables accordingly
 while getopts "acf" flag; do
@@ -30,6 +31,9 @@ while getopts "acf" flag; do
       ;;
     f)
       forced=true
+      ;;
+    s)
+      silent=true
       ;;
     *)
       gum style --foreground 196 "Invalid flag $flag"
@@ -50,6 +54,14 @@ fi
 
 # If the -a flag is passed, generate all models
 if [ "$all" = true ]; then
+  if [ "$silent" = true ]; then
+    echo "Generating all models"
+    goschema generate --out=./ --sql=./schemas/*.sql --extension=xo
+    go fmt ./*.xo.go
+    goimports -w ./*.xo.go
+    exit 0
+  fi
+
   gum spin --spinner dot --title "Generating all models" -- goschema generate --out=./ --sql=./schemas/*.sql --extension=xo
   go fmt ./*.xo.go
   goimports -w ./*.xo.go
