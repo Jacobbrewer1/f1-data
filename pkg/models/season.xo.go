@@ -14,7 +14,7 @@ import (
 
 // Season represents a row from 'season'.
 type Season struct {
-	Id   int `db:"id,autoinc,pk"`
+	Id   int `db:"id,pk,autoinc"`
 	Year int `db:"year"`
 }
 

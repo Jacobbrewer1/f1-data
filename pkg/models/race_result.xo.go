@@ -15,7 +15,7 @@ import (
 
 // RaceResult represents a row from 'race_result'.
 type RaceResult struct {
-	Id           int       `db:"id,autoinc,pk"`
+	Id           int       `db:"id,pk,autoinc"`
 	RaceId       int       `db:"race_id"`
 	Position     string    `db:"position"`
 	DriverNumber int       `db:"driver_number"`
@@ -25,7 +25,7 @@ type RaceResult struct {
 	Laps         int       `db:"laps"`
 	TimeRetired  string    `db:"time_retired"`
 	Points       float64   `db:"points"`
-	UpdatedAt    time.Time `db:"updated_at,default"`
+	UpdatedAt    time.Time `db:"updated_at"`
 }
 
 // Insert inserts the RaceResult to the database.

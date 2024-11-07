@@ -15,12 +15,12 @@ import (
 
 // ConstructorChampionship represents a row from 'constructor_championship'.
 type ConstructorChampionship struct {
-	Id        int       `db:"id,autoinc,pk"`
+	Id        int       `db:"id,pk,autoinc"`
 	SeasonId  int       `db:"season_id"`
 	Position  int       `db:"position"`
 	Name      string    `db:"name"`
 	Points    float64   `db:"points"`
-	UpdatedAt time.Time `db:"updated_at,default"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
 // Insert inserts the ConstructorChampionship to the database.

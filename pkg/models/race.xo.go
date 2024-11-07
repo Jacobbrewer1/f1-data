@@ -15,11 +15,11 @@ import (
 
 // Race represents a row from 'race'.
 type Race struct {
-	Id        int       `db:"id,autoinc,pk"`
+	Id        int       `db:"id,pk,autoinc"`
 	SeasonId  int       `db:"season_id"`
 	GrandPrix string    `db:"grand_prix"`
 	Date      time.Time `db:"date"`
-	UpdatedAt time.Time `db:"updated_at,default"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
 // Insert inserts the Race to the database.
