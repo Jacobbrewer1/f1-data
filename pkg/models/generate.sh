@@ -32,15 +32,17 @@ while getopts "acf" flag; do
     f)
       forced=true
       ;;
-    s)
-      silent=true
-      ;;
     *)
       gum style --foreground 196 "Invalid flag $flag"
       exit 1
       ;;
   esac
 done
+
+# If the silent environment variable is set, set the silent flag to true
+if [ "$GS_SILENT" = true ]; then
+  silent=true
+fi
 
 # If the -c flag is passed, remove all generated models
 if [ "$clean" = true ]; then

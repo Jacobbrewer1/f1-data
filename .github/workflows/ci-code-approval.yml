@@ -144,15 +144,11 @@ jobs:
 
       - name: "Run Code Generation"
         run: make codegen
+        env:
+          GS_SILENT: true
 
       - name: "fmt"
         run: go fmt ./...
-
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v45
-        with:
-          since_last_remote_commit: true
 
       - name: "Fail if code generation changes files"
         run: git diff --exit-code
