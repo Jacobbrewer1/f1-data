@@ -15,7 +15,7 @@ import (
 
 // DriverChampionship represents a row from 'driver_championship'.
 type DriverChampionship struct {
-	Id          int       `db:"id,autoinc,pk"`
+	Id          int       `db:"id,pk,autoinc"`
 	SeasonId    int       `db:"season_id"`
 	Position    int       `db:"position"`
 	Driver      string    `db:"driver"`
@@ -23,7 +23,7 @@ type DriverChampionship struct {
 	Nationality string    `db:"nationality"`
 	Team        string    `db:"team"`
 	Points      float64   `db:"points"`
-	UpdatedAt   time.Time `db:"updated_at,default"`
+	UpdatedAt   time.Time `db:"updated_at"`
 }
 
 // Insert inserts the DriverChampionship to the database.
