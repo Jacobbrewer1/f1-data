@@ -11,6 +11,8 @@ codegen:
 	@echo "Generating code"
 	go generate ./...
 deps:
+	sudo apt-get install dos2unix
+	dos2unix ./pkg/models/generate.sh
 	chmod +x ./pkg/models/generate.sh
 	go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
 	go install github.com/charmbracelet/gum@latest
