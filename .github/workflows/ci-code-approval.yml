@@ -139,17 +139,16 @@ jobs:
           GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: git config --global url."https://x:${GITHUB_API_TOKEN}@github.com".insteadOf "https://github.com"
 
-      - name: "Install goschema"
-        run: |
-          wget https://github.com/jacobbrewer1/goschema/releases/download/v0.0.1/goschema
-          chmod +x goschema
-          mv goschema /usr/local/bin
+      - name: "Install dependencies"
+        run: make deps
 
       - name: "Run Code Generation"
         run: make codegen
+        env:
+          GS_SILENT: true
 
       - name: "fmt"
         run: go fmt ./...
 
-      - name: "Check for changes"
+      - name: "Fail if code generation changes files"
         run: git diff --exit-code
