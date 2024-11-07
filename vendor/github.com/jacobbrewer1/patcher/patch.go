@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"reflect"
+	"slices"
 	"strings"
 )
 
@@ -73,8 +74,8 @@ type SQLPatch struct {
 func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
 	// Default options
 	p := &SQLPatch{
-		fields:            nil,
-		args:              nil,
+		fields:            make([]string, 0),
+		args:              make([]any, 0),
 		db:                nil,
 		tagName:           DefaultDbTagName,
 		table:             "",
@@ -96,10 +97,18 @@ func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
 }
 
 func (s *SQLPatch) Fields() []string {
+	if len(s.fields) == 0 {
+		// Default behaviour is to return nil if there are no fields
+		return nil
+	}
 	return s.fields
 }
 
 func (s *SQLPatch) Args() []any {
+	if len(s.args) == 0 {
+		// Default behaviour is to return nil if there are no args
+		return nil
+	}
 	return s.args
 }
 
@@ -131,4 +140,34 @@ func (s *SQLPatch) validateSQLGen() error {
 	}
 
 	return nil
+}
+
+func (s *SQLPatch) shouldIncludeNil(tag string) bool {
+	if s.includeNilValues {
+		return true
+	}
+
+	if tag != "" {
+		tags := strings.Split(tag, TagOptSeparator)
+		if slices.Contains(tags, TagOptAllowNil) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (s *SQLPatch) shouldIncludeZero(tag string) bool {
+	if s.includeZeroValues {
+		return true
+	}
+
+	if tag != "" {
+		tagOpts := strings.Split(tag, TagOptSeparator)
+		if slices.Contains(tagOpts, TagOptAllowZero) {
+			return true
+		}
+	}
+
+	return false
 }

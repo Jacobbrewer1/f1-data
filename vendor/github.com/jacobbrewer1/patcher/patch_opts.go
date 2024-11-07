@@ -9,6 +9,8 @@ const (
 	TagOptsName     = "patcher"
 	TagOptSeparator = ","
 	TagOptSkip      = "-"
+	TagOptAllowNil  = "nil"
+	TagOptAllowZero = "zero"
 )
 
 type PatchOpt func(*SQLPatch)
@@ -35,7 +37,7 @@ func WithWhere(where Wherer) PatchOpt {
 		}
 		fwSQL, fwArgs := where.Where()
 		if fwArgs == nil {
-			fwArgs = []any{}
+			fwArgs = make([]any, 0)
 		}
 		wtStr := WhereTypeAnd // default to AND
 		wt, ok := where.(WhereTyper)
@@ -57,7 +59,7 @@ func WithJoin(join Joiner) PatchOpt {
 		}
 		fjSQL, fjArgs := join.Join()
 		if fjArgs == nil {
-			fjArgs = []any{}
+			fjArgs = make([]any, 0)
 		}
 		s.joinSql.WriteString(strings.TrimSpace(fjSQL))
 		s.joinSql.WriteString("\n")
