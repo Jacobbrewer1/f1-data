@@ -155,7 +155,4 @@ jobs:
           since_last_remote_commit: true
 
       - name: "Fail if code generation changes files"
-        if: steps.changed-files.outputs.files != ''
-        run: |
-          echo "Code generation changes files. Please run 'make codegen' and commit the changes."
-          exit 1
+        run: git diff --exit-code
