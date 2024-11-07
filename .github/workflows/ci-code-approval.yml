@@ -148,5 +148,8 @@ jobs:
       - name: "fmt"
         run: go fmt ./...
 
-      - name: "Check for changes"
-        run: git diff --exit-code
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          since_last_remote_commit: true
