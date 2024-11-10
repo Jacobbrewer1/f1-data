@@ -18,6 +18,7 @@ fi
 all=false
 clean=false
 forced=false
+silent=false
 
 # Get the flags passed to the script and set the variables accordingly
 while getopts "acf" flag; do
@@ -38,6 +39,11 @@ while getopts "acf" flag; do
   esac
 done
 
+# If the silent environment variable is set, set the silent flag to true
+if [ "$GS_SILENT" = true ]; then
+  silent=true
+fi
+
 # If the -c flag is passed, remove all generated models
 if [ "$clean" = true ]; then
   if [ "$forced" = false ]; then
@@ -50,6 +56,14 @@ fi
 
 # If the -a flag is passed, generate all models
 if [ "$all" = true ]; then
+  if [ "$silent" = true ]; then
+    echo "Generating all models"
+    goschema generate --out=./ --sql=./schemas/*.sql --extension=xo
+    go fmt ./*.xo.go
+    goimports -w ./*.xo.go
+    exit 0
+  fi
+
   gum spin --spinner dot --title "Generating all models" -- goschema generate --out=./ --sql=./schemas/*.sql --extension=xo
   go fmt ./*.xo.go
   goimports -w ./*.xo.go
