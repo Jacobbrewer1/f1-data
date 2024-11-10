@@ -2,10 +2,12 @@ package vaulty
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 
 	hashiVault "github.com/hashicorp/vault/api"
+	auth "github.com/hashicorp/vault/api/auth/kubernetes"
 )
 
 type ClientOption func(c *client)
@@ -50,5 +52,39 @@ func WithUserPassAuth(username, password string) ClientOption {
 func WithKvv2Mount(mount string) ClientOption {
 	return func(c *client) {
 		c.kvv2Mount = mount
+	}
+}
+
+func WithKubernetesAuthDefault() ClientOption {
+	return func(c *client) {
+		c.auth = func(v *hashiVault.Client) (*hashiVault.Secret, error) {
+			role := os.Getenv(envKubernetesRole)
+			if role == "" {
+				return nil, fmt.Errorf("%s environment variable not set", envKubernetesRole)
+			}
+
+			return kubernetesLogin(v, role, auth.WithServiceAccountTokenPath(kubernetesServiceAccountTokenPath))
+		}
+	}
+}
+
+func WithKubernetesAuthFromEnv() ClientOption {
+	return func(c *client) {
+		c.auth = func(v *hashiVault.Client) (*hashiVault.Secret, error) {
+			role := os.Getenv(envKubernetesRole)
+			if role == "" {
+				return nil, fmt.Errorf("%s environment variable not set", envKubernetesRole)
+			}
+
+			return kubernetesLogin(v, role, auth.WithServiceAccountTokenEnv(envKubernetesToken))
+		}
+	}
+}
+
+func WithKubernetesAuth(role, token string) ClientOption {
+	return func(c *client) {
+		c.auth = func(v *hashiVault.Client) (*hashiVault.Secret, error) {
+			return kubernetesLogin(v, role, auth.WithServiceAccountToken(token))
+		}
 	}
 }

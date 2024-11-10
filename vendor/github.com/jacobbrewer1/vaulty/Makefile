@@ -2,6 +2,9 @@
 hash = $(shell git rev-parse --short HEAD)
 DATE = $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 
+codegen:
+	@echo "Generating code"
+	go generate ./...
 pr-approval:
 	@echo "Running PR CI"
 	go build ./...
