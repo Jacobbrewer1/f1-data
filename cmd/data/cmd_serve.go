@@ -108,10 +108,7 @@ func (s *serveCmd) setup(ctx context.Context, r *mux.Router) (err error) {
 	vc, err := vaulty.NewClient(
 		vaulty.WithContext(ctx),
 		vaulty.WithGeneratedVaultClient(v.GetString("vault.address")),
-		vaulty.WithUserPassAuth(
-			v.GetString("vault.auth.username"),
-			v.GetString("vault.auth.password"),
-		),
+		vaulty.WithKubernetesAuthDefault(),
 		vaulty.WithKvv2Mount(v.GetString("vault.kvv2_mount")),
 	)
 	if err != nil {
