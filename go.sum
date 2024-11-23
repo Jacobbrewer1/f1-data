@@ -141,8 +141,8 @@ github.com/jacobbrewer1/uhttp v0.0.4 h1:3RrRmz0fjsnLKuAs5fkflOcsjuBFoL0XvC6Xct/T
 github.com/jacobbrewer1/uhttp v0.0.4/go.mod h1:qwLAdGw4SLYJY2MS0sE1m/w1ILTr61bjwRtlbGwqo5c=
 github.com/jacobbrewer1/vaulty v0.1.4 h1:JLcSDX5f1UMBxNNzCxQ0neqV4Mvw6030OgxE44B/pqI=
 github.com/jacobbrewer1/vaulty v0.1.4/go.mod h1:BDrZxaM1mMWSqJ3UXHGOQyy6+2l5NxjAjva2V7ijwNI=
-github.com/jacobbrewer1/workerpool v0.0.2 h1:H5+PRi1JLtOvPXHiER6+MCEfqIMn8d0MyZ0Mi4emYqM=
-github.com/jacobbrewer1/workerpool v0.0.2/go.mod h1:PKV+PF+dbELi8p+abwzVDRy2FtgpdLJCFKlsz5thaYY=
+github.com/jacobbrewer1/workerpool v0.0.3 h1:MnRiYACaCO9+M2ogM6gxQcySdbER/T6mehTvBQLRg6I=
+github.com/jacobbrewer1/workerpool v0.0.3/go.mod h1:vZnQ5Ynp2rnihrFubKfyf7S+hnxC2TgQt755PFQ7cBQ=
 github.com/jawher/mow.cli v1.1.0/go.mod h1:aNaQlc7ozF3vw6IJ2dHjp2ZFiA4ozMIYY6PyuRJwlUg=
 github.com/jinzhu/copier v0.3.5 h1:GlvfUwHk62RokgqVNvYsku0TATCF7bAHVwEXoBh3iJg=
 github.com/jinzhu/copier v0.3.5/go.mod h1:DfbEm0FYsaqBcKcFuvmOZb218JkPGtvSHsKg8S8hyyg=

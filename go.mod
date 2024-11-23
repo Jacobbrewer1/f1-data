@@ -14,7 +14,7 @@ require (
 	github.com/jacobbrewer1/patcher v0.1.10
 	github.com/jacobbrewer1/uhttp v0.0.4
 	github.com/jacobbrewer1/vaulty v0.1.4
-	github.com/jacobbrewer1/workerpool v0.0.2
+	github.com/jacobbrewer1/workerpool v0.0.3
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/prometheus/client_golang v1.20.5
