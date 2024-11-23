@@ -12,7 +12,7 @@ import (
 )
 
 func (s *service) Import(from, to int) error {
-	workers := workerpool.NewWorkerPool(
+	workers := workerpool.New(
 		workerpool.WithDelayedStart(),
 	)
 

@@ -161,7 +161,7 @@ github.com/jacobbrewer1/uhttp/common
 ## explicit; go 1.23
 github.com/jacobbrewer1/vaulty
 github.com/jacobbrewer1/vaulty/repositories
-# github.com/jacobbrewer1/workerpool v0.0.2
+# github.com/jacobbrewer1/workerpool v0.0.3
 ## explicit; go 1.23
 github.com/jacobbrewer1/workerpool
 # github.com/jinzhu/copier v0.3.5

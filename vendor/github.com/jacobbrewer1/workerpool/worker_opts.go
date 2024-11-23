@@ -1,10 +1,10 @@
 package workerpool
 
-type WorkerOption func(pool *WorkerPool)
+type WorkerOption func(pool *pool)
 
 // WithTotalWorkers sets the total number of workers in the pool.
 func WithTotalWorkers(workers int) WorkerOption {
-	return func(pool *WorkerPool) {
+	return func(pool *pool) {
 		// Cannot have less than 1 worker. Having 1 working is the same as running the task in the main goroutine but
 		// on a separate goroutine.
 		if workers < minWorkers {
@@ -21,7 +21,7 @@ func WithTotalWorkers(workers int) WorkerOption {
 //
 // Setting the maximum queue length will set the worker pool to use a non-buffered channel (blocking channel).
 func WithMaxQueueLength(length int) WorkerOption {
-	return func(pool *WorkerPool) {
+	return func(pool *pool) {
 		if length < minQueueLength {
 			return
 		}
@@ -41,7 +41,7 @@ func WithBlockingChannel() WorkerOption {
 //
 // This is useful when you want to start the worker pool only when you have tasks to schedule.
 func WithDelayedStart() WorkerOption {
-	return func(pool *WorkerPool) {
+	return func(pool *pool) {
 		pool.delayedStart = true
 	}
 }

@@ -10,7 +10,7 @@ type MockWorkerOption struct {
 }
 
 // Execute provides a mock function with given fields: pool
-func (_m *MockWorkerOption) Execute(pool *WorkerPool) {
+func (_m *MockWorkerOption) Execute(pool *pool) {
 	_m.Called(pool)
 }
 
