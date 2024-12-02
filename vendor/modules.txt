@@ -157,7 +157,7 @@ github.com/jacobbrewer1/patcher/inserter
 ## explicit; go 1.23
 github.com/jacobbrewer1/uhttp
 github.com/jacobbrewer1/uhttp/common
-# github.com/jacobbrewer1/vaulty v0.1.4
+# github.com/jacobbrewer1/vaulty v0.1.5
 ## explicit; go 1.23
 github.com/jacobbrewer1/vaulty
 github.com/jacobbrewer1/vaulty/repositories

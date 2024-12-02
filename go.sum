@@ -139,8 +139,8 @@ github.com/jacobbrewer1/patcher v0.1.10 h1:k0T4/hW6F5r5bQ+WDzeaBg0u5ykAr6shQ7Z1P
 github.com/jacobbrewer1/patcher v0.1.10/go.mod h1:DbPetwfn5Fgarwn5VOjALRjNflSX0rbkGssZ0cRsOlo=
 github.com/jacobbrewer1/uhttp v0.0.4 h1:3RrRmz0fjsnLKuAs5fkflOcsjuBFoL0XvC6Xct/TDCk=
 github.com/jacobbrewer1/uhttp v0.0.4/go.mod h1:qwLAdGw4SLYJY2MS0sE1m/w1ILTr61bjwRtlbGwqo5c=
-github.com/jacobbrewer1/vaulty v0.1.4 h1:JLcSDX5f1UMBxNNzCxQ0neqV4Mvw6030OgxE44B/pqI=
-github.com/jacobbrewer1/vaulty v0.1.4/go.mod h1:BDrZxaM1mMWSqJ3UXHGOQyy6+2l5NxjAjva2V7ijwNI=
+github.com/jacobbrewer1/vaulty v0.1.5 h1:VWVlu4DnFNLWvVaM2K8fFaqEMVkI/3L8bKUiSm0N92s=
+github.com/jacobbrewer1/vaulty v0.1.5/go.mod h1:3x2pJ0lPDGQWud6TPcrB+dc0tu1A/3s9bnRi265HtMI=
 github.com/jacobbrewer1/workerpool v0.0.3 h1:MnRiYACaCO9+M2ogM6gxQcySdbER/T6mehTvBQLRg6I=
 github.com/jacobbrewer1/workerpool v0.0.3/go.mod h1:vZnQ5Ynp2rnihrFubKfyf7S+hnxC2TgQt755PFQ7cBQ=
 github.com/jawher/mow.cli v1.1.0/go.mod h1:aNaQlc7ozF3vw6IJ2dHjp2ZFiA4ozMIYY6PyuRJwlUg=

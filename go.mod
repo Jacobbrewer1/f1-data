@@ -13,7 +13,7 @@ require (
 	github.com/jacobbrewer1/pagefilter v0.1.4
 	github.com/jacobbrewer1/patcher v0.1.10
 	github.com/jacobbrewer1/uhttp v0.0.4
-	github.com/jacobbrewer1/vaulty v0.1.4
+	github.com/jacobbrewer1/vaulty v0.1.5
 	github.com/jacobbrewer1/workerpool v0.0.3
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/oapi-codegen/runtime v1.1.1
