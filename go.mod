@@ -20,7 +20,7 @@ require (
 	github.com/prometheus/client_golang v1.20.5
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
-	github.com/vektra/mockery/v2 v2.49.0
+	github.com/vektra/mockery/v2 v2.49.1
 	golang.org/x/crypto v0.29.0
 )
 
