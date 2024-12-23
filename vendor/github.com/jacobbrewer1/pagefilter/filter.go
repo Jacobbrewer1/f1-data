@@ -27,7 +27,7 @@ func (m *MultiFilter) Add(f any) {
 	if j, ok := f.(Joiner); ok {
 		joinSQL, joinArgs := j.Join()
 		if joinArgs == nil {
-			joinArgs = []any{}
+			joinArgs = make([]any, 0)
 		}
 		m.joinSQL.WriteString(strings.TrimSpace(joinSQL))
 		m.joinSQL.WriteString("\n")
@@ -37,7 +37,7 @@ func (m *MultiFilter) Add(f any) {
 	if wt, okWt := f.(WhereTyper); okWt {
 		whereSQL, whereArgs := wt.Where()
 		if whereArgs == nil {
-			whereArgs = []any{}
+			whereArgs = make([]any, 0)
 		}
 		wtStr := WhereTypeAnd
 		if wt.WhereType().IsValid() {
