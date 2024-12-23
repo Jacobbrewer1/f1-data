@@ -10,7 +10,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/google/subcommands v1.2.0
 	github.com/gorilla/mux v1.8.1
-	github.com/jacobbrewer1/pagefilter v0.1.4
+	github.com/jacobbrewer1/pagefilter v0.1.5
 	github.com/jacobbrewer1/patcher v0.1.10
 	github.com/jacobbrewer1/uhttp v0.0.4
 	github.com/jacobbrewer1/vaulty v0.1.5
