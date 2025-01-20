@@ -135,8 +135,8 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/jacobbrewer1/pagefilter v0.1.4 h1:yo+F4qsmu1DHo0mIcoBHeofIufO0HnUW7/9eaqN0K1s=
 github.com/jacobbrewer1/pagefilter v0.1.4/go.mod h1:6tTrmLumsrhUuDuvOSU8PEFP3n1IXifeAt+A3+Pr9jk=
-github.com/jacobbrewer1/patcher v0.1.10 h1:k0T4/hW6F5r5bQ+WDzeaBg0u5ykAr6shQ7Z1P8YUfyU=
-github.com/jacobbrewer1/patcher v0.1.10/go.mod h1:DbPetwfn5Fgarwn5VOjALRjNflSX0rbkGssZ0cRsOlo=
+github.com/jacobbrewer1/patcher v0.1.15 h1:DK0xrBKlPPSNt+mXUY1AuZ7lydSin8EcHkPMt/68aIE=
+github.com/jacobbrewer1/patcher v0.1.15/go.mod h1:zEgOixvOt2wO2WmoUreN5L5qJpCOdP2eWiYd0XZULn8=
 github.com/jacobbrewer1/uhttp v0.0.4 h1:3RrRmz0fjsnLKuAs5fkflOcsjuBFoL0XvC6Xct/TDCk=
 github.com/jacobbrewer1/uhttp v0.0.4/go.mod h1:qwLAdGw4SLYJY2MS0sE1m/w1ILTr61bjwRtlbGwqo5c=
 github.com/jacobbrewer1/vaulty v0.1.5 h1:VWVlu4DnFNLWvVaM2K8fFaqEMVkI/3L8bKUiSm0N92s=
@@ -247,8 +247,8 @@ github.com/subosito/gotenv v1.6.0 h1:9NlTDc1FTs4qu0DDq7AEtTPNw6SVm7uBMsUCUjABIf8
 github.com/subosito/gotenv v1.6.0/go.mod h1:Dk4QP5c2W3ibzajGcXpNraDfq2IrhjMIvMSWPKKo0FU=
 github.com/temoto/robotstxt v1.1.1 h1:Gh8RCs8ouX3hRSxxK7B1mO5RFByQ4CmJZDwgom++JaA=
 github.com/temoto/robotstxt v1.1.1/go.mod h1:+1AmkuG3IYkh1kv0d2qEB9Le88ehNO0zwOr3ujewlOo=
-github.com/vektra/mockery/v2 v2.50.0 h1:0GYRH38nKiRghwUq+0aJXG1sT3yyTYj/J1xQRM8kGzQ=
-github.com/vektra/mockery/v2 v2.50.0/go.mod h1:xO2DeYemEPC2tCzIZ+a1tifZ/7Laf/Chxg3vlc+oDsI=
+github.com/vektra/mockery/v2 v2.51.0 h1:pAPiE1xyZ/2y6VTr8dRAJGrbNBKeMtN0aqY12rXzuiQ=
+github.com/vektra/mockery/v2 v2.51.0/go.mod h1:xO2DeYemEPC2tCzIZ+a1tifZ/7Laf/Chxg3vlc+oDsI=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 go.uber.org/atomic v1.9.0 h1:ECmE8Bn/WFTYwEW/bpKD3M8VtR/zQVbavAoalC1PYyE=
 go.uber.org/atomic v1.9.0/go.mod h1:fEN4uk6kAWBTFdckzkM89CLk9XfWZrxpCo0nPH17wJc=
