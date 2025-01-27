@@ -36,10 +36,23 @@ func WithConfig(config *hashiVault.Config) ClientOption {
 	}
 }
 
+func WithTokenAuth(token string) ClientOption {
+	return func(c *client) {
+		c.auth = func(v *hashiVault.Client) (*hashiVault.Secret, error) {
+			return tokenLogin(v, token)
+		}
+	}
+}
+
 func WithAppRoleAuth(roleID, secretID string) ClientOption {
 	return func(c *client) {
 		c.auth = func(v *hashiVault.Client) (*hashiVault.Secret, error) {
-			return appRoleLogin(v, roleID, secretID)
+			sec, err := appRoleLogin(v, roleID, secretID)
+			if err != nil {
+				return nil, err
+			}
+			go c.renewAuthInfo()
+			return sec, nil
 		}
 	}
 }
@@ -47,7 +60,12 @@ func WithAppRoleAuth(roleID, secretID string) ClientOption {
 func WithUserPassAuth(username, password string) ClientOption {
 	return func(c *client) {
 		c.auth = func(v *hashiVault.Client) (*hashiVault.Secret, error) {
-			return userPassLogin(v, username, password)
+			sec, err := userPassLogin(v, username, password)
+			if err != nil {
+				return nil, err
+			}
+			go c.renewAuthInfo()
+			return sec, nil
 		}
 	}
 }
