@@ -12,19 +12,22 @@ var (
 	ErrInvalidType = errors.New("invalid type: must pointer to struct")
 )
 
-// LoadDiff inserts the fields provided in the new struct pointer into the old struct pointer and injects the new
-// values into the old struct
+// LoadDiff inserts the fields from the new struct pointer into the old struct pointer, updating the old struct.
 //
-// Note that it only pushes non-zero value updates, meaning you cannot set any field to zero, the empty string, etc.
-// This is configurable by setting the includeZeroValues option to true or for nil values by setting includeNilValues.
+// Note that it only updates non-zero value fields, meaning you cannot set any field to zero, the empty string, etc.
+// This behavior is configurable by setting the includeZeroValues option to true or for nil values by setting includeNilValues.
 // Please see the LoaderOption's for more configuration options.
 //
-// This can be if you are inserting a patch into an existing object but require a new object to be returned with
-// all fields
+// This function is useful if you are inserting a patch into an existing object but require a new object to be returned with
+// all fields updated.
 func LoadDiff[T any](old *T, newT *T, opts ...PatchOpt) error {
 	return newPatchDefaults(opts...).loadDiff(old, newT)
 }
 
+// loadDiff inserts the fields provided in the new struct pointer into the old struct pointer and injects the new
+// values into the old struct. It only pushes non-zero value updates, meaning you cannot set any field to zero,
+// the empty string, etc. This is configurable by setting the includeZeroValues option to true or for nil values
+// by setting includeNilValues. It handles embedded structs and recursively calls loadDiff for nested structs.
 func (s *SQLPatch) loadDiff(old, newT any) error {
 	if !isPointerToStruct(old) || !isPointerToStruct(newT) {
 		return ErrInvalidType
@@ -111,7 +114,7 @@ func (s *SQLPatch) checkSkipTag(field reflect.StructField) bool {
 }
 
 func (s *SQLPatch) ignoredFieldsCheck(field reflect.StructField) bool {
-	return s.checkIgnoredFields(strings.ToLower(field.Name)) || s.checkIgnoreFunc(field)
+	return s.checkIgnoredFields(field.Name) || s.checkIgnoreFunc(field)
 }
 
 func (s *SQLPatch) checkIgnoreFunc(field reflect.StructField) bool {
@@ -119,5 +122,5 @@ func (s *SQLPatch) checkIgnoreFunc(field reflect.StructField) bool {
 }
 
 func (s *SQLPatch) checkIgnoredFields(field string) bool {
-	return len(s.ignoreFields) > 0 && slices.Contains(s.ignoreFields, strings.ToLower(field))
+	return len(s.ignoreFields) > 0 && slices.Contains(s.ignoreFields, field)
 }
