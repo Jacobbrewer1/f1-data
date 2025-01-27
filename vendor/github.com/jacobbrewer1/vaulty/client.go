@@ -89,8 +89,6 @@ func NewClient(opts ...ClientOption) (Client, error) {
 
 	c.authCreds = authCreds
 
-	go c.renewAuthInfo()
-
 	return c, nil
 }
 
