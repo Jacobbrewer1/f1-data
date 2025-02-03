@@ -196,6 +196,10 @@ func (r *RootApp) Run() error {
 		fmt.Fprintf(os.Stderr, "Failed to initialize logger: %v\n", err)
 		return err
 	}
+	logging.DisableDeprecationWarnings = r.Config.DisableDeprecationWarnings
+	logging.DisabledDeprecationWarnings = r.Config.DisabledDeprecationWarnings
+	defer logging.LogDeprecationWarnings()
+
 	log = log.With().Bool(logging.LogKeyDryRun, r.Config.DryRun).Logger()
 	log.Info().Msgf("Starting mockery")
 	log.Info().Msgf("Using config: %s", r.Config.Config)
@@ -214,7 +218,10 @@ func (r *RootApp) Run() error {
 	if r.Config.Print {
 		osp = &pkg.StdoutStreamProvider{}
 	}
-	buildTags := strings.Split(r.Config.BuildTags, " ")
+	var buildTags []string
+	if r.Config.BuildTags != "" {
+		buildTags = strings.Split(r.Config.BuildTags, " ")
+	}
 
 	var boilerplate string
 	if r.Config.BoilerplateFile != "" {
@@ -225,21 +232,20 @@ func (r *RootApp) Run() error {
 		boilerplate = string(data)
 	}
 
-	if !r.Config.WithExpecter {
-		logging.WarnDeprecated(
-			ctx,
-			"with-expecter will be permanently set to True in v3",
-			map[string]any{
-				"url": logging.DocsURL("/deprecations/#with-expecter"),
-			},
-		)
-	}
-
 	configuredPackages, err := r.Config.GetPackages(ctx)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("failed to determine configured packages: %w", err)
 	}
-	if len(configuredPackages) != 0 {
+	if len(configuredPackages) == 0 {
+		logging.WarnDeprecated(
+			"packages",
+			"use of the packages config will be the only way to generate mocks in v3. Please migrate your config to use the packages feature.",
+			map[string]any{
+				"url":       logging.DocsURL("/features/#packages-configuration"),
+				"migration": logging.DocsURL("/migrating_to_packages/"),
+			},
+		)
+	} else {
 		r.Config.LogUnsupportedPackagesConfig(ctx)
 
 		configuredPackages, err := r.Config.GetPackages(ctx)
@@ -305,14 +311,6 @@ func (r *RootApp) Run() error {
 	} else {
 		log.Fatal().Msgf("Use --name to specify the name of the interface or --all for all interfaces found")
 	}
-
-	logging.WarnDeprecated(
-		ctx,
-		"use of the packages config will be the only way to generate mocks in v3. Please migrate your config to use the packages feature.",
-		map[string]any{
-			"url":       logging.DocsURL("/features/#packages-configuration"),
-			"migration": logging.DocsURL("/migrating_to_packages/"),
-		})
 
 	if r.Config.Profile != "" {
 		f, err := os.Create(r.Config.Profile)
