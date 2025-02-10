@@ -1,8 +1,15 @@
 package uhttp
 
 import (
-	"log/slog"
+	"errors"
+	"fmt"
 	"net/http"
+)
+
+var (
+	errNotFound         = errors.New("not found")
+	errMethodNotAllowed = errors.New("method not allowed")
+	errUnauthorized     = errors.New("unauthorized")
 )
 
 // NotFoundHandler returns a handler that returns a 404 response.
@@ -11,17 +18,23 @@ func NotFoundHandler() http.HandlerFunc {
 		rw, ok := w.(*ResponseWriter)
 		if !ok {
 			rw = NewResponseWriter(w,
-				WithDefaultStatusCode(http.StatusOK),
-				WithDefaultHeader("X-Request-ID", RequestIDFromContext(GenerateOrCopyRequestID(r.Context(), r))),
+				WithDefaultStatusCode(http.StatusNotFound),
+				WithDefaultHeader(HeaderRequestID, RequestIDFromContext(GenerateOrCopyRequestID(r.Context(), r))),
 				WithDefaultHeader(HeaderContentType, ContentTypeJSON),
 			)
 		}
 
-		msg := NewMessage(MsgNotFound)
-		err := EncodeJSON(rw, http.StatusNotFound, msg)
-		if err != nil {
-			slog.Error("Error encoding response", slog.String(loggingKeyError, err.Error()))
+		details := []any{
+			fmt.Sprintf("method: %s", r.Method),
+			fmt.Sprintf("path: %s", r.URL.Path),
 		}
+
+		if r.URL.RawQuery != "" {
+			details = append(details, fmt.Sprintf("query: %s", r.URL.RawQuery))
+		}
+
+		msg := NewHTTPError(http.StatusNotFound, errNotFound, details...)
+		MustEncode(rw, http.StatusNotFound, msg)
 	}
 }
 
@@ -31,17 +44,23 @@ func MethodNotAllowedHandler() http.HandlerFunc {
 		rw, ok := w.(*ResponseWriter)
 		if !ok {
 			rw = NewResponseWriter(w,
-				WithDefaultStatusCode(http.StatusOK),
-				WithDefaultHeader("X-Request-ID", RequestIDFromContext(GenerateOrCopyRequestID(r.Context(), r))),
+				WithDefaultStatusCode(http.StatusMethodNotAllowed),
+				WithDefaultHeader(HeaderRequestID, RequestIDFromContext(GenerateOrCopyRequestID(r.Context(), r))),
 				WithDefaultHeader(HeaderContentType, ContentTypeJSON),
 			)
 		}
 
-		msg := NewMessage(MsgMethodNotAllowed)
-		err := EncodeJSON(rw, http.StatusMethodNotAllowed, msg)
-		if err != nil {
-			slog.Error("Error encoding response", slog.String(loggingKeyError, err.Error()))
+		details := []string{
+			fmt.Sprintf("method: %s", r.Method),
+			fmt.Sprintf("path: %s", r.URL.Path),
 		}
+
+		if r.URL.RawQuery != "" {
+			details = append(details, fmt.Sprintf("query: %s", r.URL.RawQuery))
+		}
+
+		msg := NewHTTPError(http.StatusMethodNotAllowed, errMethodNotAllowed, details)
+		MustEncode(rw, http.StatusMethodNotAllowed, msg)
 	}
 }
 
@@ -51,17 +70,23 @@ func UnauthorizedHandler() http.HandlerFunc {
 		rw, ok := w.(*ResponseWriter)
 		if !ok {
 			rw = NewResponseWriter(w,
-				WithDefaultStatusCode(http.StatusOK),
-				WithDefaultHeader("X-Request-ID", RequestIDFromContext(GenerateOrCopyRequestID(r.Context(), r))),
+				WithDefaultStatusCode(http.StatusUnauthorized),
+				WithDefaultHeader(HeaderRequestID, RequestIDFromContext(GenerateOrCopyRequestID(r.Context(), r))),
 				WithDefaultHeader(HeaderContentType, ContentTypeJSON),
 			)
 		}
 
-		msg := NewMessage(MsgUnauthorized)
-		err := EncodeJSON(rw, http.StatusUnauthorized, msg)
-		if err != nil {
-			slog.Error("Error encoding response", slog.String(loggingKeyError, err.Error()))
+		details := []string{
+			fmt.Sprintf("method: %s", r.Method),
+			fmt.Sprintf("path: %s", r.URL.Path),
 		}
+
+		if r.URL.RawQuery != "" {
+			details = append(details, fmt.Sprintf("query: %s", r.URL.RawQuery))
+		}
+
+		msg := NewHTTPError(http.StatusUnauthorized, errUnauthorized, details)
+		MustEncode(rw, http.StatusUnauthorized, msg)
 	}
 }
 
@@ -69,15 +94,12 @@ func GenericErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 	rw, ok := w.(*ResponseWriter)
 	if !ok {
 		rw = NewResponseWriter(w,
-			WithDefaultStatusCode(http.StatusOK),
-			WithDefaultHeader("X-Request-ID", RequestIDFromContext(GenerateOrCopyRequestID(r.Context(), r))),
+			WithDefaultStatusCode(http.StatusBadRequest),
+			WithDefaultHeader(HeaderRequestID, RequestIDFromContext(GenerateOrCopyRequestID(r.Context(), r))),
 			WithDefaultHeader(HeaderContentType, ContentTypeJSON),
 		)
 	}
 
-	msg := NewErrorMessage(MsgBadRequest, err)
-	encErr := EncodeJSON(rw, http.StatusBadRequest, msg)
-	if encErr != nil {
-		slog.Error("Error encoding response", slog.String(loggingKeyError, encErr.Error()))
-	}
+	msg := NewHTTPError(http.StatusBadRequest, err)
+	MustEncode(rw, http.StatusBadRequest, msg)
 }

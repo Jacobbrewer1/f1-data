@@ -5,11 +5,14 @@ package common
 
 // ErrorMessage defines the model for error_message.
 type ErrorMessage struct {
-	Error   *string `json:"error,omitempty"`
-	Message *string `json:"message,omitempty"`
+	Detail    string        `json:"detail"`
+	Details   []interface{} `json:"details"`
+	RequestId string        `json:"request_id"`
+	Status    int           `json:"status"`
+	Title     string        `json:"title"`
 }
 
 // Message defines the model for message.
 type Message struct {
-	Message *string `json:"message,omitempty"`
+	Message string `json:"message"`
 }

@@ -31,6 +31,8 @@ func WithDefaultHeader(header, value string) WriterOpt {
 
 func WithDefaultHeaders(headers map[string]string) WriterOpt {
 	return func(w *ResponseWriter) {
-		w.defaultHeaders = headers
+		for k, v := range headers {
+			WithDefaultHeader(k, v)(w) // This forces append to the defaultHeaders map with existing logic, rather than overwriting it.
+		}
 	}
 }

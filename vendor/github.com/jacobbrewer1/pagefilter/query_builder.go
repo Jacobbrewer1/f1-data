@@ -25,13 +25,13 @@ type Paginator struct {
 }
 
 // NewPaginator creates a new paginator
-func NewPaginator(db DB, table, idk string, f Filter) *Paginator {
+func NewPaginator(db DB, table, idKey string, f Filter) *Paginator {
 	if f == nil {
 		f = NewMultiFilter()
 	}
 	return &Paginator{
 		db:     db,
-		idKey:  idk,
+		idKey:  idKey,
 		table:  table,
 		filter: f,
 	}
@@ -149,18 +149,153 @@ func (p *Paginator) First() (string, error) {
 	sqlBuilder.WriteString(" ASC \n")
 	sqlBuilder.WriteString("LIMIT 1")
 
-	args := append(jArgs, wArgs...)
+	sqlArgs := jArgs
+	sqlArgs = append(sqlArgs, wArgs...)
 	var err error
 	sql := sqlBuilder.String()
-	sql, args, err = sqlx.In(sql, args...)
+	sql, sqlArgs, err = sqlx.In(sql, sqlArgs...)
 	if err != nil {
 		return "", fmt.Errorf("first sql in: %w", err)
 	}
 
 	var pivot string
-	err = p.db.Get(&pivot, sql, args...)
+	err = p.db.Get(&pivot, sql, sqlArgs...)
 	if err != nil {
 		return "", fmt.Errorf("first select: %w", err)
+	}
+
+	return pivot, nil
+}
+
+func (p *Paginator) pivotFromValue() (string, error) {
+	jSQL, jArgs := p.filter.Join()
+	wSQL, wArgs := p.filter.Where()
+	var gSQL string
+	if g, ok := p.filter.(Grouper); ok && len(g.Group()) > 0 {
+		gSQL = fmt.Sprintf("GROUP BY %s", strings.Join(g.Group(), ", "))
+	}
+
+	// Be aware of SQL injection if modifying the below SQL. Any parameters in the sprintf
+	// MUST not be allowed to be created by external input.
+	sqlBuilder := new(strings.Builder)
+	sqlBuilder.WriteString("SELECT t.")
+	sqlBuilder.WriteString(p.details.SortBy)
+	sqlBuilder.WriteString(" \n")
+	sqlBuilder.WriteString("FROM ")
+	sqlBuilder.WriteString(p.table)
+	sqlBuilder.WriteString(" t \n")
+
+	if jSQL != "" {
+		sqlBuilder.WriteString(jSQL)
+		sqlBuilder.WriteString(" \n")
+	}
+
+	sqlBuilder.WriteString("WHERE (t.")
+	sqlBuilder.WriteString(p.details.SortBy)
+	sqlBuilder.WriteString(" = ?) \n")
+
+	if wSQL != "" {
+		sqlBuilder.WriteString("AND (\n")
+		sqlBuilder.WriteString(trimWherePrefix(wSQL))
+		sqlBuilder.WriteString("\n)\n")
+	}
+
+	if gSQL != "" {
+		sqlBuilder.WriteString(gSQL)
+		sqlBuilder.WriteString(" \n")
+	}
+
+	sqlBuilder.WriteString("ORDER BY t.")
+	sqlBuilder.WriteString(p.details.SortBy)
+	sqlBuilder.WriteString(" ")
+	sqlBuilder.WriteString(p.details.sortComparator)
+	sqlBuilder.WriteString(", t.")
+	sqlBuilder.WriteString(p.idKey)
+	sqlBuilder.WriteString(" ASC \n")
+	sqlBuilder.WriteString("LIMIT 1")
+
+	args := jArgs
+	args = append(args, p.details.LastVal)
+	args = append(args, wArgs...)
+
+	sql := sqlBuilder.String()
+	var err error
+	sql, args, err = sqlx.In(sql, args...)
+	if err != nil {
+		return "", fmt.Errorf("pivot from value sql in: %w", err)
+	}
+
+	var pivot string
+	err = p.db.Get(&pivot, sql, args...)
+	if err != nil {
+		return "", fmt.Errorf("pivot from value select: %w", err)
+	}
+
+	return pivot, nil
+}
+
+func (p *Paginator) pivotFromID() (string, error) {
+	jSQL, jArgs := p.filter.Join()
+	wSQL, wArgs := p.filter.Where()
+	var gSQL string
+	if g, ok := p.filter.(Grouper); ok && len(g.Group()) > 0 {
+		gSQL = fmt.Sprintf("GROUP BY %s", strings.Join(g.Group(), ", "))
+	}
+
+	// Be aware of SQL injection if modifying the below SQL. Any parameters in the sprintf
+	// MUST not be allowed to be created by external input.
+	sqlBuilder := new(strings.Builder)
+	sqlBuilder.WriteString("SELECT t.")
+	sqlBuilder.WriteString(p.details.SortBy)
+	sqlBuilder.WriteString(" \n")
+	sqlBuilder.WriteString("FROM ")
+	sqlBuilder.WriteString(p.table)
+	sqlBuilder.WriteString(" t \n")
+
+	if jSQL != "" {
+		sqlBuilder.WriteString(jSQL)
+		sqlBuilder.WriteString(" \n")
+	}
+
+	sqlBuilder.WriteString("WHERE (t.")
+	sqlBuilder.WriteString(p.idKey)
+	sqlBuilder.WriteString(" = ?) \n")
+
+	if wSQL != "" {
+		sqlBuilder.WriteString("AND (\n")
+		sqlBuilder.WriteString(trimWherePrefix(wSQL))
+		sqlBuilder.WriteString("\n)\n")
+	}
+
+	if gSQL != "" {
+		sqlBuilder.WriteString(gSQL)
+		sqlBuilder.WriteString(" \n")
+	}
+
+	sqlBuilder.WriteString("ORDER BY t.")
+	sqlBuilder.WriteString(p.details.SortBy)
+	sqlBuilder.WriteString(" ")
+	sqlBuilder.WriteString(p.details.sortComparator)
+	sqlBuilder.WriteString(", t.")
+	sqlBuilder.WriteString(p.idKey)
+	sqlBuilder.WriteString(" ASC \n")
+	sqlBuilder.WriteString("LIMIT 1")
+
+	sqlArgs := jArgs
+	sqlArgs = append(sqlArgs, p.details.LastID)
+	sqlArgs = append(sqlArgs, wArgs...)
+
+	sql := sqlBuilder.String()
+	var err error
+	sql, sqlArgs, err = sqlx.In(sql, sqlArgs...)
+	if err != nil {
+		return "", fmt.Errorf("pivot from id sql in: %w", err)
+	}
+
+	var pivot string
+	err = p.db.Get(&pivot, sql, sqlArgs...)
+	if err != nil {
+		return "", fmt.Errorf("pivot from id select: %w", err)
 	}
 
 	return pivot, nil
@@ -169,8 +304,13 @@ func (p *Paginator) First() (string, error) {
 // Pivot finds the pivot point in the data.
 func (p *Paginator) Pivot() (string, error) {
 	// We were given no information about where to pivot from, pivot from the first value
-	if p.details.LastID == "" && p.details.LastVal == "" {
+	switch {
+	case p.details.LastID == "" && p.details.LastVal == "":
 		return p.First()
+	case p.details.LastID == "" && p.details.LastVal != "":
+		return p.pivotFromValue()
+	case p.details.LastID != "" && p.details.LastVal == "":
+		return p.pivotFromID()
 	}
 
 	jSQL, jArgs := p.filter.Join()
@@ -214,7 +354,8 @@ func (p *Paginator) Pivot() (string, error) {
 
 	sqlBuilder.WriteString("LIMIT 1")
 
-	args := append(jArgs, p.details.LastVal, p.details.LastID)
+	args := jArgs
+	args = append(args, p.details.LastVal, p.details.LastID)
 	args = append(args, wArgs...)
 
 	sql := sqlBuilder.String()
@@ -356,7 +497,8 @@ func (p *Paginator) Retrieve(pivot string, dest any) error {
 	sqlBuilder.WriteString(p.idKey)
 	sqlBuilder.WriteString(" ASC \n")
 
-	args := append(jArgs, pivot, pivot, p.details.LastID)
+	args := jArgs
+	args = append(args, pivot, pivot, p.details.LastID)
 	args = append(args, wArgs...)
 
 	if p.details.Limit > 0 {
@@ -417,7 +559,8 @@ func (p *Paginator) Counts(dest *int64) error {
 
 	sql := sqlBuilder.String()
 
-	args := append(jArgs, wArgs...)
+	args := jArgs
+	args = append(args, wArgs...)
 	var err error
 	sql, args, err = sqlx.In(sql, args...)
 	if err != nil {

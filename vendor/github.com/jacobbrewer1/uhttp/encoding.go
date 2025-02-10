@@ -4,8 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 )
+
+// MustEncode encodes a response as JSON and logs an error if it fails
+func MustEncode[T any](w http.ResponseWriter, status int, v T) {
+	if err := Encode(w, status, v); err != nil {
+		slog.Error("Error encoding response", slog.String(loggingKeyError, err.Error()))
+		return
+	}
+}
 
 // Encode defaults to JSON encoding
 func Encode[T any](w http.ResponseWriter, status int, v T) error {
