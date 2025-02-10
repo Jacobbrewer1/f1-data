@@ -2,15 +2,13 @@ package patcher
 
 import (
 	"database/sql"
-	"strings"
 )
 
 const (
 	TagOptsName     = "patcher"
 	TagOptSeparator = ","
 	TagOptSkip      = "-"
-	TagOptAllowNil  = "nil"
-	TagOptAllowZero = "zero"
+	TagOptOmitempty = "omitempty"
 )
 
 type PatchOpt func(*SQLPatch)
@@ -29,41 +27,58 @@ func WithTable(table string) PatchOpt {
 	}
 }
 
+// WithFilter takes in either a Wherer or a Joiner to set the filter to use in the SQL statement
+func WithFilter(filter any) PatchOpt {
+	return func(s *SQLPatch) {
+		if join, ok := filter.(Joiner); ok {
+			WithJoin(join)(s)
+		}
+
+		if where, ok := filter.(Wherer); ok {
+			WithWhere(where)(s)
+		}
+	}
+}
+
 // WithWhere sets the where clause to use in the SQL statement
 func WithWhere(where Wherer) PatchOpt {
 	return func(s *SQLPatch) {
-		if s.whereSql == nil {
-			s.whereSql = new(strings.Builder)
-		}
-		fwSQL, fwArgs := where.Where()
-		if fwArgs == nil {
-			fwArgs = make([]any, 0)
-		}
-		wtStr := WhereTypeAnd // default to AND
-		wt, ok := where.(WhereTyper)
-		if ok && wt.WhereType().IsValid() {
-			wtStr = wt.WhereType()
-		}
-		s.whereSql.WriteString(string(wtStr) + " ")
-		s.whereSql.WriteString(strings.TrimSpace(fwSQL))
-		s.whereSql.WriteString("\n")
-		s.whereArgs = append(s.whereArgs, fwArgs...)
+		appendWhere(where, s.whereSql, &s.whereArgs)
+	}
+}
+
+// WithWhereStr takes a string and args to set the where clause to use in the SQL statement. This is useful when you
+// want to use a simple where clause.
+//
+// Note. The where string should not contain the "WHERE" keyword. We recommend using the WhereTyper interface if you
+// want to specify the WHERE type or do a more complex WHERE clause.
+func WithWhereStr(where string, args ...any) PatchOpt {
+	return func(s *SQLPatch) {
+		appendWhere(&whereStringOption{
+			where: where,
+			args:  args,
+		}, s.whereSql, &s.whereArgs)
 	}
 }
 
 // WithJoin sets the join clause to use in the SQL statement
 func WithJoin(join Joiner) PatchOpt {
 	return func(s *SQLPatch) {
-		if s.joinSql == nil {
-			s.joinSql = new(strings.Builder)
-		}
-		fjSQL, fjArgs := join.Join()
-		if fjArgs == nil {
-			fjArgs = make([]any, 0)
-		}
-		s.joinSql.WriteString(strings.TrimSpace(fjSQL))
-		s.joinSql.WriteString("\n")
-		s.joinArgs = append(s.joinArgs, fjArgs...)
+		appendJoin(join, s.joinSql, &s.joinArgs)
+	}
+}
+
+// WithJoinStr takes a string and args to set the join clause to use in the SQL statement. This is useful when you
+// want to use a simple join clause.
+//
+// Note. The join string should not contain the "JOIN" keyword. We recommend using the Joiner interface if you
+// want to specify the JOIN type or do a more complex JOIN clause.
+func WithJoinStr(join string, args ...any) PatchOpt {
+	return func(s *SQLPatch) {
+		appendJoin(&joinStringOption{
+			join: join,
+			args: args,
+		}, s.joinSql, &s.joinArgs)
 	}
 }
 
@@ -77,18 +92,18 @@ func WithDB(db *sql.DB) PatchOpt {
 // WithIncludeZeroValues sets whether zero values should be included in the patch.
 //
 // This is useful when you want to set a field to zero.
-func WithIncludeZeroValues() PatchOpt {
+func WithIncludeZeroValues(includeZeroValues bool) PatchOpt {
 	return func(s *SQLPatch) {
-		s.includeZeroValues = true
+		s.includeZeroValues = includeZeroValues
 	}
 }
 
 // WithIncludeNilValues sets whether nil values should be included in the patch.
 //
 // This is useful when you want to set a field to nil.
-func WithIncludeNilValues() PatchOpt {
+func WithIncludeNilValues(includeNilValues bool) PatchOpt {
 	return func(s *SQLPatch) {
-		s.includeNilValues = true
+		s.includeNilValues = includeNilValues
 	}
 }
 
@@ -97,13 +112,9 @@ func WithIncludeNilValues() PatchOpt {
 // This should be the actual field name, not the JSON tag name or the db tag name.
 //
 // Note. When we parse the slice of strings, we convert them to lowercase to ensure that the comparison is
-// case-insensitive.
+// case-sensitive.
 func WithIgnoredFields(fields ...string) PatchOpt {
 	return func(s *SQLPatch) {
-		for i := range fields {
-			fields[i] = strings.ToLower(fields[i])
-		}
-
 		s.ignoreFields = fields
 	}
 }

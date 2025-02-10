@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"slices"
 	"strings"
 )
 
 const (
 	DefaultDbTagName = "db"
+	DBTagPrimaryKey  = "pk"
 )
 
 var (
@@ -18,23 +18,21 @@ var (
 	ErrNoChanges = errors.New("no changes detected between the old and new objects")
 )
 
+// NewSQLPatch creates a new SQLPatch instance with the given resource and options.
+// It initializes the SQLPatch with default settings and generates the SQL patch
+// for the provided resource by processing its fields and applying the necessary tags and options.
 func NewSQLPatch(resource any, opts ...PatchOpt) *SQLPatch {
 	sqlPatch := newPatchDefaults(opts...)
 	sqlPatch.patchGen(resource)
 	return sqlPatch
 }
 
+// patchGen generates the SQL patch for the given resource.
+// It processes the fields of the struct, applying the necessary tags and options,
+// and prepares the SQL update statement components (fields and arguments).
 func (s *SQLPatch) patchGen(resource any) {
-	// If the resource is a pointer, we need to dereference it to get the value
-	if reflect.TypeOf(resource).Kind() == reflect.Ptr {
-		resource = reflect.ValueOf(resource).Elem().Interface()
-	}
-
-	// Ensure that the resource is a struct
-	if reflect.TypeOf(resource).Kind() != reflect.Struct {
-		// This is intentionally a panic as this is a programming error and should be fixed by the developer
-		panic("resource is not a struct")
-	}
+	resource = dereferenceIfPointer(resource)
+	ensureStruct(resource)
 
 	rType := reflect.TypeOf(resource)
 	rVal := reflect.ValueOf(resource)
@@ -43,88 +41,44 @@ func (s *SQLPatch) patchGen(resource any) {
 	s.fields = make([]string, 0, n)
 	s.args = make([]any, 0, n)
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		fType := rType.Field(i)
 		fVal := rVal.Field(i)
-		tag := fType.Tag.Get(s.tagName)
+		tag := getTag(&fType, s.tagName)
+		optsTag := fType.Tag.Get(TagOptsName)
 
-		// Skip unexported fields
-		if !fType.IsExported() {
+		if s.shouldSkipField(&fType, fVal) {
 			continue
 		}
 
-		patcherOptsTag := fType.Tag.Get(TagOptsName)
-
-		// Skip fields that are to be ignored
-		if s.checkSkipField(fType) {
-			continue
-		} else if fVal.Kind() == reflect.Ptr && (fVal.IsNil() && !s.shouldIncludeNil(patcherOptsTag)) {
-			continue
-		} else if fVal.Kind() != reflect.Ptr && (fVal.IsZero() && !s.shouldIncludeZero(patcherOptsTag)) {
-			continue
-		}
-
-		if patcherOptsTag != "" {
-			patcherOpts := strings.Split(patcherOptsTag, TagOptSeparator)
-			if slices.Contains(patcherOpts, TagOptSkip) {
+		var arg any = nil
+		if fVal.Kind() == reflect.Ptr && fVal.IsNil() {
+			if !s.shouldIncludeNil(optsTag) {
 				continue
 			}
-		}
-
-		// If no tag is set, use the field name
-		if tag == "" {
-			tag = fType.Name
-		}
-
-		addField := func() {
-			s.fields = append(s.fields, tag+" = ?")
-		}
-
-		if fVal.Kind() == reflect.Ptr && fVal.IsNil() && s.shouldIncludeNil(patcherOptsTag) {
-			s.args = append(s.args, nil)
-			addField()
-			continue
-		} else if fVal.Kind() == reflect.Ptr && fVal.IsNil() {
-			continue
-		}
-
-		addField()
-
-		var val reflect.Value
-		if fVal.Kind() == reflect.Ptr {
-			val = fVal.Elem()
 		} else {
-			val = fVal
+			arg = getValue(fVal)
 		}
 
-		switch val.Kind() {
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			s.args = append(s.args, val.Int())
-		case reflect.String:
-			s.args = append(s.args, val.String())
-		case reflect.Bool:
-			boolArg := 0
-			if val.Bool() {
-				boolArg = 1
-			}
-			s.args = append(s.args, boolArg)
-		case reflect.Float32, reflect.Float64:
-			s.args = append(s.args, val.Float())
-		default:
-			// This is intentionally a panic as this is a programming error and should be fixed by the developer
-			panic(fmt.Sprintf("unsupported type: %s", val.Kind()))
-		}
+		s.fields = append(s.fields, tag+" = ?")
+		s.args = append(s.args, arg)
 	}
 }
 
-func GenerateSQL(resource any, opts ...PatchOpt) (string, []any, error) {
-	sqlPatch := NewSQLPatch(resource, opts...)
-	return sqlPatch.GenerateSQL()
+// GenerateSQL generates the SQL update statement and its arguments for the given resource.
+// It creates a new SQLPatch instance with the provided options, processes the resource's fields,
+// and constructs the SQL update statement along with the necessary arguments.
+func GenerateSQL(resource any, opts ...PatchOpt) (sqlStr string, args []any, err error) {
+	return NewSQLPatch(resource, opts...).GenerateSQL()
 }
 
-func (s *SQLPatch) GenerateSQL() (string, []any, error) {
+// GenerateSQL constructs the SQL update statement and its arguments.
+// It validates the SQL generation process, builds the SQL update statement
+// with the table name, join clauses, set clauses, and where clauses,
+// and returns the final SQL string along with the arguments.
+func (s *SQLPatch) GenerateSQL() (sqlStr string, args []any, err error) {
 	if err := s.validateSQLGen(); err != nil {
-		return "", nil, fmt.Errorf("validate perform patch: %w", err)
+		return "", nil, fmt.Errorf("validate SQL generation: %w", err)
 	}
 
 	sqlBuilder := new(strings.Builder)
@@ -154,17 +108,23 @@ func (s *SQLPatch) GenerateSQL() (string, []any, error) {
 	sqlBuilder.WriteString(strings.TrimSpace(where) + "\n")
 	sqlBuilder.WriteString(")")
 
-	args := append(s.joinArgs, s.args...)
-	args = append(args, s.whereArgs...)
+	sqlArgs := s.joinArgs
+	sqlArgs = append(sqlArgs, s.args...)
+	sqlArgs = append(sqlArgs, s.whereArgs...)
 
-	return sqlBuilder.String(), args, nil
+	return sqlBuilder.String(), sqlArgs, nil
 }
 
+// PerformPatch executes the SQL update statement for the given resource.
+// It creates a new SQLPatch instance with the provided options, generates the SQL update statement,
+// and executes it using the database connection.
 func PerformPatch(resource any, opts ...PatchOpt) (sql.Result, error) {
-	sqlPatch := NewSQLPatch(resource, opts...)
-	return sqlPatch.PerformPatch()
+	return NewSQLPatch(resource, opts...).PerformPatch()
 }
 
+// PerformDiffPatch executes the SQL update statement for the differences between the old and new resources.
+// It creates a new SQLPatch instance by comparing the old and new resources, generates the SQL update statement,
+// and executes it using the database connection.
 func PerformDiffPatch[T any](old, newT *T, opts ...PatchOpt) (sql.Result, error) {
 	sqlPatch, err := NewDiffSQLPatch(old, newT, opts...)
 	if err != nil {
@@ -174,6 +134,10 @@ func PerformDiffPatch[T any](old, newT *T, opts ...PatchOpt) (sql.Result, error)
 	return sqlPatch.PerformPatch()
 }
 
+// PerformPatch executes the SQL update statement for the current SQLPatch instance.
+// It validates the SQL generation process, constructs the SQL update statement and its arguments,
+// and executes the statement using the database connection.
+// It returns the result of the SQL execution or an error if the process fails.
 func (s *SQLPatch) PerformPatch() (sql.Result, error) {
 	if err := s.validatePerformPatch(); err != nil {
 		return nil, fmt.Errorf("validate perform patch: %w", err)
@@ -187,6 +151,9 @@ func (s *SQLPatch) PerformPatch() (sql.Result, error) {
 	return s.db.Exec(sqlStr, args...)
 }
 
+// NewDiffSQLPatch creates a new SQLPatch instance by comparing the old and new resources.
+// It initializes the SQLPatch with default settings, loads the differences between the old and new resources,
+// and prepares the SQL update statement components (fields and arguments) for the differences.
 func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 	if !isPointerToStruct(old) || !isPointerToStruct(newT) {
 		return nil, ErrInvalidType
@@ -229,7 +196,7 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 			if patch.ignoreFields == nil {
 				patch.ignoreFields = make([]string, 0)
 			}
-			patch.ignoreFields = append(patch.ignoreFields, strings.ToLower(oldElem.Type().Field(i).Name))
+			patch.ignoreFields = append(patch.ignoreFields, oldElem.Type().Field(i).Name)
 			continue
 		}
 	}

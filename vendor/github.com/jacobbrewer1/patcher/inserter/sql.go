@@ -51,13 +51,18 @@ func (b *SQLBatch) genBatch(resources []any) {
 				continue
 			}
 
+			tags := strings.Split(tag, patcher.TagOptSeparator)
+			if len(tags) > 1 {
+				tag = tags[0]
+			}
+
 			// Skip unexported fields
 			if !f.IsExported() {
 				continue
 			}
 
 			// Skip fields that are to be ignored
-			if b.checkSkipField(f) {
+			if b.checkSkipField(&f) {
 				continue
 			}
 
@@ -74,7 +79,7 @@ func (b *SQLBatch) genBatch(resources []any) {
 				tag = f.Name
 			}
 
-			b.args = append(b.args, b.getFieldValue(v.Field(i), f))
+			b.args = append(b.args, b.getFieldValue(v.Field(i), &f))
 
 			// if the field is not unique, skip it
 			if _, ok := uniqueFields[tag]; ok {
@@ -88,7 +93,7 @@ func (b *SQLBatch) genBatch(resources []any) {
 	}
 }
 
-func (b *SQLBatch) getFieldValue(v reflect.Value, f reflect.StructField) any {
+func (b *SQLBatch) getFieldValue(v reflect.Value, f *reflect.StructField) any {
 	if f.Type.Kind() == reflect.Ptr {
 		if v.IsNil() {
 			return nil
@@ -99,7 +104,7 @@ func (b *SQLBatch) getFieldValue(v reflect.Value, f reflect.StructField) any {
 	return v.Interface()
 }
 
-func (b *SQLBatch) GenerateSQL() (string, []any, error) {
+func (b *SQLBatch) GenerateSQL() (sqlStr string, args []any, err error) {
 	if err := b.validateSQLGen(); err != nil {
 		return "", nil, err
 	}
@@ -140,16 +145,21 @@ func (b *SQLBatch) Perform() (sql.Result, error) {
 	return b.db.Exec(sqlStr, args...)
 }
 
-func (b *SQLBatch) checkSkipField(field reflect.StructField) bool {
+func (b *SQLBatch) checkSkipField(field *reflect.StructField) bool {
 	// The ignore fields tag takes precedence over the ignore fields list
 	if b.checkSkipTag(field) {
+		return true
+	}
+
+	// Check if the field is a primary key, we don't want to include the primary key in the insert unless specified
+	if b.checkPrimaryKey(field) {
 		return true
 	}
 
 	return b.ignoredFieldsCheck(field)
 }
 
-func (b *SQLBatch) checkSkipTag(field reflect.StructField) bool {
+func (b *SQLBatch) checkSkipTag(field *reflect.StructField) bool {
 	val, ok := field.Tag.Lookup(patcher.TagOptsName)
 	if !ok {
 		return false
@@ -159,14 +169,29 @@ func (b *SQLBatch) checkSkipTag(field reflect.StructField) bool {
 	return slices.Contains(tags, patcher.TagOptSkip)
 }
 
-func (b *SQLBatch) ignoredFieldsCheck(field reflect.StructField) bool {
-	return b.checkIgnoredFields(strings.ToLower(field.Name)) || b.checkIgnoreFunc(field)
+func (b *SQLBatch) checkPrimaryKey(field *reflect.StructField) bool {
+	// If we are including the primary key, we can immediately return false
+	if b.includePrimaryKey {
+		return false
+	}
+
+	val, ok := field.Tag.Lookup(patcher.DefaultDbTagName)
+	if !ok {
+		return false
+	}
+
+	tags := strings.Split(val, patcher.TagOptSeparator)
+	return slices.Contains(tags, patcher.DBTagPrimaryKey)
 }
 
-func (b *SQLBatch) checkIgnoreFunc(field reflect.StructField) bool {
+func (b *SQLBatch) ignoredFieldsCheck(field *reflect.StructField) bool {
+	return b.checkIgnoredFields(field.Name) || b.checkIgnoreFunc(field)
+}
+
+func (b *SQLBatch) checkIgnoreFunc(field *reflect.StructField) bool {
 	return b.ignoreFieldsFunc != nil && b.ignoreFieldsFunc(field)
 }
 
 func (b *SQLBatch) checkIgnoredFields(field string) bool {
-	return len(b.ignoreFields) > 0 && slices.Contains(b.ignoreFields, strings.ToLower(field))
+	return len(b.ignoreFields) > 0 && slices.Contains(b.ignoreFields, field)
 }
