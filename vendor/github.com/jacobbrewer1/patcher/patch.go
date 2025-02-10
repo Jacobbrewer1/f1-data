@@ -25,7 +25,7 @@ var (
 	ErrNoWhere = errors.New("no where clause set")
 )
 
-type IgnoreFieldsFunc func(field reflect.StructField) bool
+type IgnoreFieldsFunc func(field *reflect.StructField) bool
 
 type SQLPatch struct {
 	// fields is the fields to update in the SQL statement
@@ -96,6 +96,7 @@ func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
 	return p
 }
 
+// Fields returns the fields to update in the SQL statement
 func (s *SQLPatch) Fields() []string {
 	if len(s.fields) == 0 {
 		// Default behaviour is to return nil if there are no fields
@@ -104,6 +105,7 @@ func (s *SQLPatch) Fields() []string {
 	return s.fields
 }
 
+// Args returns the arguments to use in the SQL statement
 func (s *SQLPatch) Args() []any {
 	if len(s.args) == 0 {
 		// Default behaviour is to return nil if there are no args
@@ -112,44 +114,63 @@ func (s *SQLPatch) Args() []any {
 	return s.args
 }
 
+// validatePerformPatch validates the SQLPatch for the PerformPatch method
 func (s *SQLPatch) validatePerformPatch() error {
-	if s.db == nil {
+	switch {
+	case s.db == nil:
 		return ErrNoDatabaseConnection
-	} else if s.table == "" {
+	case s.table == "":
 		return ErrNoTable
-	} else if len(s.fields) == 0 {
+	case len(s.fields) == 0:
 		return ErrNoFields
-	} else if len(s.args) == 0 {
+	case len(s.args) == 0:
 		return ErrNoArgs
-	} else if s.whereSql.String() == "" {
+	case s.whereSql.String() == "":
 		return ErrNoWhere
+	default:
+		return nil
 	}
-
-	return nil
 }
 
+// validateSQLGen validates the SQLPatch for the SQLGen method
 func (s *SQLPatch) validateSQLGen() error {
-	if s.table == "" {
+	switch {
+	case s.table == "":
 		return ErrNoTable
-	} else if len(s.fields) == 0 {
+	case len(s.fields) == 0:
 		return ErrNoFields
-	} else if len(s.args) == 0 {
+	case len(s.args) == 0:
 		return ErrNoArgs
-	} else if s.whereSql.String() == "" {
+	case s.whereSql.String() == "":
 		return ErrNoWhere
+	default:
+		return nil
 	}
-
-	return nil
 }
 
+// shouldIncludeNil determines whether the field should be included in the patch
 func (s *SQLPatch) shouldIncludeNil(tag string) bool {
 	if s.includeNilValues {
 		return true
 	}
 
+	return s.shouldOmitEmpty(tag)
+}
+
+// shouldIncludeZero determines whether zero values should be included in the patch
+func (s *SQLPatch) shouldIncludeZero(tag string) bool {
+	if s.includeZeroValues {
+		return true
+	}
+
+	return s.shouldOmitEmpty(tag)
+}
+
+// shouldOmitEmpty determines whether the field should be omitted if it is empty
+func (s *SQLPatch) shouldOmitEmpty(tag string) bool {
 	if tag != "" {
 		tags := strings.Split(tag, TagOptSeparator)
-		if slices.Contains(tags, TagOptAllowNil) {
+		if slices.Contains(tags, TagOptOmitempty) {
 			return true
 		}
 	}
@@ -157,17 +178,54 @@ func (s *SQLPatch) shouldIncludeNil(tag string) bool {
 	return false
 }
 
-func (s *SQLPatch) shouldIncludeZero(tag string) bool {
-	if s.includeZeroValues {
+func (s *SQLPatch) shouldSkipField(fType *reflect.StructField, fVal reflect.Value) bool {
+	if !fType.IsExported() || !isValidType(fVal) || s.checkSkipField(fType) {
 		return true
 	}
 
-	if tag != "" {
-		tagOpts := strings.Split(tag, TagOptSeparator)
-		if slices.Contains(tagOpts, TagOptAllowZero) {
+	patcherOptsTag := fType.Tag.Get(TagOptsName)
+	if fVal.Kind() == reflect.Ptr && (fVal.IsNil() && !s.shouldIncludeNil(patcherOptsTag)) {
+		return true
+	}
+	if fVal.Kind() != reflect.Ptr && (fVal.IsZero() && !s.shouldIncludeZero(patcherOptsTag)) {
+		return true
+	}
+	if patcherOptsTag != "" {
+		patcherOpts := strings.Split(patcherOptsTag, TagOptSeparator)
+		if slices.Contains(patcherOpts, TagOptSkip) {
 			return true
 		}
 	}
-
 	return false
+}
+
+func (s *SQLPatch) checkSkipField(field *reflect.StructField) bool {
+	// The ignore fields tag takes precedence over the ignore fields list
+	if s.checkSkipTag(field) {
+		return true
+	}
+
+	return s.ignoredFieldsCheck(field)
+}
+
+func (s *SQLPatch) checkSkipTag(field *reflect.StructField) bool {
+	val, ok := field.Tag.Lookup(TagOptsName)
+	if !ok {
+		return false
+	}
+
+	tags := strings.Split(val, TagOptSeparator)
+	return slices.Contains(tags, TagOptSkip)
+}
+
+func (s *SQLPatch) ignoredFieldsCheck(field *reflect.StructField) bool {
+	return s.checkIgnoredFields(field.Name) || s.checkIgnoreFunc(field)
+}
+
+func (s *SQLPatch) checkIgnoreFunc(field *reflect.StructField) bool {
+	return s.ignoreFieldsFunc != nil && s.ignoreFieldsFunc(field)
+}
+
+func (s *SQLPatch) checkIgnoredFields(field string) bool {
+	return len(s.ignoreFields) > 0 && slices.Contains(s.ignoreFields, field)
 }

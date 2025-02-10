@@ -11,8 +11,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/rs/zerolog"
 	"github.com/vektra/mockery/v2/pkg/logging"
+
+	"github.com/rs/zerolog"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -223,6 +224,24 @@ func (p *Parser) Find(name string) (*Interface, error) {
 	return nil, ErrNotInterface
 }
 
+func (p *Parser) Has(packageName, interfaceName string) bool {
+	for _, entry := range p.files {
+		if entry.pkg.PkgPath != packageName {
+			continue
+		}
+
+		for _, ifaceName := range entry.interfaces {
+			if ifaceName != interfaceName {
+				continue
+			}
+
+			return true
+		}
+	}
+
+	return false
+}
+
 func (p *Parser) Interfaces() []*Interface {
 	ifaces := make(sortableIFaceList, 0)
 	for _, entry := range p.files {
@@ -247,12 +266,24 @@ func (p *Parser) packageInterfaces(
 			continue
 		}
 
-		typ, ok := obj.Type().(*types.Named)
+		var typ *types.Named
+		var name string
+
+		ttyp := obj.Type()
+
+		if talias, ok := obj.Type().(*types.Alias); ok {
+			name = talias.Obj().Name()
+			ttyp = types.Unalias(obj.Type())
+		}
+
+		typ, ok := ttyp.(*types.Named)
 		if !ok {
 			continue
 		}
 
-		name = typ.Obj().Name()
+		if name == "" {
+			name = typ.Obj().Name()
+		}
 
 		if typ.Obj().Pkg() == nil {
 			continue
@@ -380,7 +411,7 @@ func (nv *NodeVisitor) Visit(node ast.Node) ast.Visitor {
 				break
 			}
 			nv.add(nv.ctx, n)
-		case *ast.InterfaceType, *ast.IndexExpr, *ast.IndexListExpr:
+		case *ast.InterfaceType, *ast.IndexExpr, *ast.IndexListExpr, *ast.SelectorExpr, *ast.Ident:
 			nv.add(nv.ctx, n)
 		default:
 			log.Debug().Msg("found node with unacceptable type for mocking. Rejecting.")
