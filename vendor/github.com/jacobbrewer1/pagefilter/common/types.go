@@ -4,6 +4,11 @@
 package common
 
 import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+
+	"github.com/jacobbrewer1/uhttp"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
@@ -26,10 +31,52 @@ type Since = string
 type SortBy = string
 
 // SortDirection defines the model for sort_direction.
-type SortDirection = string
+type SortDirection string
 
 // List of SortDirection
 const (
-	SortDirection_asc  SortDirection = "asc"
-	SortDirection_desc SortDirection = "desc"
+	SortDirectionAsc  SortDirection = "asc"
+	SortDirectionDesc SortDirection = "desc"
 )
+
+func (e *SortDirection) IsValid() bool {
+	if e == nil {
+		return false
+	}
+
+	switch *e {
+	case SortDirectionAsc:
+		return true
+	case SortDirectionDesc:
+		return true
+	default:
+		return false
+	}
+}
+
+func (e *SortDirection) MarshalJSON() ([]byte, error) {
+	if !e.IsValid() {
+		return nil, uhttp.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("%s is not a valid SortDirection", *e))
+	}
+
+	return json.Marshal(string(*e))
+}
+
+func (e *SortDirection) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+
+	e2 := SortDirection(s)
+	if !e2.IsValid() {
+		return uhttp.NewHTTPError(http.StatusBadRequest, fmt.Errorf("%s is not a valid SortDirection", s),
+			"Valid values are:",
+			SortDirectionAsc,
+			SortDirectionDesc,
+		)
+	}
+
+	*e = e2
+	return nil
+}

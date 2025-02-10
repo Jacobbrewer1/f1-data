@@ -64,7 +64,7 @@ func GetPaginatorDetails(
 		d.SortBy = *sortBy
 	}
 	if sortDir != nil {
-		d.SortDir = *sortDir
+		d.SortDir = string(*sortDir)
 	}
 
 	if d.Limit <= 0 {

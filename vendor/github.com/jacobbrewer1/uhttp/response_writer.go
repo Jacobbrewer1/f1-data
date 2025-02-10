@@ -25,13 +25,15 @@ func NewResponseWriter(w http.ResponseWriter, opts ...WriterOpt) *ResponseWriter
 	rw := &ResponseWriter{
 		ResponseWriter: w,
 		startTime:      time.Now().UTC(),
+		defaultHeaders: map[string]string{
+			HeaderContentType: ContentTypeJSON,
+		},
+		defaultStatusCode: http.StatusOK,
 	}
 
 	for _, opt := range opts {
 		opt(rw)
 	}
-
-	rw.checkDefaults()
 
 	return rw
 }
@@ -41,7 +43,14 @@ func (c *ResponseWriter) Write(p []byte) (bytes int, err error) {
 	c.writeDefaultHeaders()
 	c.WriteHeader(c.defaultStatusCode)
 	bytes, err = c.ResponseWriter.Write(p)
-	c.bytesWritten += uint64(bytes)
+	if err != nil {
+		return
+	}
+	writtenBytes := uint64(0)
+	if bytes > 0 {
+		writtenBytes = uint64(bytes)
+	}
+	c.bytesWritten += writtenBytes
 	return
 }
 
@@ -77,20 +86,6 @@ func (c *ResponseWriter) IsHeaderWritten() bool {
 // GetRequestDuration gets the duration of the request
 func (c *ResponseWriter) GetRequestDuration() time.Duration {
 	return time.Since(c.startTime)
-}
-
-func (c *ResponseWriter) checkDefaults() {
-	if c.defaultStatusCode == 0 {
-		c.defaultStatusCode = http.StatusOK
-	}
-
-	if c.defaultHeaders == nil {
-		c.defaultHeaders = map[string]string{HeaderContentType: ContentTypeJSON}
-	} else if _, ok := c.defaultHeaders[HeaderContentType]; !ok {
-		c.defaultHeaders[HeaderContentType] = ContentTypeJSON
-	} else if c.defaultHeaders[HeaderContentType] == "" {
-		c.defaultHeaders[HeaderContentType] = ContentTypeJSON
-	}
 }
 
 func (c *ResponseWriter) writeDefaultHeaders() {

@@ -10,7 +10,7 @@ type MockDB struct {
 }
 
 // Get provides a mock function with given fields: dest, query, args
-func (_m *MockDB) Get(dest any, query string, args ...any) error {
+func (_m *MockDB) Get(dest interface{}, query string, args ...interface{}) error {
 	var _ca []interface{}
 	_ca = append(_ca, dest, query)
 	_ca = append(_ca, args...)
@@ -21,7 +21,7 @@ func (_m *MockDB) Get(dest any, query string, args ...any) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(any, string, ...any) error); ok {
+	if rf, ok := ret.Get(0).(func(interface{}, string, ...interface{}) error); ok {
 		r0 = rf(dest, query, args...)
 	} else {
 		r0 = ret.Error(0)
@@ -31,7 +31,7 @@ func (_m *MockDB) Get(dest any, query string, args ...any) error {
 }
 
 // Select provides a mock function with given fields: dest, query, args
-func (_m *MockDB) Select(dest any, query string, args ...any) error {
+func (_m *MockDB) Select(dest interface{}, query string, args ...interface{}) error {
 	var _ca []interface{}
 	_ca = append(_ca, dest, query)
 	_ca = append(_ca, args...)
@@ -42,7 +42,7 @@ func (_m *MockDB) Select(dest any, query string, args ...any) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(any, string, ...any) error); ok {
+	if rf, ok := ret.Get(0).(func(interface{}, string, ...interface{}) error); ok {
 		r0 = rf(dest, query, args...)
 	} else {
 		r0 = ret.Error(0)

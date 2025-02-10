@@ -145,7 +145,7 @@ github.com/iancoleman/strcase
 # github.com/inconshreveable/mousetrap v1.1.0
 ## explicit; go 1.18
 github.com/inconshreveable/mousetrap
-# github.com/jacobbrewer1/pagefilter v0.1.4
+# github.com/jacobbrewer1/pagefilter v0.1.7
 ## explicit; go 1.23
 github.com/jacobbrewer1/pagefilter
 github.com/jacobbrewer1/pagefilter/common
@@ -153,7 +153,7 @@ github.com/jacobbrewer1/pagefilter/common
 ## explicit; go 1.23
 github.com/jacobbrewer1/patcher
 github.com/jacobbrewer1/patcher/inserter
-# github.com/jacobbrewer1/uhttp v0.0.4
+# github.com/jacobbrewer1/uhttp v0.0.10
 ## explicit; go 1.23
 github.com/jacobbrewer1/uhttp
 github.com/jacobbrewer1/uhttp/common
@@ -235,7 +235,7 @@ github.com/prometheus/common/model
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
 github.com/prometheus/procfs/internal/util
-# github.com/rs/zerolog v1.29.0
+# github.com/rs/zerolog v1.33.0
 ## explicit; go 1.15
 github.com/rs/zerolog
 github.com/rs/zerolog/internal/cbor
@@ -267,7 +267,7 @@ github.com/spf13/afero/mem
 # github.com/spf13/cast v1.6.0
 ## explicit; go 1.19
 github.com/spf13/cast
-# github.com/spf13/cobra v1.6.1
+# github.com/spf13/cobra v1.7.0
 ## explicit; go 1.15
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
@@ -301,7 +301,7 @@ github.com/subosito/gotenv
 # github.com/temoto/robotstxt v1.1.1
 ## explicit; go 1.11
 github.com/temoto/robotstxt
-# github.com/vektra/mockery/v2 v2.50.0
+# github.com/vektra/mockery/v2 v2.52.1
 ## explicit; go 1.23
 github.com/vektra/mockery/v2
 github.com/vektra/mockery/v2/cmd
@@ -374,7 +374,7 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/time v0.7.0
+# golang.org/x/time v0.9.0
 ## explicit; go 1.18
 golang.org/x/time/rate
 # golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d

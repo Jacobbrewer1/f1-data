@@ -9,7 +9,7 @@ type MockGrouper struct {
 	mock.Mock
 }
 
-// Group provides a mock function with given fields:
+// Group provides a mock function with no fields
 func (_m *MockGrouper) Group() []string {
 	ret := _m.Called()
 
